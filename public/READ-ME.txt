@@ -1,0 +1,6 @@
+  =>  Template Name    : 7R Logistics 
+
+  =>  Template Author  : Yousef Elkammar
+
+  =>  Author Website   : https://github.com/RedBiscuits
+

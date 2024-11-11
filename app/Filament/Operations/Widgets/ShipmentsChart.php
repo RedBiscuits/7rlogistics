@@ -1,0 +1,48 @@
+<?php
+
+namespace App\Filament\Operations\Widgets;
+
+use App\Models\Shipment;
+use Filament\Widgets\ChartWidget;
+use Flowframe\Trend\Trend;
+use Flowframe\Trend\TrendValue;
+
+class ShipmentsChart extends ChartWidget
+{
+    protected static ?string $heading = 'Shipments';
+
+    protected static ?int $sort = 4;
+
+    protected function getData(): array
+    {
+
+        $data = Trend::query(Shipment::query()->where('status', 'Delivered'))
+            ->between(
+                start: now()->startOfYear(),
+                end: now()->endOfYear(),
+            )
+            ->perMonth()
+            ->count();
+
+        return [
+            'datasets' => [
+                [
+                    'label' => 'Shipments created',
+                    'data' => $data->map(fn (TrendValue $value) => $value->aggregate),
+                ],
+            ],
+            'labels' => $data->map(fn (TrendValue $value) => $value->date),
+        ];
+
+    }
+
+    protected function getType(): string
+    {
+        return 'line';
+    }
+
+    public function getDescription(): ?string
+    {
+        return 'Number of Shipments published over last 12 months.';
+    }
+}
