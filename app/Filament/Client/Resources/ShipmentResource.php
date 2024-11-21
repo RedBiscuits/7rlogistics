@@ -70,19 +70,11 @@ class ShipmentResource extends Resource
                             ->schema([
                                 Forms\Components\Select::make('from_city')
                                     ->label('From City')
-                                    ->options(City::where('company_id', auth()->user()->company_id)->pluck('name', 'id'))
+                                    ->options(function (callable $get) {
+                                        return City::pluck('name', 'id');
+                                    })
                                     ->reactive()
                                     ->searchable()
-                                    ->createOptionForm([
-                                        Forms\Components\TextInput::make('name')
-                                            ->label('City Name')
-                                            ->required(),
-                                    ])
-                                    ->createOptionUsing(function ($data) {
-                                        $data['company_id'] = auth()->user()->company_id;
-
-                                        return City::create($data)->id;
-                                    })
                                     ->afterStateUpdated(fn (callable $set) => $set('from_area', null))
                                     ->required(),
 
@@ -91,7 +83,7 @@ class ShipmentResource extends Resource
                                     ->options(function (callable $get, callable $set) {
                                         $cityId = $get('from_city');
                                         if ($cityId) {
-                                            return auth()->user()->company->destinations()
+                                            return auth('client')->user()->company->destinations()
                                                 ->when($get('to_area'), fn ($q) => $q->where('to_area', $get('to_area')))
                                                 ->whereNotNull('price')
                                                 ->whereHas('fromArea', function ($q) use ($cityId) {
@@ -107,18 +99,6 @@ class ShipmentResource extends Resource
                                     })
                                     ->reactive()
                                     ->searchable()
-                                    ->createOptionForm([
-                                        Forms\Components\Select::make('city_id')
-                                            ->label('City')
-                                            ->options(City::where('company_id', auth()->user()->company_id)->pluck('name', 'id'))
-                                            ->required(),
-                                        Forms\Components\TextInput::make('name')
-                                            ->label('Area Name')
-                                            ->required(),
-                                    ])
-                                    ->createOptionUsing(function ($data) {
-                                        return Area::create($data)->id;
-                                    })
                                     ->afterStateUpdated(function (Forms\Components\Select $component, $state, callable $get, callable $set) {
                                         $fromArea = $get('from_area');
                                         $toArea = $get('to_area');
@@ -139,19 +119,11 @@ class ShipmentResource extends Resource
 
                                 Forms\Components\Select::make('to_city')
                                     ->label('To City')
-                                    ->options(City::where('company_id', auth()->user()->company_id)->pluck('name', 'id'))
+                                    ->options(function (callable $get) {
+                                        return City::pluck('name', 'id');
+                                    })
                                     ->reactive()
                                     ->searchable()
-                                    ->createOptionForm([
-                                        Forms\Components\TextInput::make('name')
-                                            ->label('City Name')
-                                            ->required(),
-                                    ])
-                                    ->createOptionUsing(function ($data) {
-                                        $data['company_id'] = auth()->user()->company_id;
-
-                                        return City::create($data)->id;
-                                    })
                                     ->afterStateUpdated(fn (callable $set) => $set('to_area', null))
                                     ->required(),
 
@@ -176,18 +148,6 @@ class ShipmentResource extends Resource
                                     })
                                     ->reactive()
                                     ->searchable()
-                                    ->createOptionForm([
-                                        Forms\Components\Select::make('city_id')
-                                            ->label('City')
-                                            ->options(City::where('company_id', auth()->user()->company_id)->pluck('name', 'id'))
-                                            ->required(),
-                                        Forms\Components\TextInput::make('name')
-                                            ->label('Area Name')
-                                            ->required(),
-                                    ])
-                                    ->createOptionUsing(function ($data) {
-                                        return Area::create($data)->id;
-                                    })
                                     ->afterStateUpdated(function (Forms\Components\Select $component, $state, callable $get, callable $set) {
                                         $fromArea = $get('from_area');
                                         $toArea = $get('to_area');
@@ -434,6 +394,7 @@ class ShipmentResource extends Resource
                 });
             })
             ->columns([
+                Tables\Columns\TextColumn::make('id')->label('Code')->sortable(),
                 Tables\Columns\TextColumn::make('fromCity.name')->label('From City'),
                 Tables\Columns\TextColumn::make('fromArea.name')->label('From Area'),
                 Tables\Columns\TextColumn::make('toCity.name')->label('To City'),

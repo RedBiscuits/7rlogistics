@@ -41,15 +41,25 @@ class ShipmentResource extends Resource
     {
         return $form
             ->schema([
-
                 Forms\Components\Select::make('user_id')
-                    ->label('Client')
-                    ->options(function (callable $get) {
-                        return Company::query()
-                            ->select(['id', 'name'])
-                            ->orderBy('id')
-                            ->get()
-                            ->pluck('name', 'id');
+                    ->label('Employee')
+                    ->options(function () {
+                        return User::query()
+                        ->whereHas('roles', fn($q) => $q->where('name', 'Client'))
+                        ->join('companies', 'users.company_id', '=', 'companies.id') // Join the companies table
+                        ->select('users.id', 'users.name', 'companies.name as company_name')
+                        ->selectRaw('CONCAT(companies.name, " - ", users.name) as full_name')
+                        ->orderBy('users.id')
+                        ->pluck('full_name', 'users.id') // Use the alias `full_name` and specify `users.id`
+                        ->toArray();
+
+                    })
+                    ->formatStateUsing(function ($state, $record) {
+                        if ($record && $record->company) {
+                            return $record->company->name . ' - ' . $record->name;
+                        }
+
+                        return $state;
                     })
                     ->reactive()
                     ->searchable()
@@ -58,7 +68,7 @@ class ShipmentResource extends Resource
                         $set('to_city', null);
                         $set('from_area', null);
                         $set('to_area', null);
-                    })->default(request('company'))
+                    })
                     ->required(),
 
                 Forms\Components\ToggleButtons::make('status')
@@ -77,9 +87,9 @@ class ShipmentResource extends Resource
                     })
                     ->reactive()
                     ->searchable()
-                    ->hidden(fn ($get) => $get('status') == 0 || $get('status') == 1)
-                    ->required(fn ($get) => $get('status') != 0 && $get('status') != 1)
-                    ->dehydrated(fn ($get) => $get('status') != 0 && $get('status') != 1),
+                    ->hidden(fn($get) => $get('status') == 0 || $get('status') == 1)
+                    ->required(fn($get) => $get('status') != 0 && $get('status') != 1)
+                    ->dehydrated(fn($get) => $get('status') != 0 && $get('status') != 1),
 
                 Forms\Components\Card::make('Receiver Information')
                     ->schema([
@@ -118,66 +128,32 @@ class ShipmentResource extends Resource
                                 Forms\Components\Select::make('from_city')
                                     ->label('From City')
                                     ->options(function (callable $get) {
-                                        $get('company_id') ? $cites = City::where('company_id', $get('company_id'))->pluck('name', 'id') : $cites = [];
-
-                                        return $cites ?? [];
+                                        return City::pluck('name', 'id');
                                     })
                                     ->reactive()
                                     ->searchable()
-                                    ->createOptionForm([
-                                        Forms\Components\TextInput::make('name')
-                                            ->label('City Name')
-                                            ->required(),
-                                    ])
-                                    ->createOptionUsing(function ($data, Get $get) {
-                                        if ($get('company_id')) {
-                                            $data['company_id'] = $get('company_id');
-
-                                            return City::create($data)->id;
-                                        }
-                                    })
-                                    ->afterStateUpdated(fn (callable $set) => $set('from', null))
+                                    ->afterStateUpdated(fn(callable $set) => $set('from', null))
                                     ->required(),
 
                                 Forms\Components\Select::make('from_area')
                                     ->label('From Area')
                                     ->reactive()
-                                    ->options(function (Get $get, callable $set) {
+                                    ->options(function (Get $get) {
                                         $cityId = $get('from_city');
                                         $company_id = $get('company_id');
-                                        if ($cityId && $company_id) {
-                                            return Destination::where('company_id', $company_id)
-                                                ->when($get('to_area'), fn ($q) => $q->where('to_area', $get('to_area')))
-                                                ->whereNotNull('price')
-                                                ->whereHas('fromArea', function ($q) use ($cityId) {
-                                                    $q->where('city_id', $cityId);
-                                                })
-                                                ->with('fromArea')
-                                                ->get()
-                                                ->pluck('fromArea.name', 'fromArea.id')
-                                                ->toArray();
-                                        }
+                                        $dests = Destination::where('company_id', $company_id)
+                                            ->whereNotNull('price')
+                                            ->where('from_city', $cityId)
+                                            ->with(['fromArea', 'toArea'])
+                                            ->get();
 
-                                        return [];
+                                        $areas = $dests->map(function($dest) {
+                                            return [$dest->from_area, $dest->to_area];
+                                        })->flatten()->unique()->values();
+
+                                        return Area::whereIn('id', $areas)->pluck('name', 'id');
                                     })
                                     ->searchable()
-                                    ->createOptionForm([
-                                        Forms\Components\Select::make('city_id')
-                                            ->label('City')
-                                            ->reactive()
-                                            ->options(function (Get $get, Component $livewire) {
-                                                $get('company_id') ? $cites = City::where('company_id', $get('company_id'))->pluck('name', 'id') : $cites = [];
-
-                                                return $cites ?? [];
-                                            })
-                                            ->required(),
-                                        Forms\Components\TextInput::make('name')
-                                            ->label('Area Name')
-                                            ->required(),
-                                    ])
-                                    ->createOptionUsing(function ($data, Get $get) {
-                                        return Area::create($data)->id;
-                                    })
                                     ->afterStateUpdated(function (Forms\Components\Select $component, $state, callable $get, callable $set) {
                                         $fromArea = $get('from_area');
                                         $toArea = $get('to_area');
@@ -193,13 +169,10 @@ class ShipmentResource extends Resource
                                         }
                                     })
                                     ->required(),
-
                                 Forms\Components\Select::make('to_city')
                                     ->label('To City')
                                     ->options(function (callable $get) {
-                                        $get('company_id') ? $cites = City::where('company_id', $get('company_id'))->pluck('name', 'id') : $cites = [];
-
-                                        return $cites ?? [];
+                                        return City::pluck('name', 'id');
                                     })
                                     ->reactive()
                                     ->searchable()
@@ -208,14 +181,7 @@ class ShipmentResource extends Resource
                                             ->label('City Name')
                                             ->required(),
                                     ])
-                                    ->createOptionUsing(function ($data, Get $get) {
-                                        if ($get('company_id')) {
-                                            $data['company_id'] = $get('company_id');
-
-                                            return City::create($data)->id;
-                                        }
-                                    })
-                                    ->afterStateUpdated(fn (callable $set) => $set('to_area', null))
+                                    ->afterStateUpdated(fn(callable $set) => $set('to_area', null))
                                     ->required(),
 
                                 Forms\Components\Select::make('to_area')
@@ -223,39 +189,25 @@ class ShipmentResource extends Resource
                                     ->options(function (callable $get, callable $set) {
                                         $cityId = $get('to_city');
                                         $company_id = $get('company_id');
-                                        if ($cityId && $company_id) {
-                                            return Destination::where('company_id', $company_id)
-                                                ->when($get('from_area'), fn ($q) => $q->where('from_area', $get('from_area')))
-                                                ->whereNotNull('price')
-                                                ->whereHas('toArea', function ($q) use ($cityId) {
-                                                    $q->where('city_id', $cityId);
-                                                })
-                                                ->with('toArea')
-                                                ->get()
-                                                ->pluck('toArea.name', 'toArea.id')
-                                                ->toArray();
-                                        }
+                                        $fromArea = $get('from_area');
+                                        $dests = Destination::where('company_id', $company_id)
+                                            ->whereNotNull('price')
+                                            ->where(function ($query) use ($cityId) {
+                                                $query->where('to_city', $cityId)
+                                                    ->orWhere('from_city', $cityId);
+                                            })
+                                            ->get();
 
-                                        return [];
+                                        $areas = $dests->map(function ($dest) use ($fromArea) {
+                                            return $dest->from_area == $fromArea ? $dest->to_area : $dest->from_area;
+                                            })
+                                            ->unique()
+                                            ->values();
+
+                                        return Area::whereIn('id', $areas)->pluck('name', 'id');
                                     })
                                     ->reactive()
                                     ->searchable()
-                                    ->createOptionForm([
-                                        Forms\Components\Select::make('city_id')
-                                            ->label('City')
-                                            ->options(function (callable $get) {
-                                                $get('company_id') ? $cites = City::where('company_id', $get('company_id'))->pluck('name', 'id') : $cites = [];
-
-                                                return $cites ?? [];
-                                            })
-                                            ->required(),
-                                        Forms\Components\TextInput::make('name')
-                                            ->label('Area Name')
-                                            ->required(),
-                                    ])
-                                    ->createOptionUsing(function ($data) {
-                                        return Area::create($data)->id;
-                                    })
                                     ->afterStateUpdated(function (Forms\Components\Select $component, $state, callable $get, callable $set) {
                                         $fromArea = $get('from_area');
                                         $toArea = $get('to_area');
@@ -386,19 +338,19 @@ class ShipmentResource extends Resource
                                 Forms\Components\TextInput::make('description')
                                     ->label('Description')
                                     ->reactive()
-                                    ->required(fn ($get) => $get('type') == 'Other'),
+                                    ->required(fn($get) => $get('type') == 'Other'),
 
                                 Forms\Components\TextInput::make('weight')
                                     ->label('Weight')
                                     ->reactive()
                                     ->required()
                                     ->numeric()
-                                    ->afterStateUpdated(fn ($state, $set, $get) => $set('package_weight', ($get('weight') ?: 0) * ($get('quantity') ?: 0)))
+                                    ->afterStateUpdated(fn($state, $set, $get) => $set('package_weight', ($get('weight') ?: 0) * ($get('quantity') ?: 0)))
                                     ->rules([
-                                        fn (Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
+                                        fn(Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
 
                                             $truckWeight = Truck::find($get('../../truck_id'))->weight ?? 0;
-                                            $totalPackageWeight = collect($get('../../packages') ?: [])->sum(fn ($package) => ($package['weight'] ?: 0) * ($package['quantity'] ?: 0));
+                                            $totalPackageWeight = collect($get('../../packages') ?: [])->sum(fn($package) => ($package['weight'] ?: 0) * ($package['quantity'] ?: 0));
                                             $availableWeight = $truckWeight - $totalPackageWeight;
 
                                             if ($availableWeight < 0) {
@@ -427,17 +379,17 @@ class ShipmentResource extends Resource
                                     ->reactive()
                                     ->required()
                                     ->integer()
-                                    ->afterStateUpdated(fn ($state, $set, $get) => $set('package_weight', ($get('weight') ?: 0) * ($get('quantity') ?: 0))),
+                                    ->afterStateUpdated(fn($state, $set, $get) => $set('package_weight', ($get('weight') ?: 0) * ($get('quantity') ?: 0))),
 
                                 Forms\Components\TextInput::make('note')
                                     ->label('Note'),
 
                                 Forms\Components\Placeholder::make('package_weight')
                                     ->label('Package Weight')
-                                    ->content(fn ($get) => new HtmlString('<h1>'.(($get('weight') ?: 0) * ($get('quantity') ?: 0)).'</h1>')),
+                                    ->content(fn($get) => new HtmlString('<h1>' . (($get('weight') ?: 0) * ($get('quantity') ?: 0)) . '</h1>')),
                             ])->afterStateUpdated(function ($state, $set, $get) {
                                 $truckWeight = Truck::find($get('truck_id'))->weight ?? 0;
-                                $totalPackageWeight = collect($get('packages') ?: [])->sum(fn ($package) => ($package['weight'] ?: 0) * ($package['quantity'] ?: 0));
+                                $totalPackageWeight = collect($get('packages') ?: [])->sum(fn($package) => ($package['weight'] ?: 0) * ($package['quantity'] ?: 0));
                                 $availableWeight = $truckWeight - $totalPackageWeight;
                                 $set('available_weight', $availableWeight);
                             }),
@@ -445,19 +397,19 @@ class ShipmentResource extends Resource
                         Forms\Components\Placeholder::make('total_weight')
                             ->label('Total Weight of All Packages')
                             ->content(function ($get) {
-                                $totalWeight = collect($get('packages') ?: [])->sum(fn ($package) => ($package['weight'] ?: 0) * ($package['quantity'] ?: 0));
+                                $totalWeight = collect($get('packages') ?: [])->sum(fn($package) => ($package['weight'] ?: 0) * ($package['quantity'] ?: 0));
 
-                                return new HtmlString('<h1>'.$totalWeight.'</h1>');
+                                return new HtmlString('<h1>' . $totalWeight . '</h1>');
                             }),
 
                         Forms\Components\Placeholder::make('available_weight')
                             ->label('Available Weight in Selected Truck')
                             ->content(function ($get) {
                                 $truckWeight = Truck::find($get('truck_id'))->weight ?? 0;
-                                $totalPackageWeight = collect($get('packages') ?: [])->sum(fn ($package) => ($package['weight'] ?: 0) * ($package['quantity'] ?: 0));
+                                $totalPackageWeight = collect($get('packages') ?: [])->sum(fn($package) => ($package['weight'] ?: 0) * ($package['quantity'] ?: 0));
                                 $availableWeight = $truckWeight - $totalPackageWeight;
 
-                                return new HtmlString('<h1>'.$availableWeight.'</h1>');
+                                return new HtmlString('<h1>' . $availableWeight . '</h1>');
                             }),
 
                         Forms\Components\Placeholder::make('total_price')
@@ -475,10 +427,10 @@ class ShipmentResource extends Resource
                                         ->whereNotNull('price')
                                         ->first();
 
-                                    return new HtmlString('<h1>'.$destination->price.'</h1>');
+                                    return new HtmlString('<h1>' . $destination->price . '</h1>');
                                 }
 
-                                return new HtmlString('<h1>'. 0 .'</h1>');
+                                return new HtmlString('<h1>' . 0 . '</h1>');
                             }),
 
                     ]),
@@ -499,7 +451,8 @@ class ShipmentResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('user.name')->label('User')->sortable(),
+                Tables\Columns\TextColumn::make('id')->label('Code')->sortable(),
+                Tables\Columns\TextColumn::make('user.company.name')->label('Company')->sortable(),
                 Tables\Columns\TextColumn::make('fromCity.name')->label('From City'),
                 Tables\Columns\TextColumn::make('fromArea.name')->label('From Area'),
                 Tables\Columns\TextColumn::make('toCity.name')->label('To City'),
@@ -540,5 +493,10 @@ class ShipmentResource extends Resource
             // 'view' => Pages\ViewShipment::route('/{record}'),
             'edit' => Pages\EditShipment::route('/{record}/edit'),
         ];
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
     }
 }

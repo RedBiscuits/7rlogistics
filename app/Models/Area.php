@@ -16,8 +16,19 @@ class Area extends Model
         return $this->belongsTo(City::class, 'city_id');
     }
 
-    public function Destination()
+    public function fromDestinations()
     {
-        return $this->hasMany(Destination::class);
+        return $this->hasMany(Destination::class, 'from_area');
+    }
+
+    public function toDestinations()
+    {
+        return $this->hasMany(Destination::class, 'to_area');
+    }
+
+    public function destinations()
+    {
+        return $this->hasMany(Destination::class, 'from_area')
+            ->orWhere('to_area', $this->id);
     }
 }

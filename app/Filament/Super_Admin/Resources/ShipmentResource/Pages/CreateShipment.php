@@ -5,6 +5,7 @@ namespace App\Filament\Super_Admin\Resources\ShipmentResource\Pages;
 use App\Filament\Super_Admin\Resources\ShipmentResource;
 use App\Models\Destination;
 use Filament\Resources\Pages\CreateRecord;
+use App\Models\Company;
 
 class CreateShipment extends CreateRecord
 {
@@ -12,6 +13,9 @@ class CreateShipment extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
+        $user = Company::find($data['company_id'])->users()->first();
+        $data['user_id'] = $user->id;
+
         $destination = Destination::where('company_id', $data['company_id'])
             ->where('from_area', $data['from_area'])
             ->where('to_area', $data['to_area'])

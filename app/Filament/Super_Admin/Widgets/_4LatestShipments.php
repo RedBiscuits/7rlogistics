@@ -13,6 +13,7 @@ class _4LatestShipments extends BaseWidget
     use HasWidgetShield;
 
     protected int|string|array $columnSpan = 'full';
+    protected static ?string $heading = 'Latest Shipments';
 
     protected static ?int $sort = 4;
 
