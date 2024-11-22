@@ -16,8 +16,15 @@ class CreateShipment extends CreateRecord
 
         $destination = auth()->user()->company->destinations()
             ->whereNotNull('price')
-            ->where('from_area', $data['from_area'])
-            ->where('to_area', $data['to_area'])
+            ->where(function ($query) use ($data) {
+                $query->where(function ($q) use ($data) {
+                    $q->where('from_area', $data['from_area'])
+                        ->where('to_area', $data['to_area']);
+                })->orWhere(function ($q) use ($data) {
+                    $q->where('to_area', $data['from_area'])
+                        ->where('from_area', $data['to_area']);
+                });
+            })
             ->first();
 
         if ($destination) {

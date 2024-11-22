@@ -4,16 +4,14 @@ namespace App\Filament\Super_Admin\Resources\CompanyResource\RelationManagers;
 
 // Models
 use App\Models\Area;
-use App\Models\City;
 use App\Models\Destination;
+use App\Models\Company;
 use App\Models\Truck;
-use App\Models\User;
 
 // Filament & Forms
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
-use Filament\Forms\Components\Component;
 use Filament\Forms\Set;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
@@ -40,12 +38,6 @@ class ShipmentRelationManager extends RelationManager
     {
         return $form
             ->schema([
-
-                Forms\Components\Select::make('user_id')
-                    ->label('User ID')
-                    ->options(User::where('company_id', $this->getOwnerRecord()->id)->pluck('name', 'id'))
-                    ->required(),
-
                 Forms\Components\Card::make('Receiver Information')
                     ->schema([
                         Forms\Components\Grid::make(2)
@@ -79,161 +71,55 @@ class ShipmentRelationManager extends RelationManager
 
                         Forms\Components\Grid::make(2)
                             ->schema([
-
-                                Forms\Components\Select::make('from_city')
-                                    ->label('From City')
-                                    ->options(function (callable $get) {
-                                        $this->getOwnerRecord()->id ? $cites = City::where('company_id', $this->getOwnerRecord()->id)->pluck('name', 'id') : $cites = [];
-
-                                        return $cites ?? [];
-                                    })
-                                    ->reactive()
-                                    ->searchable()
-                                    ->createOptionForm([
-                                        Forms\Components\TextInput::make('name')
-                                            ->label('City Name')
-                                            ->required(),
-                                    ])
-                                    ->createOptionUsing(function ($data, Get $get) {
-                                        if ($this->getOwnerRecord()->id) {
-                                            $data['company_id'] = $this->getOwnerRecord()->id;
-
-                                            return City::create($data)->id;
-                                        }
-                                    })
-                                    ->afterStateUpdated(fn(callable $set) => $set('from', null))
-                                    ->required(),
-
                                 Forms\Components\Select::make('from_area')
                                     ->label('From Area')
                                     ->reactive()
-                                    ->options(function (Get $get, callable $set) {
-                                        $cityId = $get('from_city');
+                                    ->options(function (Get $get) {
                                         $company_id = $this->getOwnerRecord()->id;
-                                        if ($cityId && $company_id) {
-                                            return Destination::where('company_id', $company_id)
-                                                ->when($get('to_area'), fn($q) => $q->where('to_area', $get('to_area')))
-                                                ->whereNotNull('price')
-                                                ->whereHas('fromArea', function ($q) use ($cityId) {
-                                                    $q->where('city_id', $cityId);
-                                                })
-                                                ->with('fromArea')
-                                                ->get()
-                                                ->pluck('fromArea.name', 'fromArea.id')
-                                                ->toArray();
-                                        }
 
-                                        return [];
+                                        $dests = Destination::where('company_id', $company_id)
+                                            ->whereNotNull('price')
+                                            ->with(['fromArea', 'toArea'])
+                                            ->get();
+
+                                        $areas = $dests->map(function ($dest) {
+                                            return [$dest->from_area, $dest->to_area];
+                                        })->flatten()->unique()->values();
+
+                                        return Area::whereIn('id', $areas)->pluck('name', 'id');
                                     })
                                     ->searchable()
-                                    ->createOptionForm([
-                                        Forms\Components\Select::make('city_id')
-                                            ->label('City')
-                                            ->reactive()
-                                            ->options(function (Get $get, Component $livewire) {
-                                                $this->getOwnerRecord()->id ? $cites = City::where('company_id', $this->getOwnerRecord()->id)->pluck('name', 'id') : $cites = [];
-
-                                                return $cites ?? [];
-                                            })
-                                            ->required(),
-                                        Forms\Components\TextInput::make('name')
-                                            ->label('Area Name')
-                                            ->required(),
-                                    ])
-                                    ->createOptionUsing(function ($data, Get $get) {
-                                        return Area::create($data)->id;
-                                    })
                                     ->afterStateUpdated(function (Forms\Components\Select $component, $state, callable $get, callable $set) {
-                                        $fromArea = $get('from_area');
-                                        $toArea = $get('to_area');
-                                        $company_id = $this->getOwnerRecord()->id;
-                                        if ($fromArea && $toArea && $company_id) {
-                                            $destination = Destination::where('company_id', $company_id)->where('from_area', $fromArea)
-                                                ->where('to_area', $toArea)
-                                                ->whereNotNull('price')
-                                                ->first();
-                                            if ($destination) {
-                                                $set('price', $destination->price);
-                                            }
-                                        }
+                                        $set('price', null);
+                                        $set('truck_id', null);
+                                        $set('to_area', null);
                                     })
                                     ->required(),
 
-                                Forms\Components\Select::make('to_city')
-                                    ->label('To City')
-                                    ->options(function (callable $get) {
-                                        $this->getOwnerRecord()->id ? $cites = City::where('company_id', $this->getOwnerRecord()->id)->pluck('name', 'id') : $cites = [];
 
-                                        return $cites ?? [];
-                                    })
-                                    ->reactive()
-                                    ->searchable()
-                                    ->createOptionForm([
-                                        Forms\Components\TextInput::make('name')
-                                            ->label('City Name')
-                                            ->required(),
-                                    ])
-                                    ->createOptionUsing(function ($data, Get $get) {
-                                        if ($this->getOwnerRecord()->id) {
-                                            $data['company_id'] = $this->getOwnerRecord()->id;
-
-                                            return City::create($data)->id;
-                                        }
-                                    })
-                                    ->afterStateUpdated(fn(callable $set) => $set('to_area', null))
-                                    ->required(),
 
                                 Forms\Components\Select::make('to_area')
                                     ->label('To Area')
                                     ->options(function (callable $get, callable $set) {
-                                        $cityId = $get('to_city');
                                         $company_id = $this->getOwnerRecord()->id;
-                                        if ($cityId && $company_id) {
-                                            return Destination::where('company_id', $company_id)
-                                                ->when($get('from_area'), fn($q) => $q->where('from_area', $get('from_area')))
-                                                ->whereNotNull('price')
-                                                ->whereHas('toArea', function ($q) use ($cityId) {
-                                                    $q->where('city_id', $cityId);
-                                                })
-                                                ->with('toArea')
-                                                ->get()
-                                                ->pluck('toArea.name', 'toArea.id')
-                                                ->toArray();
-                                        }
+                                        $fromArea = $get('from_area');
+                                        $dests = Destination::where('company_id', $company_id)
+                                            ->whereNotNull('price')
+                                            ->get();
 
-                                        return [];
+                                        $areas = $dests->map(function ($dest) use ($fromArea) {
+                                            return $dest->from_area == $fromArea ? $dest->to_area : $dest->from_area;
+                                        })
+                                            ->unique()
+                                            ->values();
+
+                                        return Area::whereIn('id', $areas)->pluck('name', 'id');
                                     })
                                     ->reactive()
                                     ->searchable()
-                                    ->createOptionForm([
-                                        Forms\Components\Select::make('city_id')
-                                            ->label('City')
-                                            ->options(function (callable $get) {
-                                                $this->getOwnerRecord()->id ? $cites = City::where('company_id', $this->getOwnerRecord()->id)->pluck('name', 'id') : $cites = [];
-
-                                                return $cites ?? [];
-                                            })
-                                            ->required(),
-                                        Forms\Components\TextInput::make('name')
-                                            ->label('Area Name')
-                                            ->required(),
-                                    ])
-                                    ->createOptionUsing(function ($data) {
-                                        return Area::create($data)->id;
-                                    })
-                                    ->afterStateUpdated(function (Forms\Components\Select $component, $state, callable $get, callable $set) {
-                                        $fromArea = $get('from_area');
-                                        $toArea = $get('to_area');
-                                        $company_id = $this->getOwnerRecord()->id;
-                                        if ($fromArea && $toArea && $company_id) {
-                                            $destination = Destination::where('company_id', $company_id)->where('from_area', $fromArea)
-                                                ->where('to_area', $toArea)
-                                                ->whereNotNull('price')
-                                                ->first();
-                                            if ($destination) {
-                                                $set('price', $destination->price);
-                                            }
-                                        }
+                                    ->afterStateUpdated(function (Forms\Components\Select $component, $state, callable $set) {
+                                        $set('price', null);
+                                        $set('truck_id', null);
                                     })
                                     ->required(),
 
@@ -298,8 +184,15 @@ class ShipmentRelationManager extends RelationManager
                                     $company_id = $this->getOwnerRecord()->id;
                                     if ($fromArea && $toArea) {
                                         return Destination::where('company_id', $company_id)
-                                            ->where('from_area', $fromArea)
-                                            ->where('to_area', $toArea)
+                                            ->where(function ($query) use ($fromArea, $toArea) {
+                                                $query->where(function ($q) use ($fromArea, $toArea) {
+                                                    $q->where('from_area', $fromArea)
+                                                        ->where('to_area', $toArea);
+                                                })->orWhere(function ($q) use ($fromArea, $toArea) {
+                                                    $q->where('to_area', $fromArea)
+                                                        ->where('from_area', $toArea);
+                                                });
+                                            })
                                             ->whereNotNull('price')
                                             ->with('truck')
                                             ->get()
@@ -319,8 +212,10 @@ class ShipmentRelationManager extends RelationManager
                                             ->where('from_area', $fromArea)
                                             ->where('to_area', $toArea)
                                             ->where('truck_id', $truck)
-                                            ->whereNotNull('price')
-                                            ->first();
+                                            ->whereNotNull('price');
+                                        \Log::info($destination->toSql());
+
+                                        $destination = $destination->first();
                                         if ($destination) {
                                             $set('total_price', $destination->price);
                                         }
@@ -433,8 +328,15 @@ class ShipmentRelationManager extends RelationManager
                                 $company_id = $this->getOwnerRecord()->id;
                                 if ($fromArea && $toArea && $truck && $company_id) {
                                     $destination = Destination::where('company_id', $company_id)
-                                        ->where('from_area', $fromArea)
-                                        ->where('to_area', $toArea)
+                                        ->where(function ($query) use ($fromArea, $toArea) {
+                                            $query->where(function ($q) use ($fromArea, $toArea) {
+                                                $q->where('from_area', $fromArea)
+                                                    ->where('to_area', $toArea);
+                                            })->orWhere(function ($q) use ($fromArea, $toArea) {
+                                                $q->where('to_area', $fromArea)
+                                                    ->where('from_area', $toArea);
+                                            });
+                                        })
                                         ->where('truck_id', $truck)
                                         ->whereNotNull('price')
                                         ->first();
@@ -457,10 +359,9 @@ class ShipmentRelationManager extends RelationManager
             ->columns([
                 Tables\Columns\TextColumn::make('user.name')->label('User')
                     ->getStateUsing(fn($record) => $record->user->position . ' - ' . $record->user->name),
-                Tables\Columns\TextColumn::make('fromCity.name')->label('From City'),
                 Tables\Columns\TextColumn::make('fromArea.name')->label('From Area'),
-                Tables\Columns\TextColumn::make('toCity.name')->label('To City'),
                 Tables\Columns\TextColumn::make('toArea.name')->label('To Area'),
+                Tables\Columns\TextColumn::make('truck.name')->label('Truck'),
                 Tables\Columns\TextColumn::make('status')->label('Status')->badge(),
                 Tables\Columns\TextColumn::make('price')->label('Price')->money('EGP'),
             ])
@@ -473,8 +374,15 @@ class ShipmentRelationManager extends RelationManager
                     ->using(function (array $data, string $model): Model {
                         $destination = $this->getOwnerRecord()->destinations()
                             ->whereNotNull('price')
-                            ->where('from_area', $data['from_area'])
-                            ->where('to_area', $data['to_area'])
+                            ->where(function ($query) use ($data) {
+                                $query->where(function ($q) use ($data) {
+                                    $q->where('from_area', $data['from_area'])
+                                        ->where('to_area', $data['to_area']);
+                                })->orWhere(function ($q) use ($data) {
+                                    $q->where('to_area', $data['from_area'])
+                                        ->where('from_area', $data['to_area']);
+                                });
+                            })
                             ->where('truck_id', $data['truck_id'])
                             ->first();
 
@@ -483,6 +391,7 @@ class ShipmentRelationManager extends RelationManager
                         }
 
                         $data['price'] = $destination->price;
+                        $data['user_id'] = $this->getOwnerRecord()->users()->first()->id;
                         unset($data['company_id']);
                         return $model::create($data);
                     })

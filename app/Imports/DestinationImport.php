@@ -2,6 +2,7 @@
 
 namespace App\Imports;
 
+use App\Models\Area;
 use App\Models\Destination;
 use App\Models\Truck;
 use App\Models\Company;
@@ -31,62 +32,66 @@ class DestinationImport implements SkipsEmptyRows, ToCollection, WithCalculatedF
 
     public function collection(Collection $rows)
     {
+        foreach ($rows as $index => $row) {
+            // Match the source city and area to their IDs
+            $area_1 = $this->getArea($row['City']);
+            $area_2 = $this->getArea($row['Area']);
 
-        foreach ($rows as $row) {
+            // Iterate through all truck columns (skipping the first two: 'City' and 'Area')
+            foreach ($row as $column => $price) {
+                if (in_array($column, ['City', 'Area', '#']) || is_numeric($column)) {
+                    continue; // Skip 'City' and 'Area' columns
+                }
 
-            $from_city = $this->getCity($this->company, $row['From City']);
-            $to_city = $this->getCity($this->company, $row['To City']);
-            $from_area = $this->getAreaId($from_city, $row['From Area']);
-            $to_area = $this->getAreaId($to_city, $row['To Area']);
+                // Find the truck matching the column header
+                $truck_id = $this->getTruckId("%{$column}%");
+                if (!$truck_id) {
+                    continue; // Skip if no matching truck is found
+                }
 
-            foreach ($this->trucks as $truck) {
-                $truck_id = $this->getTruckId($truck);
-
-                // Check if the destination exists
+                // Check if the destination already exists
                 $destinationExists = $this->company->destinations()
-                    ->where('from_city', $from_city->id)
-                    ->where('from_area', $from_area)
-                    ->where('to_city', $to_city->id)
-                    ->where('to_area', $to_area)
+                    ->where(function ($query) use ($area_1) {
+                        $query->where('from_area', $area_1)
+                            ->orWhere('to_area', $area_1);
+                    })->where(function ($query) use ($area_2) {
+                        $query->where('from_area', $area_2)
+                            ->orWhere('to_area', $area_2);
+                    })
                     ->where('truck_id', $truck_id)
-                    ->exists();
+                    ->first();
 
                 if ($destinationExists) {
+                    $destinationExists->update([
+                        'price' => $price,
+                    ]);
                     continue; // Skip if destination exists
                 }
 
                 // Create a new destination
                 Destination::create([
                     'company_id' => $this->company->id,
-                    'from_city' => $from_city->id,
-                    'from_area' => $from_area,
-                    'to_city' => $to_city->id,
-                    'to_area' => $to_area,
+                    'from_city' => $area_1->city_id,
+                    'from_area' => $area_1->id,
+                    'to_city' => $area_2->city_id,
+                    'to_area' => $area_2->id,
                     'truck_id' => $truck_id,
-                    'price' => $row[$truck],
+                    'price' => $price,
                 ]);
             }
         }
     }
 
-    private function getCity($company, $city)
+    private function getArea($area)
     {
-
-        return $company->cities()->where('name', $city)->firstOrCreate(['name' => $city]);
-    }
-
-    private function getAreaId($city, $area)
-    {
-
-        return $city->areas()->where('name', $area)->firstOrCreate(['name' => $area])->id;
+        $area = trim($area);
+        return Area::where('name', 'like', "%{$area}%")->firstOrCreate(['name' => $area]);
     }
 
     private function getTruckId($truck)
     {
-
-        Log::error($truck);
-
-        return Truck::where('name', $truck)->firstOrFail()->id;
+        $truck = trim($truck);
+        return Truck::where('name', 'like', "%{$truck}%")->firstOrFail()->id;
     }
 
     public function sheets(): array

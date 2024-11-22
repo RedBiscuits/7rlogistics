@@ -96,7 +96,7 @@ class CompanyResource extends Resource
     {
         return [
             UsersRelationManager::class,
-            CitiesRelationManager::class,
+            // CitiesRelationManager::class,
             DestinationsRelationManager::class,
             ShipmentRelationManager::class,
         ];

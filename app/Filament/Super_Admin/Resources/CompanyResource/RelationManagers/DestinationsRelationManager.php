@@ -43,7 +43,7 @@ class DestinationsRelationManager extends RelationManager
                             ->label('City Name')
                             ->required(),
                     ])
- 
+
                     ->afterStateUpdated(fn (callable $set) => $set('from', null))
                     ->required(),
 
@@ -158,15 +158,20 @@ class DestinationsRelationManager extends RelationManager
                     ->color('primary')
                     ->requiresConfirmation()
                     ->form([
-                        Forms\Components\FileUpload::make('attachment'),
+                        Forms\Components\FileUpload::make('attachment')
+                            ->disk('public')
+                            ->directory('uploads'),
                     ])->action(function (array $data) {
-                        $file = public_path('storage'.'/'.$data['attachment']);
+                        $filePath = storage_path('app/public/' . $data['attachment']);
                         $this->getOwnerRecord()->destinations()->delete();
+                        // Process the Excel file
                         HeadingRowFormatter::default('none');
-                        $headings = (new HeadingRowImport)->toArray($file)[0][0];
+                        $headings = (new HeadingRowImport)->toArray($filePath)[0][0];
                         $headings = array_slice($headings, 4);
-                        Excel::import(new DestinationImport($this->getOwnerRecord(), $headings), $file, null, \Maatwebsite\Excel\Excel::XLSX);
 
+                        Excel::import(new DestinationImport($this->getOwnerRecord(), $headings), $filePath, null, \Maatwebsite\Excel\Excel::XLSX);
+
+                        // Send success notification
                         Notification::make()
                             ->title('Destinations Imported Successfully')
                             ->success()
