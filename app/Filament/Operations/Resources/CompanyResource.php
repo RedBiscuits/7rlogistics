@@ -13,12 +13,13 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 
 class CompanyResource extends Resource
 {
     protected static ?string $model = Company::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-building-office';
 
     protected static ?int $navigationSort = 1;
 
@@ -28,12 +29,28 @@ class CompanyResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')->required()->minLength(3)->maxLength(255),
-                Forms\Components\TextInput::make('industry')->minLength(3)->maxLength(255),
-                Forms\Components\TextInput::make('address')->minLength(3)->maxLength(255),
-                Forms\Components\TextInput::make('phone')->minLength(3)->maxLength(255),
-                Forms\Components\TextInput::make('email')->email()->minLength(3)->maxLength(255),
-                Forms\Components\TextInput::make('website')->minLength(3)->maxLength(255),
+                Forms\Components\TextInput::make('name')
+                    ->required()
+                    ->minLength(3)
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('tax_number')
+                    ->maxLength(255),
+                Forms\Components\DatePicker::make('tax_number_expires_at')
+                    ->unique(ignoreRecord: true),
+                Forms\Components\TextInput::make('location')
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('city')
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('contact_person')
+                    ->maxLength(255),
+                SpatieMediaLibraryFileUpload::make('attachments')
+                    ->collection('attachments')
+                    ->label('Attachments')
+                    ->downloadable()
+                    ->openable()
+                    ->multiple()
+                    ->maxFiles(5)
+                    ->previewable(false),
             ]);
     }
 
@@ -41,22 +58,27 @@ class CompanyResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')->sortable()->searchable(),
-                Tables\Columns\TextColumn::make('industry')->sortable()->searchable()->getStateUsing(function ($record) {
-                    return $record->industry ?? 'N/A';
-                }),
-                Tables\Columns\TextColumn::make('address')->sortable()->searchable()->getStateUsing(function ($record) {
-                    return $record->address ?? 'N/A';
-                }),
-                Tables\Columns\TextColumn::make('phone')->sortable()->searchable()->getStateUsing(function ($record) {
-                    return $record->phone ?? 'N/A';
-                }),
-                Tables\Columns\TextColumn::make('email')->sortable()->searchable()->getStateUsing(function ($record) {
-                    return $record->email ?? 'N/A';
-                }),
-                Tables\Columns\TextColumn::make('website')->sortable()->searchable()->getStateUsing(function ($record) {
-                    return $record->website ?? 'N/A';
-                }),
+                Tables\Columns\TextColumn::make('name')
+                    ->sortable()
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('tax_number')
+                    ->sortable()
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('tax_number_expires_at')
+                    ->date()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('location')
+                    ->sortable()
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('city')
+                    ->sortable()
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('contact_person')
+                    ->sortable()
+                    ->searchable(),
+                Tables\Columns\SpatieMediaLibraryImageColumn::make('attachments')
+                    ->label('Attachments')
+                    ->collection('attachments'),
             ])
             ->filters([])
             ->actions([
@@ -74,7 +96,7 @@ class CompanyResource extends Resource
     {
         return [
             UsersRelationManager::class,
-            CitiesRelationManager::class,
+            // CitiesRelationManager::class,
             DestinationsRelationManager::class,
             ShipmentRelationManager::class,
         ];
@@ -87,5 +109,10 @@ class CompanyResource extends Resource
             'create' => Pages\CreateCompany::route('/create'),
             'edit' => Pages\EditCompany::route('/{record}/edit'),
         ];
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
     }
 }

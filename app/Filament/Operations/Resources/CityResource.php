@@ -15,9 +15,7 @@ class CityResource extends Resource
 {
     protected static ?string $model = City::class;
 
-    protected static bool $shouldRegisterNavigation = false;
-
-    protected static ?string $navigationGroup = 'Locations management';
+    protected static ?string $navigationGroup = 'Logistics';
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -26,9 +24,6 @@ class CityResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')->required()->minLength(3)->maxLength(255),
-                Forms\Components\Select::make('company_id')->label('Company')->relationship('company', 'name')
-                    ->hiddenOn('edit')
-                    ->required(),
             ]);
     }
 
@@ -38,7 +33,8 @@ class CityResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('id')->sortable(),
                 Tables\Columns\TextColumn::make('name')->sortable()->searchable(),
-                Tables\Columns\TextColumn::make('company.name')->label('Company')->sortable()->searchable(),
+                Tables\Columns\TextColumn::make('areas_count')->counts('areas')
+                    ->label('Areas Count')->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime('Y-m-d H:i:s a'),
             ])
@@ -46,7 +42,6 @@ class CityResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
@@ -71,5 +66,10 @@ class CityResource extends Resource
             'view' => Pages\ViewCity::route('/{record}'),
             'edit' => Pages\EditCity::route('/{record}/edit'),
         ];
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
     }
 }

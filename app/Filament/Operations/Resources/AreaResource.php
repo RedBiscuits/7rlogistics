@@ -14,11 +14,9 @@ class AreaResource extends Resource
 {
     protected static ?string $model = Area::class;
 
-    protected static bool $shouldRegisterNavigation = false;
-
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $navigationGroup = 'Locations management';
+    protected static ?string $navigationGroup = 'Logistics';
 
     public static function form(Form $form): Form
     {
@@ -34,8 +32,10 @@ class AreaResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('id')->sortable(),
-                Tables\Columns\TextColumn::make('name')->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('city.name')->label('City')->sortable()->searchable(),
+                Tables\Columns\TextColumn::make('name')->sortable()->searchable(),
+                Tables\Columns\TextColumn::make('destinations_count')->counts('destinations')
+                    ->label('Destinations Count')->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime('Y-m-d H:i:s a'),
             ])
@@ -58,6 +58,11 @@ class AreaResource extends Resource
         return [
             //
         ];
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
     }
 
     public static function getPages(): array

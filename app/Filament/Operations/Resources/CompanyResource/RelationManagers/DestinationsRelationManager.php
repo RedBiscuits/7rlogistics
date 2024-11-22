@@ -34,9 +34,7 @@ class DestinationsRelationManager extends RelationManager
                 Forms\Components\Select::make('from_city')
                     ->label('From City')
                     ->options(function (callable $get) {
-                        $cites = City::where('company_id', $this->getOwnerRecord()->id)->get()->pluck('name', 'id');
-
-                        return $cites ?? [];
+                        return City::pluck('name', 'id')->toArray();
                     })
                     ->reactive()
                     ->searchable()
@@ -45,14 +43,7 @@ class DestinationsRelationManager extends RelationManager
                             ->label('City Name')
                             ->required(),
                     ])
-                    ->createOptionUsing(function ($data) {
-                        if ($this->getOwnerRecord()->cities()->where('name', $data['name'])->exists()) {
-                            return $this->getOwnerRecord()->cities()->where('name', $data['name'])->first()->id;
-                        }
-                        $data['company_id'] = $this->getOwnerRecord()->id;
 
-                        return City::create($data)->id;
-                    })
                     ->afterStateUpdated(fn (callable $set) => $set('from', null))
                     ->required(),
 
@@ -72,31 +63,20 @@ class DestinationsRelationManager extends RelationManager
                         Forms\Components\Select::make('city_id')
                             ->label('City')
                             ->options(function (callable $get) {
-                                $cites = City::where('company_id', $this->getOwnerRecord()->id)->get()->pluck('name', 'id');
-
-                                return $cites ?? [];
+                                return City::pluck('name', 'id')->toArray();
                             })
                             ->required(),
                         Forms\Components\TextInput::make('name')
                             ->label('Area Name')
                             ->required(),
                     ])
-                    ->createOptionUsing(function ($data) {
-                        $area = $this->getOwnerRecord()->whereHas('cities', fn ($q) => $q->whereHas('areas', fn ($q) => $q->where('name', $data['name'])))->first();
-                        if ($area) {
-                            return $area->id;
-                        }
 
-                        return Area::create($data)->id;
-                    })
                     ->required(),
 
                 Forms\Components\Select::make('to_city')
                     ->label('To City')
                     ->options(function (callable $get) {
-                        $cites = City::where('company_id', $this->getOwnerRecord()->id)->get()->pluck('name', 'id');
-
-                        return $cites ?? [];
+                        return City::pluck('name', 'id')->toArray();
                     })
                     ->reactive()
                     ->searchable()
@@ -105,14 +85,7 @@ class DestinationsRelationManager extends RelationManager
                             ->label('City Name')
                             ->required(),
                     ])
-                    ->createOptionUsing(function ($data) {
-                        if ($this->getOwnerRecord()->cities()->where('name', $data['name'])->exists()) {
-                            return $this->getOwnerRecord()->cities()->where('name', $data['name'])->first()->id;
-                        }
-                        $data['company_id'] = $this->getOwnerRecord()->id;
 
-                        return City::create($data)->id;
-                    })
                     ->afterStateUpdated(fn (callable $set) => $set('to', null))
                     ->required(),
 
@@ -132,9 +105,7 @@ class DestinationsRelationManager extends RelationManager
                         Forms\Components\Select::make('city_id')
                             ->label('City')
                             ->options(function (callable $get) {
-                                $cites = City::where('company_id', $this->getOwnerRecord()->id)->get()->pluck('name', 'id');
-
-                                return $cites ?? [];
+                                return City::pluck('name', 'id')->toArray();
                             })
                             ->required(),
                         Forms\Components\TextInput::make('name')
@@ -142,14 +113,7 @@ class DestinationsRelationManager extends RelationManager
                             ->required(),
 
                     ])
-                    ->createOptionUsing(function ($data) {
-                        $area = $this->getOwnerRecord()->whereHas('cities', fn ($q) => $q->whereHas('areas', fn ($q) => $q->where('name', $data['name'])))->first();
-                        if ($area) {
-                            return $area->id;
-                        }
 
-                        return Area::create($data)->id;
-                    })
                     ->required(),
 
                 Forms\Components\Select::make('truck_id')
@@ -194,15 +158,20 @@ class DestinationsRelationManager extends RelationManager
                     ->color('primary')
                     ->requiresConfirmation()
                     ->form([
-                        Forms\Components\FileUpload::make('attachment'),
+                        Forms\Components\FileUpload::make('attachment')
+                            ->disk('public')
+                            ->directory('uploads'),
                     ])->action(function (array $data) {
-                        $file = public_path('storage'.'/'.$data['attachment']);
+                        $filePath = storage_path('app/public/' . $data['attachment']);
                         $this->getOwnerRecord()->destinations()->delete();
+                        // Process the Excel file
                         HeadingRowFormatter::default('none');
-                        $headings = (new HeadingRowImport)->toArray($file)[0][0];
+                        $headings = (new HeadingRowImport)->toArray($filePath)[0][0];
                         $headings = array_slice($headings, 4);
-                        Excel::import(new DestinationImport($this->getOwnerRecord(), $headings), $file, null, \Maatwebsite\Excel\Excel::XLSX);
 
+                        Excel::import(new DestinationImport($this->getOwnerRecord(), $headings), $filePath, null, \Maatwebsite\Excel\Excel::XLSX);
+
+                        // Send success notification
                         Notification::make()
                             ->title('Destinations Imported Successfully')
                             ->success()

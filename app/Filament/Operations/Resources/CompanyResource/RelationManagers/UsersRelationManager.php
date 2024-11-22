@@ -26,9 +26,10 @@ class UsersRelationManager extends RelationManager
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('password')
-                    ->required()
                     ->password()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->required(fn (string $operation): bool => $operation === 'create')
+                    ->visibleOn('create'),
 
                 Forms\Components\TextInput::make('position')
                     ->minLength(3)

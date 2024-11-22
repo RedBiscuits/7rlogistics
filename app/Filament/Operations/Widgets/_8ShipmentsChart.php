@@ -7,11 +7,11 @@ use Filament\Widgets\ChartWidget;
 use Flowframe\Trend\Trend;
 use Flowframe\Trend\TrendValue;
 
-class ShipmentsChart extends ChartWidget
+class _8ShipmentsChart extends ChartWidget
 {
     protected static ?string $heading = 'Shipments';
 
-    protected static ?int $sort = 4;
+    protected static ?int $sort = 8;
 
     protected function getData(): array
     {

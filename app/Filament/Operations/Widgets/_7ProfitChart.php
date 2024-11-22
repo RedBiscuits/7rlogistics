@@ -7,11 +7,11 @@ use Filament\Widgets\ChartWidget;
 use Flowframe\Trend\Trend;
 use Flowframe\Trend\TrendValue;
 
-class ProfitChart extends ChartWidget
+class _7ProfitChart extends ChartWidget
 {
     protected static ?string $heading = 'Profit over last 12 months';
 
-    protected static ?int $sort = 3;
+    protected static ?int $sort = 7;
 
     protected function getData(): array
     {

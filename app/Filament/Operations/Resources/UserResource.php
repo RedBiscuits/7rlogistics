@@ -47,13 +47,15 @@ class UserResource extends Resource
                     ->rule(Password::default())
                     ->label('Confirm New Password')
                     ->columnSpan(1),
-                Forms\Components\Select::make('role_id')->label('Role')->relationship(
-                    'roles',
-                    'name',
-                    function ($query) {
+                Forms\Components\Select::make('roles')
+                    ->relationship('roles', 'name', function ($query) {
                         return $query->where('name', '!=', 'Super Admin');
-                    }
-                )->required(),
+                    })
+                    ->multiple()
+                    ->preload()
+                    ->searchable()
+                    ->required()
+                    ->maxItems(1),
             ]);
     }
 
@@ -63,8 +65,10 @@ class UserResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('id')->sortable(),
                 Tables\Columns\TextColumn::make('name')->sortable()->searchable(),
+                Tables\Columns\TextColumn::make('company.name')->sortable()->searchable()->label('Company')
+                    ->getStateUsing(fn(User $record) => $record->company->name ?? '7R Logistics'),
                 Tables\Columns\TextColumn::make('position')->sortable()->searchable()
-                    ->getStateUsing(fn (User $record) => $record->position ?? 'N/A'),
+                    ->getStateUsing(fn(User $record) => $record->position ?? 'N/A'),
                 Tables\Columns\TextColumn::make('email')->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('roles.name')->sortable()->label('Role'),
                 Tables\Columns\TextColumn::make('created_at')
@@ -98,7 +102,6 @@ class UserResource extends Resource
     {
         return [
             RelationManagers\ShipmentsRelationManager::class,
-            RelationManagers\MissionsRelationManager::class,
         ];
     }
 
@@ -110,5 +113,10 @@ class UserResource extends Resource
             'view' => Pages\ViewUser::route('/{record}'),
             'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
     }
 }

@@ -16,15 +16,15 @@ class TruckResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-truck';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 4;
 
-    protected static ?string $navigationGroup = 'System management';
+    protected static ?string $navigationGroup = 'Logistics';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')->required()->maxLength(255),
+                Forms\Components\Select::make('name')->required()->options(['Dababah', 'Jumpo' , 'Dababah Refrigirated', 'Jumpo Refrigirated']),
                 Forms\Components\TextInput::make('plate_number')->required()->unique()->maxLength(255),
                 Forms\Components\TextInput::make('weight')->numeric()->minValue(0)->required(),
             ]);
@@ -69,5 +69,10 @@ class TruckResource extends Resource
             // 'view' => Pages\ViewTruck::route('/{record}'),
             'edit' => Pages\EditTruck::route('/{record}/edit'),
         ];
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
     }
 }

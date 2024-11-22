@@ -8,13 +8,14 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 
-class LatestShipments extends BaseWidget
+class _4LatestShipments extends BaseWidget
 {
     use HasWidgetShield;
 
     protected int|string|array $columnSpan = 'full';
+    protected static ?string $heading = 'Latest Shipments';
 
-    protected static ?int $sort = 2;
+    protected static ?int $sort = 4;
 
     public function table(Table $table): Table
     {

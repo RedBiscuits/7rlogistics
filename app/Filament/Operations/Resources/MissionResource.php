@@ -72,4 +72,9 @@ class MissionResource extends Resource
             'edit' => Pages\EditMission::route('/{record}/edit'),
         ];
     }
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Operations\Resources\UserResource\RelationManagers;
+namespace App\Filament\Operations\Resources\DriverResource\RelationManagers;
 
 use App\Filament\Client\Resources\ShipmentResource;
 use Filament\Forms\Form;
@@ -37,7 +37,7 @@ class MissionsRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
+
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
@@ -49,10 +49,5 @@ class MissionsRelationManager extends RelationManager
                 //     Tables\Actions\DeleteBulkAction::make(),
                 // ]),
             ]);
-    }
-
-    public static function canViewForRecord(Model $ownerRecord, string $pageClass): bool
-    {
-        return $ownerRecord->hasRole('Driver');
     }
 }
