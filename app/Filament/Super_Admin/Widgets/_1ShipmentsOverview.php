@@ -36,7 +36,7 @@ class _1ShipmentsOverview extends BaseWidget
 
             Stat::make('Total Drivers', Driver::count())
                 ->description('Total available drivers')
-                ->url('admin/users?tableFilters[role][value]=2')
+                ->url('admin/drivers')
                 ->chart([8, 12, 5, 15, 9, 11, 13])
                 ->icon('heroicon-o-truck')
                 ->color('DRIVER_RECEIVED'),

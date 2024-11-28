@@ -24,7 +24,14 @@ class TruckResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('name')->required()->options(['Dababah', 'Jumpo' , 'Dababah Refrigirated', 'Jumpo Refrigirated']),
+                Forms\Components\Select::make('name')
+                    ->required()
+                    ->options([
+                        'dababah' => 'Dababah',
+                        'jumbo' => 'Jumbo',
+                        'dababah_refrigerated' => 'Dababah Refrigerated',
+                        'jumbo_refrigerated' => 'Jumbo Refrigerated'
+                    ]),
                 Forms\Components\TextInput::make('plate_number')->required()->unique()->maxLength(255),
                 Forms\Components\TextInput::make('weight')->numeric()->minValue(0)->required(),
             ]);
@@ -34,9 +41,8 @@ class TruckResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('id')->sortable(),
+                Tables\Columns\TextColumn::make('plate_number')->label('Code')->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('name')->sortable()->searchable(),
-                Tables\Columns\TextColumn::make('plate_number')->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('weight')->sortable()->searchable(),
                 // Tables\Columns\TextColumn::make('created_at')
             ])

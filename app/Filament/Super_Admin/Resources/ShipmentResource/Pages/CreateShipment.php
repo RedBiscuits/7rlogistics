@@ -13,9 +13,6 @@ class CreateShipment extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $user = Company::find($data['company_id'])->users()->first();
-        $data['user_id'] = $user->id;
-
         $destination = Destination::where('company_id', $data['company_id'])
             ->where(function ($query) use ($data) {
                 $query->where(function ($q) use ($data) {
@@ -39,7 +36,6 @@ class CreateShipment extends CreateRecord
             $data['driver_id'] = null;
         }
 
-        unset($data['company_id']);
 
         return $data;
     }

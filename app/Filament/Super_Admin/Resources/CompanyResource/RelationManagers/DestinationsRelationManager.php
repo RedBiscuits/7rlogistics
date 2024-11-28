@@ -5,6 +5,7 @@ namespace App\Filament\Super_Admin\Resources\CompanyResource\RelationManagers;
 use App\Imports\DestinationImport;
 use App\Models\Area;
 use App\Models\City;
+use App\Models\Destination;
 use App\Models\Truck;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -38,12 +39,6 @@ class DestinationsRelationManager extends RelationManager
                     })
                     ->reactive()
                     ->searchable()
-                    ->createOptionForm([
-                        Forms\Components\TextInput::make('name')
-                            ->label('City Name')
-                            ->required(),
-                    ])
-
                     ->afterStateUpdated(fn (callable $set) => $set('from', null))
                     ->required(),
 
@@ -59,17 +54,7 @@ class DestinationsRelationManager extends RelationManager
                     })
                     ->reactive()
                     ->searchable()
-                    ->createOptionForm([
-                        Forms\Components\Select::make('city_id')
-                            ->label('City')
-                            ->options(function (callable $get) {
-                                return City::pluck('name', 'id')->toArray();
-                            })
-                            ->required(),
-                        Forms\Components\TextInput::make('name')
-                            ->label('Area Name')
-                            ->required(),
-                    ])
+
 
                     ->required(),
 
@@ -80,11 +65,7 @@ class DestinationsRelationManager extends RelationManager
                     })
                     ->reactive()
                     ->searchable()
-                    ->createOptionForm([
-                        Forms\Components\TextInput::make('name')
-                            ->label('City Name')
-                            ->required(),
-                    ])
+
 
                     ->afterStateUpdated(fn (callable $set) => $set('to', null))
                     ->required(),
@@ -101,18 +82,7 @@ class DestinationsRelationManager extends RelationManager
                     })
                     ->reactive()
                     ->searchable()
-                    ->createOptionForm([
-                        Forms\Components\Select::make('city_id')
-                            ->label('City')
-                            ->options(function (callable $get) {
-                                return City::pluck('name', 'id')->toArray();
-                            })
-                            ->required(),
-                        Forms\Components\TextInput::make('name')
-                            ->label('Area Name')
-                            ->required(),
 
-                    ])
 
                     ->required(),
 
@@ -125,13 +95,46 @@ class DestinationsRelationManager extends RelationManager
                     })
                     ->reactive()
                     ->searchable()
+                    ->afterStateUpdated(function (callable $set, callable $get)  {
+                        $destination = Destination::where('company_id', $this->getOwnerRecord()->id)
+                            ->where(function ($query) use ($get) {
+                                $query->where(function ($q) use ($get) {
+                                    $q->where('from_area', $get('from_area'))
+                                        ->where('to_area', $get('to_area'));
+                                })->orWhere(function ($q) use ($get) {
+                                    $q->where('to_area', $get('from_area'))
+                                        ->where('from_area', $get('to_area'));
+                                });
+                            })
+                            ->where('truck_id', $get('truck_id'))
+                            ->first();
+                            
+                        $set('price', $destination?->price ?? null);
+                    })
                     ->required(),
 
                 Forms\Components\TextInput::make('price')
                     ->required()
                     ->numeric()
                     ->prefix('EGP')
-                    ->minValue(0),
+                    ->minValue(0)
+                    ->default(function (callable $get) {
+                        $destination = $this->getOwnerRecord()->destinations()
+                            ->where(function ($query) use ($get) {
+                                $query->where(function ($q) use ($get) {
+                                    $q->where('from_area', $get('from_area'))
+                                        ->where('to_area', $get('to_area'));
+                                })->orWhere(function ($q) use ($get) {
+                                    $q->where('to_area', $get('from_area'))
+                                        ->where('from_area', $get('to_area'));
+                                });
+                            })
+                            ->where('truck_id', $get('truck_id'))
+                            ->first();
+
+                        return $destination->price ?? 0;
+                    })
+                    ->reactive(),
             ]);
     }
 
@@ -181,20 +184,35 @@ class DestinationsRelationManager extends RelationManager
                 Tables\Actions\CreateAction::make()
                     ->using(function (array $data, string $model): Model {
                         $destination = $this->getOwnerRecord()->destinations()
-                            ->where('from_city', $data['from_city'])
-                            ->where('from_area', $data['from_area'])
-                            ->where('to_city', $data['to_city'])
-                            ->where('to_area', $data['to_area'])
+                            ->where(function ($query) use ($data) {
+                                $query->where(function ($q) use ($data) {
+                                    $q->where('from_area', $data['from_area'])
+                                        ->where('to_area', $data['to_area']);
+                                })->orWhere(function ($q) use ($data) {
+                                    $q->where('to_area', $data['from_area'])
+                                        ->where('from_area', $data['to_area']);
+                                });
+                            })
                             ->where('truck_id', $data['truck_id'])
                             ->first();
 
                         if ($destination) {
+                            $destination->update(['price' => $data['price']]);
+
+                            Notification::make()
+                                ->title('Price Updated Successfully')
+                                ->success()
+                                ->send();
+
                             return $destination;
                         }
 
                         $data['company_id'] = $this->getOwnerRecord()->id;
-
                         return $model::create($data);
+                    })
+                    ->successNotificationTitle(function ($record) {
+                        // Only show success notification if it's a new record
+                        return $record->wasRecentlyCreated ? 'Created successfully' : null;
                     }),
 
             ])

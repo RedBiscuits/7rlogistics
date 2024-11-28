@@ -50,7 +50,10 @@ class CompanyResource extends Resource
                     ->openable()
                     ->multiple()
                     ->maxFiles(5)
-                    ->previewable(false),
+                    ->previewable(false)
+                    // ->disk('public')
+                    // ->visibility('public')  // Add this line
+                    ->previewable(true),
             ]);
     }
 
@@ -78,7 +81,8 @@ class CompanyResource extends Resource
                     ->searchable(),
                 Tables\Columns\SpatieMediaLibraryImageColumn::make('attachments')
                     ->label('Attachments')
-                    ->collection('attachments'),
+                    ->collection('attachments')
+                    ->disk('public'),
             ])
             ->filters([])
             ->actions([

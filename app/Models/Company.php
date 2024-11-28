@@ -29,13 +29,12 @@ class Company extends Model implements HasMedia
 
     public function shipments()
     {
-        return $this->hasManyThrough(
-            Shipment::class,
-            User::class,
-            'company_id', // Foreign key on users table
-            'user_id',    // Foreign key on shipments table
-            'id',         // Local key on companies table
-            'id'         // Local key on users table
-        );
+        return $this->hasMany(Shipment::class);
     }
+
+    // public function registerMediaCollections(): void
+    // {
+    //     $this->addMediaCollection('attachments')
+    //         ->useDisk('public');
+    // }
 }

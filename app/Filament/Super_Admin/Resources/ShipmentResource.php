@@ -5,13 +5,12 @@ namespace App\Filament\Super_Admin\Resources;
 use App\Enums\ShipmentStatus;
 use App\Filament\Super_Admin\Resources\ShipmentResource\Pages;
 use App\Models\Area;
-use App\Models\City;
+
 use App\Models\Company;
 use App\Models\Destination;
 use App\Models\Driver;
 use App\Models\Shipment;
 use App\Models\Truck;
-use App\Models\User;
 use Closure;
 use Dotswan\MapPicker\Fields\Map;
 use Filament\Forms;
@@ -23,7 +22,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
-use Livewire\Component;
+use App\Models\User;
 
 class ShipmentResource extends Resource
 {
@@ -43,8 +42,23 @@ class ShipmentResource extends Resource
             ->schema([
                 Forms\Components\Select::make('company_id')
                     ->label('Company')
-                    ->options(Company::whereHas('users', fn($q) => $q->whereHas('roles', fn($q) => $q->where('name', 'Client')))->pluck('name', 'id'))
-                    ->required(),
+                    ->options(Company::pluck('name', 'id'))
+                    ->required()
+                    ->reactive()
+                    ->afterStateUpdated(function (Set $set) {
+                        $set('user_id', null);
+                    }),
+
+                Forms\Components\Select::make('user_id')
+                    ->label('User')
+                    ->options(function (callable $get) {
+                        $company_id = $get('company_id');
+                        if (!$company_id) {
+                            return [];
+                        }
+                        return User::where('company_id', $company_id)->pluck('name', 'id');
+                    })
+                    ->disabled(fn ($get) => !$get('company_id')),
 
                 Forms\Components\ToggleButtons::make('status')
                     ->inline()
@@ -85,7 +99,6 @@ class ShipmentResource extends Resource
 
                                 Forms\Components\DateTimePicker::make('pickup_date')
                                     ->label('Pickup Date')
-                                    ->date()
                                     ->required(),
 
                                 Forms\Components\TextInput::make('awb')
@@ -392,7 +405,7 @@ class ShipmentResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('id')->label('Code')->sortable(),
-                Tables\Columns\TextColumn::make('user.company.name')->label('Company')->sortable(),
+                Tables\Columns\TextColumn::make('company.name')->label('Company')->sortable(),
                 Tables\Columns\TextColumn::make('fromArea.name')->label('From'),
                 Tables\Columns\TextColumn::make('toArea.name')->label('To'),
                 Tables\Columns\TextColumn::make('truck.name')->label('Truck'),
