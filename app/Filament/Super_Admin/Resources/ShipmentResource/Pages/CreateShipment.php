@@ -26,11 +26,11 @@ class CreateShipment extends CreateRecord
             ->where('truck_id' , $data['truck_id'])
             ->first();
 
-        if ($destination) {
-            $data['price'] = $destination->price;
-        } else {
-            redirect()->back()->with('error', 'Destination not found');
-        }
+        // if ($destination) {
+        //     $data['price'] = $destination->price;
+        // } else {
+        //     redirect()->back()->with('error', 'Destination not found');
+        // }
 
         if ($data['status'] == 0 || $data['status'] == 1) {
             $data['driver_id'] = null;

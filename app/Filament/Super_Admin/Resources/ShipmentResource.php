@@ -261,7 +261,7 @@ class ShipmentResource extends Resource
 
                                         $destination = $destination->first();
                                         if ($destination) {
-                                            $set('total_price', $destination->price);
+                                            $set('price', $destination->price);
                                         }
                                     }
                                 })
@@ -358,33 +358,37 @@ class ShipmentResource extends Resource
                                 return new HtmlString('<h1>' . $availableWeight . '</h1>');
                             }),
 
-                        Forms\Components\Placeholder::make('total_price')
+                        Forms\Components\TextInput::make('price')
                             ->label('Total Price')
-                            ->content(function ($get) {
-                                $fromArea = $get('from_area');
-                                $toArea = $get('to_area');
-                                $truck = $get('truck_id');
-                                $company_id = $get('company_id');
-                                if ($fromArea && $toArea && $truck && $company_id) {
-                                    $destination = Destination::where('company_id', $company_id)
-                                        ->where(function ($query) use ($fromArea, $toArea) {
-                                            $query->where(function ($q) use ($fromArea, $toArea) {
-                                                $q->where('from_area', $fromArea)
-                                                    ->where('to_area', $toArea);
-                                            })->orWhere(function ($q) use ($fromArea, $toArea) {
-                                                $q->where('to_area', $fromArea)
-                                                    ->where('from_area', $toArea);
-                                            });
-                                        })
-                                        ->where('truck_id', $truck)
-                                        ->whereNotNull('price')
-                                        ->first();
+                            ->numeric()
+                            ->reactive()
+                            ->required(),
 
-                                    return new HtmlString('<h1>' . $destination->price . '</h1>');
-                                }
+                            // ->content(function ($get) {
+                            //     $fromArea = $get('from_area');
+                            //     $toArea = $get('to_area');
+                            //     $truck = $get('truck_id');
+                            //     $company_id = $get('company_id');
+                            //     if ($fromArea && $toArea && $truck && $company_id) {
+                            //         $destination = Destination::where('company_id', $company_id)
+                            //             ->where(function ($query) use ($fromArea, $toArea) {
+                            //                 $query->where(function ($q) use ($fromArea, $toArea) {
+                            //                     $q->where('from_area', $fromArea)
+                            //                         ->where('to_area', $toArea);
+                            //                 })->orWhere(function ($q) use ($fromArea, $toArea) {
+                            //                     $q->where('to_area', $fromArea)
+                            //                         ->where('from_area', $toArea);
+                            //                 });
+                            //             })
+                            //             ->where('truck_id', $truck)
+                            //             ->whereNotNull('price')
+                            //             ->first();
 
-                                return new HtmlString('<h1>' . 0 . '</h1>');
-                            }),
+                            //         return new HtmlString('<h1>' . $destination->price . '</h1>');
+                            //     }
+
+                            //     return new HtmlString('<h1>' . 0 . '</h1>');
+                            // }),
 
                     ]),
 
