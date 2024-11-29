@@ -368,7 +368,7 @@ class ShipmentRelationManager extends RelationManager
             ->recordTitleAttribute('id')
             ->columns([
                 Tables\Columns\TextColumn::make('user.name')->label('User')
-                    ->getStateUsing(function($record) {
+                    ->getStateUsing(function ($record) {
                         if (!$record->user) {
                             return 'Not assigned';
                         }
@@ -376,9 +376,11 @@ class ShipmentRelationManager extends RelationManager
                     }),
                 Tables\Columns\TextColumn::make('fromArea.name')->label('From Area'),
                 Tables\Columns\TextColumn::make('toArea.name')->label('To Area'),
-                Tables\Columns\TextColumn::make('truck.name')->label('Truck'),
+                Tables\Columns\TextColumn::make('truck.name')->label('Truck')
+                    ->getStateUsing(fn($record) => $record->truck->name . ' - (' . $record->truck->plate_number . ')'),
                 Tables\Columns\TextColumn::make('status')->label('Status')->badge(),
                 Tables\Columns\TextColumn::make('price')->label('Price')->money('EGP'),
+                Tables\Columns\TextColumn::make('created_at')->label('Creation Date')->dateTime('Y-m-d H:i A'),
             ])
             ->filters([
                 //
