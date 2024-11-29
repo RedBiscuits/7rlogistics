@@ -27,8 +27,8 @@ class TruckResource extends Resource
                 Forms\Components\Select::make('name')
                     ->required()
                     ->options([
-                        'dababah' => 'Dababah',
-                        'jumbo' => 'Jumbo',
+                        'Dababah' => 'Dababah',
+                        'Jumbo' => 'Jumbo',
                         'dababah_refrigerated' => 'Dababah Refrigerated',
                         'jumbo_refrigerated' => 'Jumbo Refrigerated'
                     ]),
