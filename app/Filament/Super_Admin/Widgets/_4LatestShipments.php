@@ -24,10 +24,10 @@ class _4LatestShipments extends BaseWidget
                 Shipment::latest()
             )
             ->columns([
-                Tables\Columns\TextColumn::make('user.name')->label('User')->sortable(),
-                Tables\Columns\TextColumn::make('fromCity.name')->label('From City'),
+                Tables\Columns\TextColumn::make('company.name')->label('Company')->sortable(),
+                Tables\Columns\TextColumn::make('fromArea.city.name')->label('From City'),
                 Tables\Columns\TextColumn::make('fromArea.name')->label('From Area'),
-                Tables\Columns\TextColumn::make('toCity.name')->label('To City'),
+                Tables\Columns\TextColumn::make('toArea.city.name')->label('To City'),
                 Tables\Columns\TextColumn::make('toArea.name')->label('To Area'),
                 Tables\Columns\TextColumn::make('status')->label('Status')->badge(),
                 Tables\Columns\TextColumn::make('price')->label('Price')->money('EGP'),

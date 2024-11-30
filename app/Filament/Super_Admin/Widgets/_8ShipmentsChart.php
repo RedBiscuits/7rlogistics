@@ -16,7 +16,7 @@ class _8ShipmentsChart extends ChartWidget
     protected function getData(): array
     {
 
-        $data = Trend::query(Shipment::query()->where('status', 'Delivered'))
+        $data = Trend::query(Shipment::query())
             ->between(
                 start: now()->startOfYear(),
                 end: now()->endOfYear(),
