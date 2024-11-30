@@ -5,13 +5,12 @@ namespace App\Filament\Operations\Resources;
 use App\Enums\ShipmentStatus;
 use App\Filament\Operations\Resources\ShipmentResource\Pages;
 use App\Models\Area;
-use App\Models\City;
+
 use App\Models\Company;
 use App\Models\Destination;
 use App\Models\Driver;
 use App\Models\Shipment;
 use App\Models\Truck;
-use App\Models\User;
 use Closure;
 use Dotswan\MapPicker\Fields\Map;
 use Filament\Forms;
@@ -23,7 +22,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
-use Livewire\Component;
+use App\Models\User;
 
 class ShipmentResource extends Resource
 {
@@ -43,8 +42,23 @@ class ShipmentResource extends Resource
             ->schema([
                 Forms\Components\Select::make('company_id')
                     ->label('Company')
-                    ->options(Company::whereHas('users', fn($q) => $q->whereHas('roles', fn($q) => $q->where('name', 'Client')))->pluck('name', 'id'))
-                    ->required(),
+                    ->options(Company::pluck('name', 'id'))
+                    ->required()
+                    ->reactive()
+                    ->afterStateUpdated(function (Set $set) {
+                        $set('user_id', null);
+                    }),
+
+                Forms\Components\Select::make('user_id')
+                    ->label('User')
+                    ->options(function (callable $get) {
+                        $company_id = $get('company_id');
+                        if (!$company_id) {
+                            return [];
+                        }
+                        return User::where('company_id', $company_id)->pluck('name', 'id');
+                    })
+                    ->disabled(fn($get) => !$get('company_id')),
 
                 Forms\Components\ToggleButtons::make('status')
                     ->inline()
@@ -85,7 +99,11 @@ class ShipmentResource extends Resource
 
                                 Forms\Components\DateTimePicker::make('pickup_date')
                                     ->label('Pickup Date')
-                                    ->date()
+                                    ->required(),
+
+                                Forms\Components\DateTimePicker::make('created_at')
+                                    ->label('Creation Date')
+                                    ->default(now())
                                     ->required(),
 
                                 Forms\Components\TextInput::make('awb')
@@ -248,7 +266,7 @@ class ShipmentResource extends Resource
 
                                         $destination = $destination->first();
                                         if ($destination) {
-                                            $set('total_price', $destination->price);
+                                            $set('price', $destination->price);
                                         }
                                     }
                                 })
@@ -345,33 +363,37 @@ class ShipmentResource extends Resource
                                 return new HtmlString('<h1>' . $availableWeight . '</h1>');
                             }),
 
-                        Forms\Components\Placeholder::make('total_price')
+                        Forms\Components\TextInput::make('price')
                             ->label('Total Price')
-                            ->content(function ($get) {
-                                $fromArea = $get('from_area');
-                                $toArea = $get('to_area');
-                                $truck = $get('truck_id');
-                                $company_id = $get('company_id');
-                                if ($fromArea && $toArea && $truck && $company_id) {
-                                    $destination = Destination::where('company_id', $company_id)
-                                        ->where(function ($query) use ($fromArea, $toArea) {
-                                            $query->where(function ($q) use ($fromArea, $toArea) {
-                                                $q->where('from_area', $fromArea)
-                                                    ->where('to_area', $toArea);
-                                            })->orWhere(function ($q) use ($fromArea, $toArea) {
-                                                $q->where('to_area', $fromArea)
-                                                    ->where('from_area', $toArea);
-                                            });
-                                        })
-                                        ->where('truck_id', $truck)
-                                        ->whereNotNull('price')
-                                        ->first();
+                            ->numeric()
+                            ->reactive()
+                            ->required(),
 
-                                    return new HtmlString('<h1>' . $destination->price . '</h1>');
-                                }
+                        // ->content(function ($get) {
+                        //     $fromArea = $get('from_area');
+                        //     $toArea = $get('to_area');
+                        //     $truck = $get('truck_id');
+                        //     $company_id = $get('company_id');
+                        //     if ($fromArea && $toArea && $truck && $company_id) {
+                        //         $destination = Destination::where('company_id', $company_id)
+                        //             ->where(function ($query) use ($fromArea, $toArea) {
+                        //                 $query->where(function ($q) use ($fromArea, $toArea) {
+                        //                     $q->where('from_area', $fromArea)
+                        //                         ->where('to_area', $toArea);
+                        //                 })->orWhere(function ($q) use ($fromArea, $toArea) {
+                        //                     $q->where('to_area', $fromArea)
+                        //                         ->where('from_area', $toArea);
+                        //                 });
+                        //             })
+                        //             ->where('truck_id', $truck)
+                        //             ->whereNotNull('price')
+                        //             ->first();
 
-                                return new HtmlString('<h1>' . 0 . '</h1>');
-                            }),
+                        //         return new HtmlString('<h1>' . $destination->price . '</h1>');
+                        //     }
+
+                        //     return new HtmlString('<h1>' . 0 . '</h1>');
+                        // }),
 
                     ]),
 
@@ -392,13 +414,14 @@ class ShipmentResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('id')->label('Code')->sortable(),
-                Tables\Columns\TextColumn::make('user.company.name')->label('Company')->sortable(),
+                Tables\Columns\TextColumn::make('company.name')->label('Company')->sortable(),
                 Tables\Columns\TextColumn::make('fromArea.name')->label('From'),
                 Tables\Columns\TextColumn::make('toArea.name')->label('To'),
-                Tables\Columns\TextColumn::make('truck.name')->label('Truck'),
-
+                Tables\Columns\TextColumn::make('truck')->label('Truck')
+                    ->getStateUsing(fn($record) => $record->truck->name . ' - (' . $record->truck->plate_number . ')'),
                 Tables\Columns\TextColumn::make('status')->label('Status')->badge(),
                 Tables\Columns\TextColumn::make('price')->label('Price')->money('EGP'),
+                Tables\Columns\TextColumn::make('created_at')->label('Creation Date')->dateTime('Y-m-d H:i A'),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')->label('Status')

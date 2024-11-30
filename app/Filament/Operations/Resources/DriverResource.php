@@ -94,7 +94,8 @@ class DriverResource extends Resource
                 TextColumn::make('id')
                     ->label('ID')
                     ->sortable(),
-                TextColumn::make('user.name')
+                TextColumn::make('name')
+                    ->label('Name')
                     ->searchable()
                     ->sortable()
                     ->default('N/A'),

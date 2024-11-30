@@ -38,6 +38,16 @@ class ShipmentRelationManager extends RelationManager
     {
         return $form
             ->schema([
+                Forms\Components\Select::make('user_id')
+                    ->label('User')
+                    ->options(function (callable $get) {
+                        $company_id = $this->getOwnerRecord()->id;
+                        if (!$company_id) {
+                            return [];
+                        }
+                        return User::where('company_id', $company_id)->pluck('name', 'id');
+                    }),
+
                 Forms\Components\Card::make('Receiver Information')
                     ->schema([
                         Forms\Components\Grid::make(2)
@@ -358,12 +368,19 @@ class ShipmentRelationManager extends RelationManager
             ->recordTitleAttribute('id')
             ->columns([
                 Tables\Columns\TextColumn::make('user.name')->label('User')
-                    ->getStateUsing(fn($record) => $record->user->position . ' - ' . $record->user->name),
+                    ->getStateUsing(function ($record) {
+                        if (!$record->user) {
+                            return 'Not assigned';
+                        }
+                        return $record->user->position . ' - ' . $record->user->name;
+                    }),
                 Tables\Columns\TextColumn::make('fromArea.name')->label('From Area'),
                 Tables\Columns\TextColumn::make('toArea.name')->label('To Area'),
-                Tables\Columns\TextColumn::make('truck.name')->label('Truck'),
+                Tables\Columns\TextColumn::make('truck.name')->label('Truck')
+                    ->getStateUsing(fn($record) => $record->truck->name . ' - (' . $record->truck->plate_number . ')'),
                 Tables\Columns\TextColumn::make('status')->label('Status')->badge(),
                 Tables\Columns\TextColumn::make('price')->label('Price')->money('EGP'),
+                Tables\Columns\TextColumn::make('created_at')->label('Creation Date')->dateTime('Y-m-d H:i A'),
             ])
             ->filters([
                 //
@@ -391,8 +408,7 @@ class ShipmentRelationManager extends RelationManager
                         }
 
                         $data['price'] = $destination->price;
-                        $data['user_id'] = $this->getOwnerRecord()->users()->first()->id;
-                        unset($data['company_id']);
+
                         return $model::create($data);
                     })
                     ->successRedirectUrl(fn(Model $record): string => ShipmentResource::getUrl('index')),
