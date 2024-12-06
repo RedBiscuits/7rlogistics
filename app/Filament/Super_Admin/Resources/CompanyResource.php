@@ -82,7 +82,15 @@ class CompanyResource extends Resource
                 Tables\Columns\SpatieMediaLibraryImageColumn::make('attachments')
                     ->label('Attachments')
                     ->collection('attachments')
-                    ->disk('public'),
+                    ->disk('public')
+                    ->conversion('thumb')
+                    ->placeholder(function ($record) {
+                        $media = $record->getFirstMedia('attachments');
+                        if ($media && $media->mime_type === 'application/pdf') {
+                            return 'https://cdn-icons-png.flaticon.com/512/337/337946.png';
+                        }
+                        return null;
+                    }),
             ])
             ->filters([])
             ->actions([
