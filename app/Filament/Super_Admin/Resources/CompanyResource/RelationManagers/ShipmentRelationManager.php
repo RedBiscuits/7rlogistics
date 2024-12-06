@@ -5,7 +5,7 @@ namespace App\Filament\Super_Admin\Resources\CompanyResource\RelationManagers;
 // Models
 use App\Models\Area;
 use App\Models\Destination;
-use App\Models\Company;
+use App\Models\User;
 use App\Models\Truck;
 
 // Filament & Forms

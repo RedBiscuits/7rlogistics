@@ -29,7 +29,7 @@ class UserResource extends Resource
 
                 Forms\Components\TextInput::make('name')->required()->minLength(3)->maxLength(255),
                 Forms\Components\Select::make('company_id')->label('Company')
-                    ->relationship('company', 'name')->required(),
+                    ->relationship('company', 'name'),
                 Forms\Components\TextInput::make('position')->minLength(3)->maxLength(255),
                 Forms\Components\TextInput::make('email')->email()->unique(ignoreRecord: true)->required()->maxLength(255),
                 Forms\Components\TextInput::make('password')
@@ -44,12 +44,16 @@ class UserResource extends Resource
                     ->password()
                     ->required()
                     ->same('password')
-                    ->rule(Password::default())
+                    ->dehydrated(false) // Prevents saving to database
                     ->label('Confirm New Password')
                     ->columnSpan(1),
                 Forms\Components\Select::make('roles')
-                    ->relationship('roles', 'name', function ($query) {
-                        return $query->where('name', '!=', 'Super Admin');
+                    ->relationship('roles', 'name', function ($query, $get) {
+                        $query = $query->where('name', '!=', 'Super Admin');
+                        if (!$get('company_id')) {
+                            $query->where('name', '!=', 'Client');
+                        }
+                        return $query;
                     })
                     ->multiple()
                     ->preload()
