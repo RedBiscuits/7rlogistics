@@ -418,7 +418,7 @@ class ShipmentResource extends Resource
                 Tables\Columns\TextColumn::make('fromArea.name')->label('From'),
                 Tables\Columns\TextColumn::make('toArea.name')->label('To'),
                 Tables\Columns\TextColumn::make('truck')->label('Truck')
-                    ->getStateUsing(fn($record) => $record->truck->name . ' - (' . $record->truck->plate_number . ')'),
+                    ->getStateUsing(fn($record) => $record->truck ? $record->truck->name . ' - (' . $record->truck->plate_number . ')' : ''),
                 Tables\Columns\TextColumn::make('status')->label('Status')->badge(),
                 Tables\Columns\TextColumn::make('price')->label('Price')->money('EGP'),
                 Tables\Columns\TextColumn::make('created_at')->label('Creation Date')->dateTime('Y-m-d H:i A'),

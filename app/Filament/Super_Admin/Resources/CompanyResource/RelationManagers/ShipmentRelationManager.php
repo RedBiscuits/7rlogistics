@@ -408,7 +408,7 @@ class ShipmentRelationManager extends RelationManager
                         }
 
                         $data['price'] = $destination->price;
-
+                        $data['company_id'] = $this->getOwnerRecord()->id;
                         return $model::create($data);
                     })
                     ->successRedirectUrl(fn(Model $record): string => ShipmentResource::getUrl('index')),
