@@ -29,22 +29,12 @@ class DestinationResource extends Resource
                 Forms\Components\Select::make('from_city')
                     ->label('From City')
                     ->options(function (callable $get) {
-                        $cites = City::where('company_id', auth()->user()->company_id)->get()->pluck('name', 'id');
+                        $cites = City::get()->pluck('name', 'id');
 
                         return $cites ?? [];
                     })
                     ->reactive()
                     ->searchable()
-                    ->createOptionForm([
-                        Forms\Components\TextInput::make('name')
-                            ->label('City Name')
-                            ->required(),
-                    ])
-                    ->createOptionUsing(function ($data) {
-                        $data['company_id'] = auth()->user()->company_id;
-
-                        return City::create($data)->id;
-                    })
                     ->afterStateUpdated(fn (callable $set) => $set('from_area', null))
                     ->required(),
 
@@ -60,43 +50,17 @@ class DestinationResource extends Resource
                     })
                     ->reactive()
                     ->searchable()
-                    ->createOptionForm([
-                        Forms\Components\Select::make('city_id')
-                            ->label('City')
-                            ->options(function (callable $get) {
-                                $cites = City::where('company_id', auth()->user()->company_id)->get()->pluck('name', 'id');
-
-                                return $cites ?? [];
-                            })
-                            ->required(),
-                        Forms\Components\TextInput::make('name')
-                            ->label('Area Name')
-                            ->required(),
-                    ])
-                    ->createOptionUsing(function ($data) {
-                        return Area::create($data)->id;
-                    })
                     ->required(),
 
                 Forms\Components\Select::make('to_city')
                     ->label('To City')
                     ->options(function (callable $get) {
-                        $cites = City::where('company_id', auth()->user()->company_id)->get()->pluck('name', 'id');
+                        $cites = City::get()->pluck('name', 'id');
 
                         return $cites ?? [];
                     })
                     ->reactive()
                     ->searchable()
-                    ->createOptionForm([
-                        Forms\Components\TextInput::make('name')
-                            ->label('City Name')
-                            ->required(),
-                    ])
-                    ->createOptionUsing(function ($data) {
-                        $data['company_id'] = auth()->user()->company_id;
-
-                        return City::create($data)->id;
-                    })
                     ->afterStateUpdated(fn (callable $set) => $set('to_area', null))
                     ->required(),
 
@@ -112,23 +76,6 @@ class DestinationResource extends Resource
                     })
                     ->reactive()
                     ->searchable()
-                    ->createOptionForm([
-                        Forms\Components\Select::make('city_id')
-                            ->label('City')
-                            ->options(function (callable $get) {
-                                $cites = City::where('company_id', auth()->user()->company_id)->get()->pluck('name', 'id');
-
-                                return $cites ?? [];
-                            })
-                            ->required(),
-                        Forms\Components\TextInput::make('name')
-                            ->label('Area Name')
-                            ->required(),
-
-                    ])
-                    ->createOptionUsing(function ($data) {
-                        return Area::create($data)->id;
-                    })
                     ->required(),
 
                 Forms\Components\Select::make('truck_id')

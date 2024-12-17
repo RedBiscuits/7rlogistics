@@ -5,6 +5,9 @@ namespace App\Providers;
 use Filament\Support\Colors\Color;
 use Filament\Support\Facades\FilamentColor;
 use Illuminate\Support\ServiceProvider;
+use Filament\Facades\Filament;
+use App\Http\Responses\LogoutResponse;
+use Filament\Http\Responses\Auth\Contracts\LogoutResponse as LogoutResponseContract;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -13,7 +16,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(LogoutResponseContract::class, LogoutResponse::class);
     }
 
     /**
@@ -21,17 +24,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Page::$reportValidationErrorUsing = function (ValidationException $exception) {
-
-        //     if($exception->getMessage() == "Truck Weight is not enough"){
-        //         Notification::make()
-        //         ->title($exception->getMessage())
-        //         ->danger()
-        //         ->send();
-        //     }
-
-        // };
-
         FilamentColor::register([
             'PENDING' => Color::Gray, // Blue
             'CANCELLED' => Color::Red, // Red

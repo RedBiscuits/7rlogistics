@@ -13,7 +13,8 @@ class CreateShipment extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['user_id'] = auth()->user()->id;
-
+        $data['company_id'] = auth()->user()->company_id;
+        
         $destination = auth()->user()->company->destinations()
             ->whereNotNull('price')
             ->where(function ($query) use ($data) {

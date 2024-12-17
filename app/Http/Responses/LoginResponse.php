@@ -29,8 +29,9 @@ class LoginResponse extends AuthLoginResponse implements LoginResponseContract
             $url = route('filament.finance.pages.dashboard'); // Finance panel
         } elseif ($user->hasRole('Operations')) {
             $url = route('filament.operations.pages.dashboard'); // Operations panel
+        }else{
+            Auth::logout(); // Log out the user
         }
-
         return redirect()->intended($url);
     }
 }

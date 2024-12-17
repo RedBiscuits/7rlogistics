@@ -141,6 +141,7 @@ class ShipmentResource extends Resource
                                         $set('to_area', null);
                                     })
                                     ->required(),
+
                                 Forms\Components\Select::make('to_area')
                                     ->label('To Area')
                                     ->options(function (callable $get, callable $set) {
@@ -227,6 +228,15 @@ class ShipmentResource extends Resource
                             Forms\Components\Select::make('truck_id')
                                 ->label('Truck Type')
                                 ->reactive()
+                                ->helperText(function (callable $get, $state, $record) {
+
+
+                                    if ($record) {
+                                        return "User requested a truck type: " . $record->requested_truck;
+                                    }
+
+                                    return 'Assign a specific truck';
+                                })
                                 ->options(function (callable $get, callable $set) {
                                     $fromArea = $get('from_area');
                                     $toArea = $get('to_area');
@@ -245,7 +255,11 @@ class ShipmentResource extends Resource
                                             ->whereNotNull('price')
                                             ->with('truck')
                                             ->get()
-                                            ->pluck('truck.name', 'truck.id')
+                                            ->mapWithKeys(function ($destination) {
+                                                return [
+                                                    $destination->truck->id => $destination->truck->name . ' - ' . $destination->truck->plate_number
+                                                ];
+                                            })
                                             ->toArray();
                                     }
 
