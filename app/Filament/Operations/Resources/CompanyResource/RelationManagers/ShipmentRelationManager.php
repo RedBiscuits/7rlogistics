@@ -5,7 +5,7 @@ namespace App\Filament\Operations\Resources\CompanyResource\RelationManagers;
 // Models
 use App\Models\Area;
 use App\Models\Destination;
-use App\Models\Company;
+use App\Models\User;
 use App\Models\Truck;
 
 // Filament & Forms
@@ -408,7 +408,7 @@ class ShipmentRelationManager extends RelationManager
                         }
 
                         $data['price'] = $destination->price;
-
+                        $data['company_id'] = $this->getOwnerRecord()->id;
                         return $model::create($data);
                     })
                     ->successRedirectUrl(fn(Model $record): string => ShipmentResource::getUrl('index')),
