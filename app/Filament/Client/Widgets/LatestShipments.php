@@ -19,14 +19,13 @@ class LatestShipments extends BaseWidget
     {
         return $table
             ->query(
-                auth()->user()->shipments()->latest()->getQuery()
+                auth()->user()->company->shipments()->orderBy('created_at', 'desc')->getQuery()
             )
             ->columns([
                 Tables\Columns\TextColumn::make('user.name')->label('User')->sortable(),
-                Tables\Columns\TextColumn::make('fromCity.name')->label('From City'),
                 Tables\Columns\TextColumn::make('fromArea.name')->label('From Area'),
-                Tables\Columns\TextColumn::make('toCity.name')->label('To City'),
                 Tables\Columns\TextColumn::make('toArea.name')->label('To Area'),
+                Tables\Columns\TextColumn::make('truck.name')->label('Truck'),
                 Tables\Columns\TextColumn::make('status')->label('Status')->badge(),
                 Tables\Columns\TextColumn::make('price')->label('Price')->money('EGP'),
             ]);
