@@ -30,7 +30,9 @@ class TruckResource extends Resource
                         'Dababah' => 'Dababah',
                         'Jumbo' => 'Jumbo',
                         'dababah_refrigerated' => 'Dababah Refrigerated',
-                        'jumbo_refrigerated' => 'Jumbo Refrigerated'
+                        'jumbo_refrigerated' => 'Jumbo Refrigerated',
+                        "Dababah_Box" => "Dababah Box",
+                        "Jumbo_Box" => "Jumbo Box",
                     ]),
                 Forms\Components\TextInput::make('plate_number')->required()->unique()->maxLength(255),
                 Forms\Components\TextInput::make('weight')->numeric()->minValue(0)->required(),
