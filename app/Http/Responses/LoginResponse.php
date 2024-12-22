@@ -21,6 +21,11 @@ class LoginResponse extends AuthLoginResponse implements LoginResponseContract
         $user = Auth::user();
         $url = '/';
 
+        if (!$user) {
+            Auth::logout();
+            return redirect()->route($url);
+        }
+
         if ($user->hasRole('Super Admin')) {
             $url = route('filament.admin.pages.dashboard'); // Admin panel
         } elseif ($user->hasRole('Client') && $user->company_id) {
@@ -29,7 +34,7 @@ class LoginResponse extends AuthLoginResponse implements LoginResponseContract
             $url = route('filament.finance.pages.dashboard'); // Finance panel
         } elseif ($user->hasRole('Operations')) {
             $url = route('filament.operations.pages.dashboard'); // Operations panel
-        }else{
+        } else {
             Auth::logout(); // Log out the user
         }
         return redirect()->intended($url);
