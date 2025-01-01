@@ -6,213 +6,22 @@
     <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
     <meta name="description" content="A well made and handcrafted Bootstrap 5 template">
     <link rel="apple-touch-icon" sizes="180x180" href="img/apple-touch-icon.png">
+    <title>7R Logistics</title>
+
     <link rel="icon" type="image/png" sizes="32x32" href="img/logo-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="img/logo-16x16.png">
     <link rel="icon" type="image/png" sizes="96x96" href="img/logo.png">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Bootstrap JS Bundle (includes Popper) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
     <meta name="author" content="Yousef Elkammar">
     <meta name="HandheldFriendly" content="true">
-    <title>7R Logistics</title>
     <link rel="stylesheet" href="css/theme.min.css">
-    <style>
-        /* Set default text color */
-        * {
-            color: #CE3333;
-        }
-
-        .card-custom {
-            background-color: #111111;
-            /* Darker background for the cards */
-            width: 100%;
-            /* Make the card smaller by taking full width with a smaller height */
-            max-width: 500px;
-            /* Limit card size */
-            margin: 0 auto;
-            /* Center the card */
-        }
-
-        .card-custom-img-top {
-            border-top-left-radius: 2rem;
-            /* Keep top-left rounded */
-            border-top-right-radius: 2rem;
-            /* Keep top-right rounded */
-            border-bottom-left-radius: 0;
-            /* Remove bottom-left radius */
-            border-bottom-right-radius: 0;
-            /* Remove bottom-right radius */
-        }
-
-        .card-custom-body {
-            padding: 20px;
-            /* Increased padding for the description */
-            min-height: 150px;
-            /* Ensure the description area is taller */
-            background-color: #111111;
-            border-bottom-left-radius: 2rem;
-            /* Keep top-left rounded */
-            border-bottom-right-radius: 2rem;
-        }
-
-        .card-text-custom {
-            font-size: 16px;
-            /* Adjust text size for better readability */
-            line-height: 1.5;
-        }
-
-        .carousel-control-prev-icon,
-        .carousel-control-next-icon {
-            filter: invert(1);
-            /* Make carousel arrows white */
-        }
-
-
-        /* inter-300 - latin */
-        @font-face {
-            font-family: 'Inter';
-            font-style: normal;
-            font-weight: 300;
-            font-display: swap;
-            src: local(''),
-                url('fonts/inter-v12-latin-300.woff2') format('woff2'),
-                /* Chrome 26+, Opera 23+, Firefox 39+ */
-                url('fonts/inter-v12-latin-300.woff') format('woff');
-            /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
-        }
-
-        /* inter-400 - latin */
-        @font-face {
-            font-family: 'Inter';
-            font-style: normal;
-            font-weight: 400;
-            font-display: swap;
-            src: local(''),
-                url('fonts/inter-v12-latin-regular.woff2') format('woff2'),
-                /* Chrome 26+, Opera 23+, Firefox 39+ */
-                url('fonts/inter-v12-latin-regular.woff') format('woff');
-            /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
-        }
-
-        @font-face {
-            font-family: 'Inter';
-            font-style: normal;
-            font-weight: 500;
-            font-display: swap;
-            src: local(''),
-                url('fonts/inter-v12-latin-500.woff2') format('woff2'),
-                /* Chrome 26+, Opera 23+, Firefox 39+ */
-                url('fonts/inter-v12-latin-500.woff') format('woff');
-            /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
-        }
-
-        @font-face {
-            font-family: 'Inter';
-            font-style: normal;
-            font-weight: 700;
-            font-display: swap;
-            src: local(''),
-                url('fonts/inter-v12-latin-700.woff2') format('woff2'),
-                /* Chrome 26+, Opera 23+, Firefox 39+ */
-                url('fonts/inter-v12-latin-700.woff') format('woff');
-            /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
-        }
-
-        .carousel-card-wrapper {
-            width: 100%;
-            aspect-ratio: 4/3;
-            /* This maintains a consistent aspect ratio */
-            max-width: 600px;
-            /* Adjust this value as needed */
-            margin: 0 auto;
-        }
-
-        .carousel-card-image {
-            width: 100%;
-            height: 60%;
-            /* Takes up 60% of the card height */
-            object-fit: cover;
-            /* This ensures images cover the space without distortion */
-            border-top-left-radius: 2rem;
-            border-top-right-radius: 2rem;
-        }
-
-        .carousel-card-content {
-            height: 40%;
-            padding: 1.5rem;
-            background-color: #111111;
-            border-bottom-left-radius: 2rem;
-            border-bottom-right-radius: 2rem;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .carousel-card-text {
-            font-size: 0.9rem;
-            line-height: 1.4;
-            margin: 0;
-        }
-
-        .truck-name {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            color: #CE3333;
-        }
-
-        .specs-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .spec-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .spec-icon {
-            width: 1.2rem;
-            height: 1.2rem;
-            fill: #CE3333;
-        }
-
-        .spec-label {
-            font-size: 0.8rem;
-            color: #888;
-        }
-
-        .spec-value {
-            font-size: 0.9rem;
-            color: #fff;
-        }
-
-        .truck-description {
-            font-size: 0.9rem;
-            color: #aaa;
-            margin-top: auto;
-        }
-
-        .reefer-badge {
-            display: inline-block;
-            background-color: #CE3333;
-            color: white;
-            padding: 0.2rem 0.5rem;
-            border-radius: 0.3rem;
-            font-size: 0.8rem;
-            margin-top: 0.5rem;
-        }
-    </style>
-    <script>
-        function openContactPopup() {
-            window.open('/contact', 'Contact', 'width=800,height=600');
-        }
-    </script>
+    <link rel="stylesheet" href="css/home.css">
+    <script rel="script" src="js/home.js"></script>
+   <!-- Bootstrap JS Bundle (includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 
 <body class="bg-black text-white mt-0" data-bs-spy="scroll" data-bs-target="#navScroll">

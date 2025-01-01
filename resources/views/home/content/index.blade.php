@@ -14,11 +14,7 @@
     <meta name="HandheldFriendly" content="true">
     <title>About</title>
     <link rel="stylesheet" href="css/theme.min.css">
-    <script>
-        function openContactPopup() {
-            window.open('/contact', 'Contact', 'width=800,height=600');
-        }
-    </script>
+    <script rel="script" src="js/home.js"></script>
     <style>
         /* inter-300 - latin */
         @font-face {
