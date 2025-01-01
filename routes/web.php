@@ -3,11 +3,11 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ContactController;
 
-Route::get('/', function () {
+Route::get('/old_home', function () {
     return view('welcome');
 });
 
-Route::get('/home', function () {
+Route::get('/', function () {
     return view('home/index');
 });
 
