@@ -8,11 +8,11 @@
     <link rel="apple-touch-icon" sizes="180x180" href="img/apple-touch-icon.png">
     <title>7R Logistics</title>
 
-    <link rel="icon" type="image/png" sizes="32x32" href="img/logo-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="img/logo-16x16.png">
-    <link rel="icon" type="image/png" sizes="96x96" href="img/logo.png">
+    <link rel="icon" type="image/webp" sizes="32x32" href="img/logo.webp">
+    <link rel="icon" type="image/webp" sizes="16x16" href="img/logo.webp">
+    <link rel="icon" type="image/webp" sizes="96x96" href="img/logo.webp">
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
 
 
     <meta name="author" content="Yousef Elkammar">
@@ -21,15 +21,15 @@
     <link rel="stylesheet" href="css/home.css">
     <script rel="script" src="js/home.js"></script>
    <!-- Bootstrap JS Bundle (includes Popper) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/bootstrap.bundle.min.js"></script>
 </head>
 
 <body class="bg-black text-white mt-0" data-bs-spy="scroll" data-bs-target="#navScroll">
 
     <nav id="navScroll" class="navbar navbar-dark bg-black fixed-top px-vw-5" tabindex="0">
         <div class="container">
-            <a class="navbar-brand pe-md-4 fs-4 col-12 col-md-auto text-center" href="index.html">
-                <img src="{{ asset('img/logo.png') }}" alt="7R Logistics" width="36" height="28">
+            <a class="navbar-brand pe-md-4 fs-4 col-12 col-md-auto text-center" href="/">
+                <img src="{{ asset('img/logo.webp') }}" alt="7R Logistics" width="36" height="28">
                 <span class="ms-md-1 mt-1 fw-bolder me-md-5">Logistics</span>
             </a>
 
@@ -78,13 +78,13 @@
                             partnerships.</p>
                     </div>
                     <div class="col-12 text-center">
-                        <a class="btn btn-xl btn-light" onclick="openContactPopup()">Contact us
+                        <p class="btn btn-xl btn-light" onclick="openContactPopup()">Contact us
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                 class="bi bi-arrow-right" viewBox="0 0 16 16">
                                 <path fill-rule="evenodd"
                                     d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z" />
                             </svg>
-                        </a>
+                        </p>
                     </div>
                 </div>
             </div>
@@ -99,7 +99,7 @@
                     style="min-height: 600px;">
                     <div class="col-12 col-lg-6" style="height: 500px;">
                         <div class="img-container" style="position: relative; width: 100%; height: 100%;">
-                            <img src="img/webp/aaa.avif" alt="abstract image"
+                            <img src="img/webp/aaa.webp" alt="abstract image"
                                 class="img-fluid position-relative rounded-5 shadow" data-aos="fade-up"
                                 data-aos-duration="2000"
                                 style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;">
@@ -108,7 +108,7 @@
                     </div>
                     <div class="col-12 col-md-6 col-lg-3" style="height: 450px;">
                         <div class="img-container" style="position: relative; width: 100%; height: 100%;">
-                            <img src="img/webp/abstract6.jpg" alt="abstract image"
+                            <img src="img/webp/abstract6.webp" alt="abstract image"
                                 class="img-fluid position-relative rounded-5 shadow" data-aos="fade-up"
                                 data-aos-duration="2000"
                                 style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;">
@@ -117,7 +117,7 @@
                     <div class="col-12 col-md-6 col-lg-3" style="height: 250px;">
                         <div class="img-container" style="position: relative; width: 100%; height: 100%;">
 
-                            <img src="img/webp/abstract9.jpg" alt="abstract image"
+                            <img src="img/webp/abstract9.webp" alt="abstract image"
                                 class="img-fluid position-relative rounded-5 shadow" data-aos="fade-up"
                                 data-aos-duration="2000"
                                 style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;">
@@ -250,7 +250,7 @@
                                 <!-- First Item (already updated) -->
                                 <div class="carousel-item active">
                                     <div class="carousel-card-wrapper">
-                                        <img class="carousel-card-image" src="img/webp/dababah.png"
+                                        <img class="carousel-card-image" src="img/webp/dababah.webp"
                                             alt="Dababah truck" loading="lazy">
                                         <div class="carousel-card-content">
                                             <h3 class="truck-name">Dababah</h3>
@@ -312,7 +312,7 @@
                                 <!-- Second Item -->
                                 <div class="carousel-item">
                                     <div class="carousel-card-wrapper">
-                                        <img class="carousel-card-image" src="img/webp/dababah_box.png"
+                                        <img class="carousel-card-image" src="img/webp/dababah_box.webp"
                                             alt="Dababah Box truck" loading="lazy">
                                         <div class="carousel-card-content">
                                             <h3 class="truck-name">Dababah Box</h3>
@@ -375,7 +375,7 @@
                                 <!-- Third Item -->
                                 <div class="carousel-item">
                                     <div class="carousel-card-wrapper">
-                                        <img class="carousel-card-image" src="img/webp/jumbo.png" alt="Jumbo truck"
+                                        <img class="carousel-card-image" src="img/webp/jumbo.webp" alt="Jumbo truck"
                                             loading="lazy">
                                         <div class="carousel-card-content">
                                             <h3 class="truck-name">Jumbo 7000</h3>
@@ -437,7 +437,7 @@
                                 <!-- Fourth Item -->
                                 <div class="carousel-item">
                                     <div class="carousel-card-wrapper">
-                                        <img class="carousel-card-image" src="img/webp/jumbo_box.png"
+                                        <img class="carousel-card-image" src="img/webp/jumbo_box.webp"
                                             alt="Jumbo Box truck" loading="lazy">
                                         <div class="carousel-card-content">
                                             <h3 class="truck-name">Jumbo 7000 Box</h3>
@@ -582,7 +582,7 @@
                 <div class="row d-flex gx-5 align-items-center">
                     <div class="col-12 col-lg-6">
                         <div class="rounded-5 bg-black p-5 shadow" data-aos="zoom-in-right">
-                            <img src="img/webp/elite.png" class="img-fluid w-100 mb-3 rounded-4" alt="Elite Logistics"
+                            <img src="img/webp/elite.webp" class="img-fluid w-100 mb-3 rounded-4" alt="Elite Logistics"
                                 style="border-radius: 2rem !important;" />
 
                             <div
@@ -626,7 +626,7 @@
                             </div>
                         </div>
                         <div class="rounded-5 bg-black p-5 shadow mt-5" data-aos="zoom-in-right">
-                            <img src="img/webp/TS.png" class="img-fluid w-100 mb-3 rounded-4" alt="T.S Logistics"
+                            <img src="img/webp/TS.webp" class="img-fluid w-100 mb-3 rounded-4" alt="T.S Logistics"
                                 style="border-radius: 2rem !important;" />
                             <div
                                 class="d-flex justify-content-start align-items-center border-top border-secondary pt-3">
@@ -652,7 +652,7 @@
 
 
                     <div class="mt-3">
-                        <img src="img/webp/qr.png" alt="QR Code"/>
+                        <img src="img/webp/qr.webp" alt="QR Code"/>
                     </div>
                 </div>
                 <div class="col border-end border-dark">
@@ -663,7 +663,7 @@
                         </li>
 
                         <li class="nav-item">
-                            <a  class="link-fancy link-fancy-light" onclick="openContactPopup()">Contact</a>
+                            <p class="link-fancy link-fancy-light" onclick="openContactPopup()">Contact</p>
                         </li>
                     </ul>
                 </div>
