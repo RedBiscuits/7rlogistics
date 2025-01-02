@@ -1,0 +1,17 @@
+/* Fix for mobile padding */
+@media (max-width: 768px) {
+    /* Add these new styles for the numbers section */
+    #numbers .row {
+        flex-direction: column;
+    }
+
+    #numbers .col-6,
+    #numbers .col-5.offset-1 {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    #numbers .col-5.offset-1 {
+        margin-top: 2rem;
+    }
+}

@@ -101,31 +101,26 @@
 
 .carousel-card-wrapper {
     width: 100%;
-    aspect-ratio: 4/3;
-    /* This maintains a consistent aspect ratio */
     max-width: 600px;
-    /* Adjust this value as needed */
     margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    margin-bottom: 2rem;
 }
 
 .carousel-card-image {
     width: 100%;
-    height: 60%;
-    /* Takes up 60% of the card height */
+    aspect-ratio: 16/9;
     object-fit: cover;
-    /* This ensures images cover the space without distortion */
-    border-top-left-radius: 2rem;
-    border-top-right-radius: 2rem;
+    border-radius: 2rem;
+    margin-bottom: 0;
 }
 
 .carousel-card-content {
-    height: 40%;
-    padding: 1.5rem;
+    padding: 2rem;
     background-color: #111111;
-    border-bottom-left-radius: 2rem;
-    border-bottom-right-radius: 2rem;
-    display: flex;
-    flex-direction: column;
+    border-radius: 2rem;
 }
 
 .carousel-card-text {
@@ -137,51 +132,212 @@
 .truck-name {
     font-size: 1.5rem;
     font-weight: 700;
-    margin-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
     color: #CE3333;
 }
 
 .specs-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
+    gap: 1.25rem;
+    margin: 2rem 0;
 }
 
 .spec-item {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 0;
 }
 
 .spec-icon {
     width: 1.2rem;
     height: 1.2rem;
     fill: #CE3333;
+    flex-shrink: 0;
 }
 
 .spec-label {
     font-size: 0.8rem;
     color: #888;
+    margin-bottom: 0.2rem;
 }
 
 .spec-value {
     font-size: 0.9rem;
     color: #fff;
+    font-weight: 500;
 }
 
 .truck-description {
     font-size: 0.9rem;
     color: #aaa;
-    margin-top: auto;
+    line-height: 1.6;
+    margin: 2rem 0;
 }
 
 .reefer-badge {
     display: inline-block;
     background-color: #CE3333;
     color: white;
-    padding: 0.2rem 0.5rem;
+    padding: 0.5rem 1rem;
     border-radius: 0.3rem;
     font-size: 0.8rem;
-    margin-top: 0.5rem;
+    margin-top: 1.5rem;
+    font-weight: 500;
+}
+
+/* Improve carousel controls visibility */
+.carousel-control-prev,
+.carousel-control-next {
+    width: 3rem;
+    height: 3rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(206, 51, 51, 0.9);
+    border-radius: 50%;
+    opacity: 1;
+    margin: 0 1rem;
+}
+
+.carousel-control-prev {
+    left: 0;
+}
+
+.carousel-control-next {
+    right: 0;
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    background-color: transparent;
+    padding: 0;
+    filter: brightness(0) invert(1);
+}
+
+/* Add hover effect */
+.carousel-control-prev:hover,
+.carousel-control-next:hover {
+    background-color: rgba(206, 51, 51, 1);
+    transform: translateY(-50%) scale(1.1);
+    transition: all 0.3s ease;
+}
+
+html, body {
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100%;
+}
+
+.container-fluid {
+    padding-left: 0;
+    padding-right: 0;
+    width: 100%;
+    max-width: 100%;
+}
+
+/* Fix for mobile padding */
+@media (max-width: 768px) {
+    .px-vw-5 {
+        padding-left: 15px !important;
+        padding-right: 15px !important;
+    }
+
+    .container {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    .carousel-card-wrapper {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .carousel-card-content {
+        min-height: 320px;
+    }
+
+    .specs-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .truck-description {
+        margin: 1rem 0;
+    }
+
+    .carousel-control-prev,
+    .carousel-control-next {
+        width: 2.5rem;
+        height: 2.5rem;
+        margin: 0 0.5rem;
+    }
+
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+        width: 1.2rem;
+        height: 1.2rem;
+    }
+
+    #numbers .row {
+        flex-direction: column;
+    }
+
+    #numbers .col-6,
+    #numbers .col-5.offset-1 {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    #numbers .col-5.offset-1 {
+        margin-top: 2rem;
+    }
+
+    /* Reorder partners section content on mobile */
+    #partners > .container > .row {
+        display: flex;
+        flex-direction: column;
+    }
+
+    #partners > .container > .row > .col-12.col-lg-6:last-child {
+        display: flex;
+        flex-direction: column;
+        order: -1; /* Move the entire right column to the top */
+    }
+
+    #partners > .container > .row > .col-12.col-lg-6:first-child {
+        margin-top: 2rem; /* Add spacing between sections */
+    }
+
+    #partners .rounded-5.bg-black {
+        margin-top: 2rem; /* Consistent spacing between partner cards */
+    }
+}
+
+/* Tablet and desktop */
+@media (min-width: 769px) {
+    .carousel-card-wrapper {
+        flex-direction: column; /* Image first on desktop */
+    }
+
+    .carousel-card-content {
+        min-height: 280px; /* Fixed height for content on desktop */
+    }
+
+    .specs-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    #partners > .container > .row {
+        flex-direction: row;
+    }
+
+    #partners > .container > .row > .col-12.col-lg-6:last-child {
+        order: 0;
+    }
 }

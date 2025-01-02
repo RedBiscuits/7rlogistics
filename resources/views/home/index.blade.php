@@ -20,44 +20,88 @@
     <link rel="stylesheet" href="css/theme.min.css">
     <link rel="stylesheet" href="css/home.css">
     <script rel="script" src="js/home.js"></script>
-   <!-- Bootstrap JS Bundle (includes Popper) -->
+    <!-- Bootstrap JS Bundle (includes Popper) -->
     <script src="js/bootstrap.bundle.min.js"></script>
 </head>
 
-<body class="bg-black text-white mt-0" data-bs-spy="scroll" data-bs-target="#navScroll">
+<body class="bg-black text-white mt-0 overflow-x-hidden" data-bs-spy="scroll" data-bs-target="#navScroll">
 
     <nav id="navScroll" class="navbar navbar-dark bg-black fixed-top px-vw-5" tabindex="0">
         <div class="container">
-            <a class="navbar-brand pe-md-4 fs-4 col-12 col-md-auto text-center" href="/">
+            <!-- Logo and Mobile Menu Toggle -->
+            <div class="d-flex align-items-center">
+                <!-- Mobile Menu Toggle (Hamburger Icon) -->
+                <button class="navbar-toggler d-md-none me-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu" aria-controls="mobileMenu" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Logo -->
                 <img src="{{ asset('img/logo.webp') }}" alt="7R Logistics" width="36" height="28">
                 <span class="ms-md-1 mt-1 fw-bolder me-md-5">Logistics</span>
-            </a>
+            </div>
 
-            <ul class="navbar-nav mx-auto mb-2 mb-lg-0 list-group list-group-horizontal">
-                <li class="nav-item">
-                    <a class="nav-link fs-5" href="/" aria-label="Homepage">
-                        Home
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link fs-5" onclick="openContactPopup()" aria-label="A sample content page">
-                        Contact
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link fs-5" href="content.html" aria-label="A sample content page">
-                        Pricing
-                    </a>
-                </li>
+            <!-- Navbar Links (Desktop) -->
+            <div class="d-none d-md-flex align-items-center">
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0 list-group list-group-horizontal">
+                    <li class="nav-item">
+                        <a class="nav-link fs-5" href="/" aria-label="Homepage">
+                            Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link fs-5" onclick="openContactPopup()" aria-label="Contact">
+                            Contact
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link fs-5" href="content.html" aria-label="Pricing">
+                            Pricing
+                        </a>
+                    </li>
+                </ul>
+            </div>
 
-            </ul>
-            <a href="client/login" aria-label="System" class="btn btn-outline-light">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#FFFFFF"
-                    class="bi bi-person" viewBox="0 0 16 16">
-                    <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM8 9a5 5 0 0 0-5 5v1h10v-1a5 5 0 0 0-5-5z" />
-                </svg>
-                <small style="color: #FFFFFF;">Login</small>
-            </a>
+            <!-- Login Button (Desktop) -->
+            <div class="d-none d-md-block">
+                <a href="client/login" aria-label="Login" class="btn btn-outline-light">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#FFFFFF" class="bi bi-person" viewBox="0 0 16 16">
+                        <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM8 9a5 5 0 0 0-5 5v1h10v-1a5 5 0 0 0-5-5z" />
+                    </svg>
+                    <small style="color: #FFFFFF;">Login</small>
+                </a>
+            </div>
+
+            <!-- Mobile Side Menu (Offcanvas) -->
+            <div class="offcanvas offcanvas-start bg-black" tabindex="-1" id="mobileMenu" aria-labelledby="mobileMenuLabel">
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title" id="mobileMenuLabel">Menu</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+                <div class="offcanvas-body">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link fs-5" href="/" aria-label="Homepage">
+                                Home
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link fs-5" onclick="openContactPopup()" aria-label="Contact">
+                                Contact
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link fs-5" href="content.html" aria-label="Pricing">
+                                Pricing
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link fs-5" href="client/login" aria-label="Login">
+                                Login
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </nav>
 
@@ -100,6 +144,7 @@
                     <div class="col-12 col-lg-6" style="height: 500px;">
                         <div class="img-container" style="position: relative; width: 100%; height: 100%;">
                             <img src="img/webp/aaa.webp" alt="abstract image"
+                                width="600" height="500"
                                 class="img-fluid position-relative rounded-5 shadow" data-aos="fade-up"
                                 data-aos-duration="2000"
                                 style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;">
@@ -109,6 +154,7 @@
                     <div class="col-12 col-md-6 col-lg-3" style="height: 450px;">
                         <div class="img-container" style="position: relative; width: 100%; height: 100%;">
                             <img src="img/webp/abstract6.webp" alt="abstract image"
+                                width="300" height="450"
                                 class="img-fluid position-relative rounded-5 shadow" data-aos="fade-up"
                                 data-aos-duration="2000"
                                 style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;">
@@ -118,6 +164,7 @@
                         <div class="img-container" style="position: relative; width: 100%; height: 100%;">
 
                             <img src="img/webp/abstract9.webp" alt="abstract image"
+                                width="300" height="250"
                                 class="img-fluid position-relative rounded-5 shadow" data-aos="fade-up"
                                 data-aos-duration="2000"
                                 style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;">
@@ -539,8 +586,7 @@
                                 <div class="col-12" style="border-radius: 2rem;">
                                     <dotlottie-player direction="1"
                                         id="animation_team-work_e79e0354-1162-11ee-94de-af5f3bbf4233" speed="1"
-                                        mode="normal" autoplay
-                                        loop
+                                        mode="normal" autoplay loop
                                         src="https://assets-v2.lottiefiles.com/a/165556e0-1170-11ee-ba69-cb0e26064da5/puJi8zQL3x.lottie"></dotlottie-player>
                                 </div>
                                 <div class="col-12 col-lg-10 col-xl-8 text-center my-5">
@@ -582,8 +628,8 @@
                 <div class="row d-flex gx-5 align-items-center">
                     <div class="col-12 col-lg-6">
                         <div class="rounded-5 bg-black p-5 shadow" data-aos="zoom-in-right">
-                            <img src="img/webp/elite.webp" class="img-fluid w-100 mb-3 rounded-4" alt="Elite Logistics"
-                                style="border-radius: 2rem !important;" />
+                            <img src="img/webp/elite.webp" width="800" height="400"
+                                class="img-fluid w-100 mb-3 rounded-4" alt="Elite Logistics" style="border-radius: 2rem !important;" />
 
                             <div
                                 class="d-flex justify-content-start align-items-center border-top border-secondary pt-3">
@@ -596,8 +642,8 @@
                         </div>
 
                         <div class="rounded-5 bg-black p-5 shadow mt-5" data-aos="zoom-in-left">
-                            <img src="img/webp/HAT.svg" class="img-fluid w-100 mb-3 rounded-4" alt="Hassan Allam Trading & Engineering"
-                            style="border-radius: 2rem !important;" />
+                            <img src="img/webp/HAT.svg" width="800" height="400"
+                                class="img-fluid w-100 mb-3 rounded-4" alt="Hassan Allam Trading & Engineering" style="border-radius: 2rem !important;" />
                             <div class="d-flex justify-content-start align-items-center border-top pt-3">
                                 <div>
                                     <span class="h6 fw-5">Hassan Allam Trading & Engineering</span><br>
@@ -615,19 +661,20 @@
                                 together.</h2>
                         </div>
                         <div class="rounded-5 bg-black p-5 shadow mt-5" data-aos="zoom-in-right">
-                            <img src="img/webp/hilti.svg" class="img-fluid w-100 mb-3 rounded-4" alt="Hilti"
-                                style="border-radius: 2rem !important;" />
+                            <img src="img/webp/hilti.svg" width="800" height="400"
+                                class="img-fluid w-100 mb-3 rounded-4" alt="Hilti" style="border-radius: 2rem !important;" />
                             <div
                                 class="d-flex justify-content-start align-items-center border-top border-secondary pt-3">
                                 <div>
                                     <span class="h6 fw-5">Hilti</span><br>
-                                    <small class="text-secondary">Leading supplier of construction tools and equipment.</small>
+                                    <small class="text-secondary">Leading supplier of construction tools and
+                                        equipment.</small>
                                 </div>
                             </div>
                         </div>
                         <div class="rounded-5 bg-black p-5 shadow mt-5" data-aos="zoom-in-right">
-                            <img src="img/webp/TS.webp" class="img-fluid w-100 mb-3 rounded-4" alt="T.S Logistics"
-                                style="border-radius: 2rem !important;" />
+                            <img src="img/webp/TS.webp" width="800" height="400"
+                                class="img-fluid w-100 mb-3 rounded-4" alt="T.S Logistics" style="border-radius: 2rem !important;" />
                             <div
                                 class="d-flex justify-content-start align-items-center border-top border-secondary pt-3">
                                 <div>
@@ -652,7 +699,7 @@
 
 
                     <div class="mt-3">
-                        <img src="img/webp/qr.webp" alt="QR Code"/>
+                        <img src="img/webp/qr.webp" alt="QR Code" width="200" height="200" />
                     </div>
                 </div>
                 <div class="col border-end border-dark">
