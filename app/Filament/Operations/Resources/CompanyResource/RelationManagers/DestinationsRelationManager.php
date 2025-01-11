@@ -89,9 +89,9 @@ class DestinationsRelationManager extends RelationManager
                 Forms\Components\Select::make('truck_id')
                     ->label('Truck')
                     ->options(function (callable $get) {
-                        $trucks = Truck::all()->pluck('name', 'id');
-
-                        return $trucks ?? [];
+                        return Truck::all()->mapWithKeys(function($truck) {
+                            return [$truck->id => $truck->name . ' - ' . $truck->plate_number];
+                        });
                     })
                     ->reactive()
                     ->searchable()
@@ -108,7 +108,7 @@ class DestinationsRelationManager extends RelationManager
                             })
                             ->where('truck_id', $get('truck_id'))
                             ->first();
-                            
+
                         $set('price', $destination?->price ?? null);
                     })
                     ->required(),

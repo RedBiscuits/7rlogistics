@@ -23,6 +23,8 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
 use App\Models\User;
+use App\Utils\AcceptedMedia;
+use Filament\Notifications\Notification;
 
 class ShipmentResource extends Resource
 {
@@ -204,12 +206,65 @@ class ShipmentResource extends Resource
                                         'zoomSnap' => 2,
                                     ]),
 
-                                // Forms\Components\TextInput::make('price')
-                                //     ->label('Price')
-                                //     ->reactive()
-                                //     ->required()
-                                //     ->readOnly()
-                                //     ->disabled(),
+                                Forms\Components\Select::make('truck_id')
+                                    ->label('Truck Type')
+                                    ->reactive()
+                                    ->helperText(function (callable $get, $state, $record) {
+
+
+                                        if ($record) {
+                                            return "User requested a truck type: " . $record->requested_truck;
+                                        }
+
+                                        return 'Assign a specific truck';
+                                    })
+                                    ->options(function (callable $get, callable $set) {
+                                        $fromArea = $get('from_area');
+                                        $toArea = $get('to_area');
+                                        $company_id = $get('company_id');
+                                        if ($fromArea && $toArea) {
+                                            return Destination::where('company_id', $company_id)
+                                                ->where(function ($query) use ($fromArea, $toArea) {
+                                                    $query->where(function ($q) use ($fromArea, $toArea) {
+                                                        $q->where('from_area', $fromArea)
+                                                            ->where('to_area', $toArea);
+                                                    })->orWhere(function ($q) use ($fromArea, $toArea) {
+                                                        $q->where('to_area', $fromArea)
+                                                            ->where('from_area', $toArea);
+                                                    });
+                                                })
+                                                ->whereNotNull('price')
+                                                ->with('truck')
+                                                ->get()
+                                                ->mapWithKeys(function ($destination) {
+                                                    return [
+                                                        $destination->truck->id => $destination->truck->name . ' - ' . $destination->truck->plate_number
+                                                    ];
+                                                })
+                                                ->toArray();
+                                        }
+
+                                        return [];
+                                    })
+                                    ->afterStateUpdated(function (Forms\Components\Select $component, $state, callable $get, callable $set) {
+                                        $fromArea = $get('from_area');
+                                        $toArea = $get('to_area');
+                                        $truck = $get('truck_id');
+                                        $company_id = $get('company_id');
+                                        if ($fromArea && $toArea && $truck && $company_id) {
+                                            $destination = Destination::where('company_id', $company_id)
+                                                ->where('from_area', $fromArea)
+                                                ->where('to_area', $toArea)
+                                                ->where('truck_id', $truck)
+                                                ->whereNotNull('price');
+
+                                            $destination = $destination->first();
+                                            if ($destination) {
+                                                $set('price', $destination->price);
+                                            }
+                                        }
+                                    })
+                                    ->required(),
 
                                 Forms\Components\TextInput::make('latitude')
                                     ->hiddenLabel()
@@ -223,70 +278,6 @@ class ShipmentResource extends Resource
 
                 Forms\Components\Card::make('Packages Information')
                     ->schema([
-
-                        Forms\Components\Grid::make(2)->schema([
-                            Forms\Components\Select::make('truck_id')
-                                ->label('Truck Type')
-                                ->reactive()
-                                ->helperText(function (callable $get, $state, $record) {
-
-
-                                    if ($record) {
-                                        return "User requested a truck type: " . $record->requested_truck;
-                                    }
-
-                                    return 'Assign a specific truck';
-                                })
-                                ->options(function (callable $get, callable $set) {
-                                    $fromArea = $get('from_area');
-                                    $toArea = $get('to_area');
-                                    $company_id = $get('company_id');
-                                    if ($fromArea && $toArea) {
-                                        return Destination::where('company_id', $company_id)
-                                            ->where(function ($query) use ($fromArea, $toArea) {
-                                                $query->where(function ($q) use ($fromArea, $toArea) {
-                                                    $q->where('from_area', $fromArea)
-                                                        ->where('to_area', $toArea);
-                                                })->orWhere(function ($q) use ($fromArea, $toArea) {
-                                                    $q->where('to_area', $fromArea)
-                                                        ->where('from_area', $toArea);
-                                                });
-                                            })
-                                            ->whereNotNull('price')
-                                            ->with('truck')
-                                            ->get()
-                                            ->mapWithKeys(function ($destination) {
-                                                return [
-                                                    $destination->truck->id => $destination->truck->name . ' - ' . $destination->truck->plate_number
-                                                ];
-                                            })
-                                            ->toArray();
-                                    }
-
-                                    return [];
-                                })
-                                ->afterStateUpdated(function (Forms\Components\Select $component, $state, callable $get, callable $set) {
-                                    $fromArea = $get('from_area');
-                                    $toArea = $get('to_area');
-                                    $truck = $get('truck_id');
-                                    $company_id = $get('company_id');
-                                    if ($fromArea && $toArea && $truck && $company_id) {
-                                        $destination = Destination::where('company_id', $company_id)
-                                            ->where('from_area', $fromArea)
-                                            ->where('to_area', $toArea)
-                                            ->where('truck_id', $truck)
-                                            ->whereNotNull('price');
-                                        \Log::info($destination->toSql());
-
-                                        $destination = $destination->first();
-                                        if ($destination) {
-                                            $set('price', $destination->price);
-                                        }
-                                    }
-                                })
-                                ->required(),
-                        ]),
-
                         Forms\Components\Repeater::make('packages')
                             ->relationship('packages')
                             ->defaultItems(1)
@@ -307,22 +298,28 @@ class ShipmentResource extends Resource
 
                                 Forms\Components\TextInput::make('weight')
                                     ->label('Weight')
+                                    ->debounce(1000)
                                     ->reactive()
                                     ->required()
                                     ->numeric()
-                                    ->afterStateUpdated(fn($state, $set, $get) => $set('package_weight', ($get('weight') ?: 0) * ($get('quantity') ?: 0)))
-                                    ->rules([
-                                        fn(Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
+                                    ->afterStateUpdated(function($state, $set, $get) {
+                                        if ($state !== null) {
+                                            $weight = floatval($state);
+                                            $quantity = floatval($get('quantity') ?: 0);
+                                            $set('package_weight', $weight * $quantity);
 
                                             $truckWeight = Truck::find($get('../../truck_id'))->weight ?? 0;
                                             $totalPackageWeight = collect($get('../../packages') ?: [])->sum(fn($package) => ($package['weight'] ?: 0) * ($package['quantity'] ?: 0));
                                             $availableWeight = $truckWeight - $totalPackageWeight;
 
                                             if ($availableWeight < 0) {
-                                                $fail('Truck Weight is not enough');
+                                                Notification::make()
+                                                    ->title('Truck Weight is not enough')
+                                                    ->danger()
+                                                    ->send();
                                             }
-                                        },
-                                    ]),
+                                        }
+                                    }),
 
                                 Forms\Components\TextInput::make('length')
                                     ->label('Length')
@@ -339,15 +336,44 @@ class ShipmentResource extends Resource
                                     ->numeric()
                                     ->required(),
 
-                                Forms\Components\TextInput::make('quantity')
+                                    Forms\Components\TextInput::make('quantity')
                                     ->label('Quantity')
                                     ->reactive()
-                                    ->required()
                                     ->integer()
-                                    ->afterStateUpdated(fn($state, $set, $get) => $set('package_weight', ($get('weight') ?: 0) * ($get('quantity') ?: 0))),
+                                    ->required()
+                                    ->debounce(500)
+                                    ->afterStateUpdated(function($state, $set, $get) {
+                                        if ($state !== null) {
+                                            $quantity = floatval($state);
+                                            $weight = floatval($get('weight') ?: 0);
+                                            $set('package_weight', $weight * $quantity);
 
+                                            $truckWeight = Truck::where('name', $get('requested_truck'))->first()->weight ?? 0;
+                                            $totalPackageWeight = collect($get('packages') ?: [])->sum(fn($package) =>
+                                                (floatval($package['weight'] ?: 0) * floatval($package['quantity'] ?: 0))
+                                            );
+                                            $availableWeight = $truckWeight - $totalPackageWeight;
+
+                                            if ($availableWeight < 0) {
+                                                Notification::make()
+                                                    ->title('Truck Weight is not enough')
+                                                    ->danger()
+                                                    ->send();
+                                            }
+                                        }
+                                    }),
                                 Forms\Components\TextInput::make('note')
                                     ->label('Note'),
+
+                                SpatieMediaLibraryFileUpload::make('attachment')
+                                    ->collection('attachment')
+                                    ->label('Attachment')
+                                    ->downloadable()
+                                    ->openable()
+                                    ->multiple()
+                                    ->maxFiles(5)
+                                    ->previewable(true)
+                                    ->acceptedFileTypes(AcceptedMedia::getAcceptedMediaTypes()),
 
                                 Forms\Components\Placeholder::make('package_weight')
                                     ->label('Package Weight')
