@@ -25,7 +25,8 @@ class ViewShipment extends ViewRecord
                     return response()->download($service->downloadTcn());
                 })
                 ->disabled(function (Shipment $record) {
-                    return in_array($record->status, [ShipmentStatus::CANCELLED, ShipmentStatus::PENDING]);
+                    // return in_array($record->status, [ShipmentStatus::CANCELLED, ShipmentStatus::PENDING]);
+                    return true;
                 })
                 ->icon('heroicon-o-arrow-down-on-square'),
         ];
