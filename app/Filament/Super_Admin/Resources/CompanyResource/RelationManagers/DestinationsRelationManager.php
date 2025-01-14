@@ -162,23 +162,51 @@ class DestinationsRelationManager extends RelationManager
                     ->requiresConfirmation()
                     ->form([
                         Forms\Components\FileUpload::make('attachment')
+                            ->label('Excel File')
+                            ->helperText('The excel file should have the following columns: City, Area, #, Truck 1, Truck 2, Truck 3, etc.')
+                            ->acceptedFileTypes(['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'])
                             ->disk('public')
                             ->directory('uploads'),
                     ])->action(function (array $data) {
+                        // Get the correct storage path
                         $filePath = storage_path('app/public/' . $data['attachment']);
-                        $this->getOwnerRecord()->destinations()->delete();
-                        // Process the Excel file
-                        HeadingRowFormatter::default('none');
-                        $headings = (new HeadingRowImport)->toArray($filePath)[0][0];
-                        $headings = array_slice($headings, 4);
 
-                        Excel::import(new DestinationImport($this->getOwnerRecord(), $headings), $filePath, null, \Maatwebsite\Excel\Excel::XLSX);
+                        // Debug the file path if needed
+                        // \Log::info('File path: ' . $filePath);
 
-                        // Send success notification
-                        Notification::make()
-                            ->title('Destinations Imported Successfully')
-                            ->success()
-                            ->send();
+                        if (!file_exists($filePath)) {
+                            Notification::make()
+                                ->title('File not found at: ' . $filePath)
+                                ->danger()
+                                ->send();
+                            return;
+                        }
+
+                        try {
+                            $this->getOwnerRecord()->destinations()->delete();
+
+                            HeadingRowFormatter::default('none');
+                            $headings = (new HeadingRowImport)->toArray($filePath)[0][0];
+                            $headings = array_slice($headings, 4);
+
+                            Excel::import(
+                                new DestinationImport($this->getOwnerRecord(), $headings),
+                                $filePath,
+                                null,
+                                \Maatwebsite\Excel\Excel::XLSX
+                            );
+
+                            Notification::make()
+                                ->title('Destinations Imported Successfully')
+                                ->success()
+                                ->send();
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('Import Failed')
+                                ->danger()
+                                ->body($e->getMessage())
+                                ->send();
+                        }
                     }),
 
                 Tables\Actions\CreateAction::make()
