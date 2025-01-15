@@ -85,7 +85,7 @@ class DestinationImport implements SkipsEmptyRows, ToCollection, WithCalculatedF
     private function getArea($area)
     {
         $area = trim($area);
-        return Area::where('name', 'like', "%{$area}%")->firstOrCreate(['name' => $area]);
+        return Area::where('name', 'like', "%{$area}%")->firstOrCreate(['name' => $area, 'city_id' => City::where('name', 'like', "%Cairo%")->firstOrFail()->id]);
     }
 
     private function getTruckId($truck)
