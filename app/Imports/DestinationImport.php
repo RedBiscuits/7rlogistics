@@ -34,12 +34,12 @@ class DestinationImport implements SkipsEmptyRows, ToCollection, WithCalculatedF
     {
         foreach ($rows as $index => $row) {
             // Match the source city and area to their IDs
-            $area_1 = $this->getArea($row['City']);
-            $area_2 = $this->getArea($row['Area']);
+            $area_1 = $this->getArea($row['Area_1_ID']);
+            $area_2 = $this->getArea($row['Area_2_ID']);
 
             // Iterate through all truck columns (skipping the first two: 'City' and 'Area')
             foreach ($row as $column => $price) {
-                if (in_array($column, ['City', 'Area', '#']) || is_numeric($column)) {
+                if (in_array($column, ['Area_1_ID', 'Area_2_ID', '#']) || is_numeric($column)) {
                     continue; // Skip 'City' and 'Area' columns
                 }
 
@@ -82,10 +82,9 @@ class DestinationImport implements SkipsEmptyRows, ToCollection, WithCalculatedF
         }
     }
 
-    private function getArea($area)
+    private function getArea($id)
     {
-        $area = trim($area);
-        return Area::where('name', 'like', "%{$area}%")->firstOrCreate(['name' => $area, 'city_id' => City::where('name', 'like', "%Cairo%")->firstOrFail()->id]);
+        return Area::findOrFail((int)$id);
     }
 
     private function getTruckId($truck)
