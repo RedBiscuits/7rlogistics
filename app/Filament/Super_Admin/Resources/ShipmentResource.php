@@ -11,6 +11,7 @@ use App\Models\Destination;
 use App\Models\Driver;
 use App\Models\Shipment;
 use App\Models\Truck;
+use App\Models\TruckType;
 use Closure;
 use Dotswan\MapPicker\Fields\Map;
 use Filament\Forms;
@@ -207,7 +208,7 @@ class ShipmentResource extends Resource
                                     ]),
 
                                 Forms\Components\Select::make('truck_id')
-                                    ->label('Truck Type')
+                                    ->label('Assigned Truck')
                                     ->reactive()
                                     ->helperText(function (callable $get, $state, $record) {
 
@@ -236,10 +237,11 @@ class ShipmentResource extends Resource
                                                 ->whereNotNull('price')
                                                 ->with('truck')
                                                 ->get()
-                                                ->mapWithKeys(function ($destination) {
-                                                    return [
-                                                        $destination->truck->id => $destination->truck->name . ' - ' . $destination->truck->plate_number
-                                                    ];
+                                                ->flatMap(function ($destination) {
+                                                    return $destination->truck->trucks->pluck('name', 'id')
+                                                        ->map(function($name, $id) use ($destination) {
+                                                            return $name . ' - ' . $destination->truck->trucks->where('id', $id)->first()->plate_number;
+                                                        });
                                                 })
                                                 ->toArray();
                                         }
@@ -249,13 +251,13 @@ class ShipmentResource extends Resource
                                     ->afterStateUpdated(function (Forms\Components\Select $component, $state, callable $get, callable $set) {
                                         $fromArea = $get('from_area');
                                         $toArea = $get('to_area');
-                                        $truck = $get('truck_id');
+                                        $truck_id = $get('truck_id');
                                         $company_id = $get('company_id');
-                                        if ($fromArea && $toArea && $truck && $company_id) {
+                                        if ($fromArea && $toArea && $truck_id && $company_id) {
                                             $destination = Destination::where('company_id', $company_id)
                                                 ->where('from_area', $fromArea)
                                                 ->where('to_area', $toArea)
-                                                ->where('truck_id', $truck)
+                                                ->where('truck_type_id', Truck::find($truck_id)->truckType->id)
                                                 ->whereNotNull('price');
 
                                             $destination = $destination->first();
@@ -308,7 +310,7 @@ class ShipmentResource extends Resource
                                             $quantity = floatval($get('quantity') ?: 0);
                                             $set('package_weight', $weight * $quantity);
 
-                                            $truckWeight = Truck::find($get('../../truck_id'))->weight ?? 0;
+                                            $truckWeight = Truck::find($get('../../truck_id'))->truckType->weight ?? 0;
                                             $totalPackageWeight = collect($get('../../packages') ?: [])->sum(fn($package) => ($package['weight'] ?: 0) * ($package['quantity'] ?: 0));
                                             $availableWeight = $truckWeight - $totalPackageWeight;
 
@@ -379,7 +381,7 @@ class ShipmentResource extends Resource
                                     ->label('Package Weight')
                                     ->content(fn($get) => new HtmlString('<h1>' . (($get('weight') ?: 0) * ($get('quantity') ?: 0)) . '</h1>')),
                             ])->afterStateUpdated(function ($state, $set, $get) {
-                                $truckWeight = Truck::find($get('truck_id'))->weight ?? 0;
+                                $truckWeight = Truck::find($get('truck_id'))->truckType->weight ?? 0;
                                 $totalPackageWeight = collect($get('packages') ?: [])->sum(fn($package) => ($package['weight'] ?: 0) * ($package['quantity'] ?: 0));
                                 $availableWeight = $truckWeight - $totalPackageWeight;
                                 $set('available_weight', $availableWeight);
@@ -396,7 +398,7 @@ class ShipmentResource extends Resource
                         Forms\Components\Placeholder::make('available_weight')
                             ->label('Available Weight in Selected Truck')
                             ->content(function ($get) {
-                                $truckWeight = Truck::find($get('truck_id'))->weight ?? 0;
+                                $truckWeight = Truck::find($get('truck_id'))->truckType->weight ?? 0;
                                 $totalPackageWeight = collect($get('packages') ?: [])->sum(fn($package) => ($package['weight'] ?: 0) * ($package['quantity'] ?: 0));
                                 $availableWeight = $truckWeight - $totalPackageWeight;
 

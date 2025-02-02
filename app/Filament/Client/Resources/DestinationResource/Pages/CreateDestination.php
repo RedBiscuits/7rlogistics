@@ -18,7 +18,7 @@ class CreateDestination extends CreateRecord
             ->where('from_area', $data['from_area'])
             ->where('to_city', $data['to_city'])
             ->where('to_area', $data['to_area'])
-            ->where('truck_id', $data['truck_id'])
+            ->where('truck_type_id', $data['truck_type_id'])
             ->first();
 
         if ($destination) {

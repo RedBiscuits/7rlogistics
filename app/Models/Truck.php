@@ -11,12 +11,13 @@ class Truck extends Model
 
     protected $guarded = [];
 
-    public function destinations()
+    public function truckType()
     {
-        return $this->hasMany(Destination::class, 'truck_id');
+        return $this->belongsTo(TruckType::class, 'truck_type_id');
     }
 
-    // public function TruckName(){
-    //     return $this->belongsTo(TruckName::class, 'name_id');
-    // }
+    public function truckDestination()
+    {
+        return $this->hasMany(TruckDestination::class, 'truck_id');
+    }
 }

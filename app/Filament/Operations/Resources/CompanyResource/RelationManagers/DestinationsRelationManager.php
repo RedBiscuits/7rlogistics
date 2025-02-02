@@ -16,6 +16,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\HeadingRowImport;
 use Maatwebsite\Excel\Imports\HeadingRowFormatter;
@@ -86,11 +87,11 @@ class DestinationsRelationManager extends RelationManager
 
                     ->required(),
 
-                Forms\Components\Select::make('truck_id')
+                Forms\Components\Select::make('truck_type_id')
                     ->label('Truck')
                     ->options(function (callable $get) {
-                        return Truck::all()->mapWithKeys(function($truck) {
-                            return [$truck->id => $truck->name . ' - ' . $truck->plate_number];
+                        return TruckType::all()->mapWithKeys(function($truckType) {
+                            return [$truckType->id => $truckType->name];
                         });
                     })
                     ->reactive()
@@ -106,7 +107,7 @@ class DestinationsRelationManager extends RelationManager
                                         ->where('from_area', $get('to_area'));
                                 });
                             })
-                            ->where('truck_id', $get('truck_id'))
+                            ->where('truck_type_id', $get('truck_type_id'))
                             ->first();
 
                         $set('price', $destination?->price ?? null);
@@ -129,7 +130,7 @@ class DestinationsRelationManager extends RelationManager
                                         ->where('from_area', $get('to_area'));
                                 });
                             })
-                            ->where('truck_id', $get('truck_id'))
+                            ->where('truck_type_id', $get('truck_type_id'))
                             ->first();
 
                         return $destination->price ?? 0;
@@ -147,7 +148,7 @@ class DestinationsRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('fromArea.name')->label('From Area'),
                 Tables\Columns\TextColumn::make('toCity.name')->label('To City'),
                 Tables\Columns\TextColumn::make('toArea.name')->label('To Area'),
-                Tables\Columns\TextColumn::make('truck.name')->label('Truck'),
+                Tables\Columns\TextColumn::make('truckType.name')->label('Truck'),
                 Tables\Columns\TextColumn::make('price')->label('Price')->money('EGP'),
             ])
             ->filters([
@@ -156,58 +157,61 @@ class DestinationsRelationManager extends RelationManager
             ->headerActions([
 
                 Tables\Actions\Action::make('importDestinations')
-                ->label('Import Destinations')
-                ->icon('heroicon-o-document-arrow-down')
-                ->color('primary')
-                ->requiresConfirmation()
-                ->form([
-                    Forms\Components\FileUpload::make('attachment')
-                        ->label('Excel File')
-                        ->helperText('The excel file should have the following columns: City, Area, #, Truck 1, Truck 2, Truck 3, etc.')
-                        ->acceptedFileTypes(['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'])
-                        ->disk('public')
-                        ->directory('uploads'),
-                ])->action(function (array $data) {
-                    // Get the correct storage path
-                    $filePath = storage_path('app/public/' . $data['attachment']);
+                    ->label('Import Destinations')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->color('primary')
+                    ->requiresConfirmation()
+                    ->form([
+                        Forms\Components\FileUpload::make('attachment')
+                            ->label('Excel File')
+                            ->helperText('The excel file should have the following columns: City, Area, #, Truck 1, Truck 2, Truck 3, etc.')
+                            ->acceptedFileTypes(['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'])
+                            ->disk('public')
+                            ->directory('uploads'),
+                    ])->action(function (array $data) {
+                        // Get the correct storage path
+                        $filePath = storage_path('app/public/' . $data['attachment']);
 
-                    // Debug the file path if needed
-                    // \Log::info('File path: ' . $filePath);
+                        // Debug the file path if needed
+                        // \Log::info('File path: ' . $filePath);
 
-                    if (!file_exists($filePath)) {
-                        Notification::make()
-                            ->title('File not found at: ' . $filePath)
-                            ->danger()
-                            ->send();
-                        return;
-                    }
+                        if (!file_exists($filePath)) {
+                            Notification::make()
+                                ->title('File not found at: ' . $filePath)
+                                ->danger()
+                                ->send();
+                            return;
+                        }
 
-                    try {
-                        $this->getOwnerRecord()->destinations()->delete();
+                        try {
+                            DB::beginTransaction();
+                            $this->getOwnerRecord()->destinations()->delete();
 
-                        HeadingRowFormatter::default('none');
-                        $headings = (new HeadingRowImport)->toArray($filePath)[0][0];
-                        $headings = array_slice($headings, 4);
+                            HeadingRowFormatter::default('none');
+                            $headings = (new HeadingRowImport)->toArray($filePath)[0][0];
+                            $headings = array_slice($headings, 4);
 
-                        Excel::import(
-                            new DestinationImport($this->getOwnerRecord(), $headings),
-                            $filePath,
-                            null,
-                            \Maatwebsite\Excel\Excel::XLSX
-                        );
+                            Excel::import(
+                                new DestinationImport($this->getOwnerRecord(), $headings),
+                                $filePath,
+                                null,
+                                \Maatwebsite\Excel\Excel::XLSX
+                            );
 
-                        Notification::make()
-                            ->title('Destinations Imported Successfully')
-                            ->success()
-                            ->send();
-                    } catch (\Exception $e) {
-                        Notification::make()
-                            ->title('Import Failed')
-                            ->danger()
-                            ->body($e->getMessage())
-                            ->send();
-                    }
-                }),
+                            Notification::make()
+                                ->title('Destinations Imported Successfully')
+                                ->success()
+                                ->send();
+                            DB::commit();
+                        } catch (\Exception $e) {
+                            DB::rollBack();
+                            Notification::make()
+                                ->title('Import Failed')
+                                ->danger()
+                                ->body($e->getMessage())
+                                ->send();
+                        }
+                    }),
 
                 Tables\Actions\CreateAction::make()
                     ->using(function (array $data, string $model): Model {
@@ -221,7 +225,7 @@ class DestinationsRelationManager extends RelationManager
                                         ->where('from_area', $data['to_area']);
                                 });
                             })
-                            ->where('truck_id', $data['truck_id'])
+                            ->where('truck_type_id', $data['truck_type_id'])
                             ->first();
 
                         if ($destination) {

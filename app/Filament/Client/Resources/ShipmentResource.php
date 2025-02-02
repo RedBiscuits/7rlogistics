@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\HtmlString;
 use App\Enums\ShipmentStatus;
 use App\Models\Destination;
+use App\Models\TruckType;
 use App\Utils\AcceptedMedia;
 
 class ShipmentResource extends Resource
@@ -235,7 +236,7 @@ class ShipmentResource extends Resource
                                     ->options(['Box' => 'Box', 'Pallets' => 'Pallets', 'Other' => 'Other'])
                                     ->rules([
                                         fn(Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
-                                            $truckWeight = Truck::where('name', $get('requested_truck'))->first()->weight ?? 0;
+                                            $truckWeight = TruckType::where('name', $get('requested_truck'))->first()->weight ?? 0;
                                             $totalPackageWeight = collect($get('packages') ?: [])->sum(fn($package) => ($package['weight'] ?: 0) * ($package['quantity'] ?: 0));
                                             $availableWeight = $truckWeight - $totalPackageWeight;
 
@@ -262,16 +263,16 @@ class ShipmentResource extends Resource
                                     ->numeric()
                                     ->reactive()
                                     ->debounce(500) // Add 1 second debounce
-                                    ->afterStateUpdated(function($state, $set, $get) {
+                                    ->afterStateUpdated(function ($state, $set, $get) {
                                         // Only update after user stops typing
                                         if ($state !== null) {
                                             $weight = floatval($state);
                                             $quantity = floatval($get('quantity') ?: 0);
                                             $set('package_weight', $weight * $quantity);
 
-                                            $truckWeight = Truck::where('name', $get('requested_truck'))->first()->weight ?? 0;
-                                            $totalPackageWeight = collect($get('packages') ?: [])->sum(fn($package) =>
-                                                (floatval($package['weight'] ?: 0) * floatval($package['quantity'] ?: 0))
+                                            $truckWeight = TruckType::where('name', $get('requested_truck'))->first()->weight ?? 0;
+                                            $totalPackageWeight = collect($get('packages') ?: [])->sum(
+                                                fn($package) => (floatval($package['weight'] ?: 0) * floatval($package['quantity'] ?: 0))
                                             );
                                             $availableWeight = $truckWeight - $totalPackageWeight;
 
@@ -306,15 +307,15 @@ class ShipmentResource extends Resource
                                     ->integer()
                                     ->required(fn(Get $get): bool => ! $get('attachment'))
                                     ->debounce(500)
-                                    ->afterStateUpdated(function($state, $set, $get) {
+                                    ->afterStateUpdated(function ($state, $set, $get) {
                                         if ($state !== null) {
                                             $quantity = floatval($state);
                                             $weight = floatval($get('weight') ?: 0);
                                             $set('package_weight', $weight * $quantity);
 
-                                            $truckWeight = Truck::where('name', $get('requested_truck'))->first()->weight ?? 0;
-                                            $totalPackageWeight = collect($get('packages') ?: [])->sum(fn($package) =>
-                                                (floatval($package['weight'] ?: 0) * floatval($package['quantity'] ?: 0))
+                                            $truckWeight = TruckType::where('name', $get('requested_truck'))->first()->weight ?? 0;
+                                            $totalPackageWeight = collect($get('packages') ?: [])->sum(
+                                                fn($package) => (floatval($package['weight'] ?: 0) * floatval($package['quantity'] ?: 0))
                                             );
                                             $availableWeight = $truckWeight - $totalPackageWeight;
 
@@ -349,7 +350,7 @@ class ShipmentResource extends Resource
                                     ->content(fn($get) => new HtmlString('<h1>' . (($get('weight') ?: 0) * ($get('quantity') ?: 0)) . '</h1>')),
                             ])->afterStateUpdated(function ($state, $set, $get) {
 
-                                $truckWeight = Truck::where('name', $get('requested_truck'))->first()->weight ?? 0;
+                                $truckWeight = TruckType::where('name', $get('requested_truck'))->first()->weight ?? 0;
                                 $totalPackageWeight = collect($get('packages') ?: [])->sum(fn($package) => ($package['weight'] ?: 0) * ($package['quantity'] ?: 0));
                                 $availableWeight = $truckWeight - $totalPackageWeight;
                                 $set('available_weight', $availableWeight);
@@ -385,7 +386,7 @@ class ShipmentResource extends Resource
                                     return new HtmlString('<div class="text-warning-600">Shipment will be reviewed before processing</div>');
                                 }
 
-                                $truckWeight = Truck::where('name', $get('requested_truck'))->first()->weight ?? 0;
+                                $truckWeight = TruckType::where('name', $get('requested_truck'))->first()->weight ?? 0;
                                 $totalPackageWeight = collect($get('packages') ?: [])->sum(fn($package) => ($package['weight'] ?: 0) * ($package['quantity'] ?: 0));
                                 $availableWeight = $truckWeight - $totalPackageWeight;
                                 return new HtmlString('<h1>' . $availableWeight . '</h1>');
@@ -418,9 +419,7 @@ class ShipmentResource extends Resource
                                             })->orWhere(function ($q) use ($fromArea, $toArea) {
                                                 $q->where('to_area', $fromArea)
                                                     ->where('from_area', $toArea);
-                                            })->whereHas('truck', function ($query) use ($truckName) {
-                                                $query->where('name', $truckName);
-                                            });
+                                            })->where('truck_type_id', TruckType::where('name', $truckName)->first()->id);
                                         })
                                         ->whereNotNull('price')
                                         ->first()->price . '</h1>');
@@ -460,11 +459,11 @@ class ShipmentResource extends Resource
                 Tables\Columns\TextColumn::make('requested_truck')
                     ->label('Truck')
                     ->getStateUsing(function ($record) {
-                        if ($record->requested_truck) {
-                            return $record->requested_truck;
+                        if ($record->truck?->truckType?->name) {
+                            return $record->truck?->truckType?->name ?? $record->requested_truck;
                         }
 
-                        return $record->truck?->name ?? '';
+                        return $record->requested_truck;
                     }),
                 Tables\Columns\TextColumn::make('status')->label('Status')->badge(),
                 Tables\Columns\TextColumn::make('price')->label('Price')->money('EGP'),

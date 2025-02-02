@@ -6,7 +6,7 @@ use App\Filament\Client\Resources\DestinationResource\Pages;
 use App\Models\Area;
 use App\Models\City;
 use App\Models\Destination;
-use App\Models\Truck;
+use App\Models\TruckType;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -78,12 +78,12 @@ class DestinationResource extends Resource
                     ->searchable()
                     ->required(),
 
-                Forms\Components\Select::make('truck_id')
+                Forms\Components\Select::make('truck_type_id')
                     ->label('Truck')
                     ->options(function (callable $get) {
-                        $trucks = Truck::all()->pluck('name', 'id');
+                        $truckTypes = TruckType::all()->pluck('name', 'id');
 
-                        return $trucks ?? [];
+                        return $truckTypes ?? [];
                     })
                     ->reactive()
                     ->searchable()
@@ -102,7 +102,7 @@ class DestinationResource extends Resource
                 Tables\Columns\TextColumn::make('fromArea.name')->label('From Area')->searchable(),
                 Tables\Columns\TextColumn::make('toArea.city.name')->label('To City')->searchable(),
                 Tables\Columns\TextColumn::make('toArea.name')->label('To Area')->searchable(),
-                Tables\Columns\TextColumn::make('truck.name')->label('Truck'),
+                Tables\Columns\TextColumn::make('truckType.name')->label('Truck'),
                 Tables\Columns\TextColumn::make('price')->label('Price')->money('EGP')->hidden(fn ($livewire) => $livewire->activeTab === 'Pending'),
             ])
             ->filters([

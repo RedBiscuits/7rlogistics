@@ -16,6 +16,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\HeadingRowImport;
 use Maatwebsite\Excel\Imports\HeadingRowFormatter;
@@ -86,11 +87,11 @@ class DestinationsRelationManager extends RelationManager
 
                     ->required(),
 
-                Forms\Components\Select::make('truck_id')
+                Forms\Components\Select::make('truck_type_id')
                     ->label('Truck')
                     ->options(function (callable $get) {
-                        return Truck::all()->mapWithKeys(function($truck) {
-                            return [$truck->id => $truck->name . ' - ' . $truck->plate_number];
+                        return TruckType::all()->mapWithKeys(function($truckType) {
+                            return [$truckType->id => $truckType->name];
                         });
                     })
                     ->reactive()
@@ -106,7 +107,7 @@ class DestinationsRelationManager extends RelationManager
                                         ->where('from_area', $get('to_area'));
                                 });
                             })
-                            ->where('truck_id', $get('truck_id'))
+                            ->where('truck_type_id', $get('truck_type_id'))
                             ->first();
 
                         $set('price', $destination?->price ?? null);
@@ -129,7 +130,7 @@ class DestinationsRelationManager extends RelationManager
                                         ->where('from_area', $get('to_area'));
                                 });
                             })
-                            ->where('truck_id', $get('truck_id'))
+                            ->where('truck_type_id', $get('truck_type_id'))
                             ->first();
 
                         return $destination->price ?? 0;
@@ -147,7 +148,7 @@ class DestinationsRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('fromArea.name')->label('From Area'),
                 Tables\Columns\TextColumn::make('toCity.name')->label('To City'),
                 Tables\Columns\TextColumn::make('toArea.name')->label('To Area'),
-                Tables\Columns\TextColumn::make('truck.name')->label('Truck'),
+                Tables\Columns\TextColumn::make('truckType.name')->label('Truck'),
                 Tables\Columns\TextColumn::make('price')->label('Price')->money('EGP'),
             ])
             ->filters([
@@ -183,6 +184,7 @@ class DestinationsRelationManager extends RelationManager
                         }
 
                         try {
+                            DB::beginTransaction();
                             $this->getOwnerRecord()->destinations()->delete();
 
                             HeadingRowFormatter::default('none');
@@ -200,7 +202,9 @@ class DestinationsRelationManager extends RelationManager
                                 ->title('Destinations Imported Successfully')
                                 ->success()
                                 ->send();
+                            DB::commit();
                         } catch (\Exception $e) {
+                            DB::rollBack();
                             Notification::make()
                                 ->title('Import Failed')
                                 ->danger()
@@ -221,7 +225,7 @@ class DestinationsRelationManager extends RelationManager
                                         ->where('from_area', $data['to_area']);
                                 });
                             })
-                            ->where('truck_id', $data['truck_id'])
+                            ->where('truck_type_id', $data['truck_type_id'])
                             ->first();
 
                         if ($destination) {

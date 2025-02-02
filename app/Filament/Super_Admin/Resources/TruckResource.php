@@ -4,6 +4,7 @@ namespace App\Filament\Super_Admin\Resources;
 
 use App\Filament\Super_Admin\Resources\TruckResource\Pages;
 use App\Models\Truck;
+use App\Models\TruckType;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -18,23 +19,21 @@ class TruckResource extends Resource
 
     protected static ?int $navigationSort = 4;
 
-    protected static ?string $navigationGroup = 'Logistics';
+    protected static ?string $navigationGroup = 'Transport';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('name')
+                Forms\Components\Select::make('truck_type_id')
+                    ->label('Truck Type')
                     ->required()
-                    ->options([
-                        'Dababah' => 'Dababah',
-                        'Jumbo' => 'Jumbo',
-                        'dababah_refrigerated' => 'Dababah Refrigerated',
-                        'jumbo_refrigerated' => 'Jumbo Refrigerated',
-                        "Dababah_Box" => "Dababah Box",
-                        "Jumbo_Box" => "Jumbo Box"
-                    ]),
-                Forms\Components\TextInput::make('plate_number')->required()->unique()->maxLength(255),
+                    ->options(TruckType::all()->pluck('name', 'id'))
+                    ->searchable()
+                    ->preload(),
+
+                Forms\Components\TextInput::make('name')->nullable()->maxLength(255),
+                Forms\Components\TextInput::make('plate_number')->required()->unique(ignoreRecord: true)->maxLength(255),
                 Forms\Components\TextInput::make('weight')->numeric()->minValue(0)->required(),
             ]);
     }
@@ -44,7 +43,8 @@ class TruckResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('plate_number')->label('Code')->sortable()->searchable(),
-                Tables\Columns\TextColumn::make('name')->sortable()->searchable(),
+                Tables\Columns\TextColumn::make('truckType.name')->label('Truck Type')->sortable()->searchable(),
+                Tables\Columns\TextColumn::make('name')->label('Truck Name')->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('weight')->sortable()->searchable(),
                 // Tables\Columns\TextColumn::make('created_at')
             ])

@@ -7,6 +7,7 @@ use App\Models\Area;
 use App\Models\City;
 use App\Models\Destination;
 use App\Models\Truck;
+use App\Models\TruckType;
 use Closure;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -191,7 +192,7 @@ class ShipmentsRelationManager extends RelationManager
 
                         Forms\Components\Grid::make(2)->schema([
 
-                            Forms\Components\Select::make('truck_id')
+                            Forms\Components\Select::make('truck_type_id')
                                 ->label('Truck Type')
                                 ->reactive()
                                 ->options(function (callable $get, callable $set) {
@@ -214,13 +215,13 @@ class ShipmentsRelationManager extends RelationManager
                                 ->afterStateUpdated(function (Forms\Components\Select $component, $state, callable $get, callable $set) {
                                     $fromArea = $get('from_area');
                                     $toArea = $get('to_area');
-                                    $truck = $get('truck_id');
+                                    $truck = $get('truck_type_id');
                                     $user_id = $get('user_id');
                                     if ($fromArea && $toArea && $truck && $user_id) {
                                         $destination = Destination::where('user_id', $user_id)
                                             ->where('from_area', $fromArea)
                                             ->where('to_area', $toArea)
-                                            ->where('truck_id', $truck)
+                                            ->where('truck_type_id', $truck)
                                             ->whereNotNull('price')
                                             ->first();
                                         if ($destination) {
@@ -245,7 +246,7 @@ class ShipmentsRelationManager extends RelationManager
                                     ->rules([
                                         fn (Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
 
-                                            $truckWeight = Truck::find($get('../../truck_id'))->weight ?? 0;
+                                            $truckWeight = TruckType::find($get('../../truck_type_id'))->weight ?? 0;
                                             $totalPackageWeight = collect($get('../../packages') ?: [])->sum(fn ($package) => ($package['weight'] ?: 0) * ($package['quantity'] ?: 0));
                                             $availableWeight = $truckWeight - $totalPackageWeight;
 
@@ -302,7 +303,7 @@ class ShipmentsRelationManager extends RelationManager
                                     ->label('Package Weight')
                                     ->content(fn ($get) => new HtmlString('<h1>'.(($get('weight') ?: 0) * ($get('quantity') ?: 0)).'</h1>')),
                             ])->afterStateUpdated(function ($state, $set, $get) {
-                                $truckWeight = Truck::find($get('truck_id'))->weight ?? 0;
+                                $truckWeight = TruckType::find($get('truck_type_id'))->weight ?? 0;
                                 $totalPackageWeight = collect($get('packages') ?: [])->sum(fn ($package) => ($package['weight'] ?: 0) * ($package['quantity'] ?: 0));
                                 $availableWeight = $truckWeight - $totalPackageWeight;
                                 $set('available_weight', $availableWeight);
@@ -319,7 +320,7 @@ class ShipmentsRelationManager extends RelationManager
                         Forms\Components\Placeholder::make('available_weight')
                             ->label('Available Weight in Selected Truck')
                             ->content(function ($get) {
-                                $truckWeight = Truck::find($get('truck_id'))->weight ?? 0;
+                                $truckWeight = TruckType::find($get('truck_type_id'))->weight ?? 0;
                                 $totalPackageWeight = collect($get('packages') ?: [])->sum(fn ($package) => ($package['weight'] ?: 0) * ($package['quantity'] ?: 0));
                                 $availableWeight = $truckWeight - $totalPackageWeight;
 
@@ -331,13 +332,13 @@ class ShipmentsRelationManager extends RelationManager
                             ->content(function ($get) {
                                 $fromArea = $get('from_area');
                                 $toArea = $get('to_area');
-                                $truck = $get('truck_id');
+                                $truck = $get('truck_type_id');
                                 $user_id = $get('user_id');
                                 if ($fromArea && $toArea && $truck && $user_id) {
                                     $destination = Destination::where('user_id', $user_id)
                                         ->where('from_area', $fromArea)
                                         ->where('to_area', $toArea)
-                                        ->where('truck_id', $truck)
+                                        ->where('truck_type_id', $truck)
                                         ->whereNotNull('price')
                                         ->first();
 

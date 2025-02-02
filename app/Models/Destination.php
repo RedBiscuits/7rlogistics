@@ -38,6 +38,6 @@ class Destination extends Model
 
     public function truck()
     {
-        return $this->belongsTo(Truck::class, 'truck_id');
+        return $this->belongsTo(TruckType::class, 'truck_type_id');
     }
 }

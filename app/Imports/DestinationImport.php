@@ -7,6 +7,7 @@ use App\Models\Destination;
 use App\Models\Truck;
 use App\Models\Company;
 use App\Models\City;
+use App\Models\TruckType;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
 use Maatwebsite\Excel\Concerns\ToCollection;
@@ -58,7 +59,7 @@ class DestinationImport implements SkipsEmptyRows, ToCollection, WithCalculatedF
                         $query->where('from_area', $area_2)
                             ->orWhere('to_area', $area_2);
                     })
-                    ->where('truck_id', $truck_id)
+                    ->where('truck_type_id', $truck_id)
                     ->first();
 
                 if ($destinationExists) {
@@ -75,7 +76,7 @@ class DestinationImport implements SkipsEmptyRows, ToCollection, WithCalculatedF
                     'from_area' => $area_1->id,
                     'to_city' => $area_2->city_id,
                     'to_area' => $area_2->id,
-                    'truck_id' => $truck_id,
+                    'truck_type_id' => $truck_id,
                     'price' => $price,
                 ]);
             }
@@ -84,13 +85,21 @@ class DestinationImport implements SkipsEmptyRows, ToCollection, WithCalculatedF
 
     private function getArea($id)
     {
-        return Area::findOrFail((int)$id);
+        $area = Area::findOrFail((int)$id);
+        if (!$area) {
+            throw new \Exception("Area '{$id}' not found in the system. Please add it first.");
+        }
+        return $area;
     }
 
     private function getTruckId($truck)
     {
         $truck = trim($truck);
-        return Truck::where('name', 'like', "%{$truck}%")->firstOrFail()->id;
+        $truckType = TruckType::where('name', 'like', "%{$truck}%")->first();
+        if (!$truckType) {
+            throw new \Exception("Truck type '{$truck}' not found in the system. Please add it first.");
+        }
+        return $truckType->id;
     }
 
     public function sheets(): array
