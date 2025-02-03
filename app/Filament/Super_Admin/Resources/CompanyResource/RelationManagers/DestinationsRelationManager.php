@@ -6,7 +6,7 @@ use App\Imports\DestinationImport;
 use App\Models\Area;
 use App\Models\City;
 use App\Models\Destination;
-use App\Models\Truck;
+use App\Models\TruckType;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
@@ -148,7 +148,7 @@ class DestinationsRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('fromArea.name')->label('From Area'),
                 Tables\Columns\TextColumn::make('toCity.name')->label('To City'),
                 Tables\Columns\TextColumn::make('toArea.name')->label('To Area'),
-                Tables\Columns\TextColumn::make('truckType.name')->label('Truck'),
+                Tables\Columns\TextColumn::make('truck.name')->label('Truck'),
                 Tables\Columns\TextColumn::make('price')->label('Price')->money('EGP'),
             ])
             ->filters([
