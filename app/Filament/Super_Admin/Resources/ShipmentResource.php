@@ -211,18 +211,16 @@ class ShipmentResource extends Resource
                                     ->label('Assigned Truck')
                                     ->reactive()
                                     ->helperText(function (callable $get, $state, $record) {
-
-
                                         if ($record) {
                                             return "User requested a truck type: " . $record->requested_truck;
                                         }
-
                                         return 'Assign a specific truck';
                                     })
                                     ->options(function (callable $get, callable $set) {
                                         $fromArea = $get('from_area');
                                         $toArea = $get('to_area');
                                         $company_id = $get('company_id');
+
                                         if ($fromArea && $toArea) {
                                             return Destination::where('company_id', $company_id)
                                                 ->where(function ($query) use ($fromArea, $toArea) {
@@ -235,13 +233,12 @@ class ShipmentResource extends Resource
                                                     });
                                                 })
                                                 ->whereNotNull('price')
-                                                ->with('truck')
+                                                ->with(['truck.trucks']) // Eager load the relationships
                                                 ->get()
                                                 ->flatMap(function ($destination) {
-                                                    return $destination->truck->trucks->pluck('name', 'id')
-                                                        ->map(function($name, $id) use ($destination) {
-                                                            return $name . ' - ' . $destination->truck->trucks->where('id', $id)->first()->plate_number;
-                                                        });
+                                                    return $destination->truck->trucks->mapWithKeys(function ($truck) {
+                                                        return [$truck->id => $truck->name . ' - ' . $truck->plate_number];
+                                                    });
                                                 })
                                                 ->toArray();
                                         }
@@ -350,7 +347,7 @@ class ShipmentResource extends Resource
                                             $weight = floatval($get('weight') ?: 0);
                                             $set('package_weight', $weight * $quantity);
 
-                                            $truckWeight = Truck::where('name', $get('requested_truck'))->first()->weight ?? 0;
+                                            $truckWeight = Truck::find($get('truck_id'))->truckType->weight ?? 0;
                                             $totalPackageWeight = collect($get('packages') ?: [])->sum(fn($package) =>
                                                 (floatval($package['weight'] ?: 0) * floatval($package['quantity'] ?: 0))
                                             );
