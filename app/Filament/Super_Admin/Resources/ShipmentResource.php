@@ -220,18 +220,24 @@ class ShipmentResource extends Resource
                                         $fromArea = $get('from_area');
                                         $toArea = $get('to_area');
                                         $company_id = $get('company_id');
-
                                         if ($fromArea && $toArea) {
                                             return Truck::select('trucks.id', 'trucks.name', 'trucks.plate_number')
-                                            ->join('truck_types', 'trucks.truck_type_id', '=', 'truck_types.id')
-                                            ->join('destinations', 'truck_types.id', '=', 'destinations.truck_type_id')
-                                            ->where('destinations.from_area', $fromArea)
-                                            ->where('destinations.to_area', $toArea)
-                                            ->where('destinations.company_id', $company_id)
-                                            ->get()
-                                            ->mapWithKeys(function ($truck) {
-                                                return [$truck->id => $truck->name . ' - ' . $truck->plate_number];
-                                            });
+                                                ->join('truck_types', 'trucks.truck_type_id', '=', 'truck_types.id')
+                                                ->join('destinations', 'truck_types.id', '=', 'destinations.truck_type_id')
+                                                ->where(function ($query) use ($fromArea, $toArea) {
+                                                    $query->where(function ($q) use ($fromArea, $toArea) {
+                                                        $q->where('destinations.from_area', $fromArea)
+                                                            ->where('destinations.to_area', $toArea);
+                                                    })->orWhere(function ($q) use ($fromArea, $toArea) {
+                                                        $q->where('destinations.from_area', $toArea)
+                                                            ->where('destinations.to_area', $fromArea);
+                                                    });
+                                                })
+                                                ->where('destinations.company_id', $company_id)
+                                                ->get()
+                                                ->mapWithKeys(function ($truck) {
+                                                    return [$truck->id => $truck->name . ' - ' . $truck->plate_number];
+                                                });
                                         }
 
                                         return [];
@@ -293,7 +299,7 @@ class ShipmentResource extends Resource
                                     ->reactive()
                                     ->required()
                                     ->numeric()
-                                    ->afterStateUpdated(function($state, $set, $get) {
+                                    ->afterStateUpdated(function ($state, $set, $get) {
                                         if ($state !== null) {
                                             $weight = floatval($state);
                                             $quantity = floatval($get('quantity') ?: 0);
@@ -327,21 +333,21 @@ class ShipmentResource extends Resource
                                     ->numeric()
                                     ->required(),
 
-                                    Forms\Components\TextInput::make('quantity')
+                                Forms\Components\TextInput::make('quantity')
                                     ->label('Quantity')
                                     ->reactive()
                                     ->integer()
                                     ->required()
                                     ->debounce(500)
-                                    ->afterStateUpdated(function($state, $set, $get) {
+                                    ->afterStateUpdated(function ($state, $set, $get) {
                                         if ($state !== null) {
                                             $quantity = floatval($state);
                                             $weight = floatval($get('weight') ?: 0);
                                             $set('package_weight', $weight * $quantity);
 
                                             $truckWeight = Truck::find($get('truck_id'))->truckType->weight ?? 0;
-                                            $totalPackageWeight = collect($get('packages') ?: [])->sum(fn($package) =>
-                                                (floatval($package['weight'] ?: 0) * floatval($package['quantity'] ?: 0))
+                                            $totalPackageWeight = collect($get('packages') ?: [])->sum(
+                                                fn($package) => (floatval($package['weight'] ?: 0) * floatval($package['quantity'] ?: 0))
                                             );
                                             $availableWeight = $truckWeight - $totalPackageWeight;
 

@@ -227,8 +227,15 @@ class ShipmentResource extends Resource
                                             return Truck::select('trucks.id', 'trucks.name', 'trucks.plate_number')
                                                 ->join('truck_types', 'trucks.truck_type_id', '=', 'truck_types.id')
                                                 ->join('destinations', 'truck_types.id', '=', 'destinations.truck_type_id')
-                                                ->where('destinations.from_area', $fromArea)
-                                                ->where('destinations.to_area', $toArea)
+                                                ->where(function ($query) use ($fromArea, $toArea) {
+                                                    $query->where(function ($q) use ($fromArea, $toArea) {
+                                                        $q->where('destinations.from_area', $fromArea)
+                                                          ->where('destinations.to_area', $toArea);
+                                                    })->orWhere(function ($q) use ($fromArea, $toArea) {
+                                                        $q->where('destinations.from_area', $toArea)
+                                                          ->where('destinations.to_area', $fromArea);
+                                                    });
+                                                })
                                                 ->where('destinations.company_id', $company_id)
                                                 ->get()
                                                 ->mapWithKeys(function ($truck) {
@@ -246,8 +253,15 @@ class ShipmentResource extends Resource
 
                                         if ($fromArea && $toArea && $truck_id && $company_id) {
                                             $destination = Destination::where('company_id', $company_id)
-                                                ->where('from_area', $fromArea)
-                                                ->where('to_area', $toArea)
+                                                ->where(function ($query) use ($fromArea, $toArea) {
+                                                    $query->where(function ($q) use ($fromArea, $toArea) {
+                                                        $q->where('destinations.from_area', $fromArea)
+                                                          ->where('destinations.to_area', $toArea);
+                                                    })->orWhere(function ($q) use ($fromArea, $toArea) {
+                                                        $q->where('destinations.from_area', $toArea)
+                                                          ->where('destinations.to_area', $fromArea);
+                                                    });
+                                                })
                                                 ->where('truck_type_id', Truck::find($truck_id)->truckType->id)
                                                 ->whereNotNull('price');
 
