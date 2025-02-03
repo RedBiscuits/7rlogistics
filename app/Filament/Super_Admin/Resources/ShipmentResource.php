@@ -222,25 +222,16 @@ class ShipmentResource extends Resource
                                         $company_id = $get('company_id');
 
                                         if ($fromArea && $toArea) {
-                                            return Destination::where('company_id', $company_id)
-                                                ->where(function ($query) use ($fromArea, $toArea) {
-                                                    $query->where(function ($q) use ($fromArea, $toArea) {
-                                                        $q->where('from_area', $fromArea)
-                                                            ->where('to_area', $toArea);
-                                                    })->orWhere(function ($q) use ($fromArea, $toArea) {
-                                                        $q->where('to_area', $fromArea)
-                                                            ->where('from_area', $toArea);
-                                                    });
-                                                })
-                                                ->whereNotNull('price')
-                                                ->with(['truck.trucks']) // Eager load the relationships
-                                                ->get()
-                                                ->flatMap(function ($destination) {
-                                                    return $destination->truck->trucks->mapWithKeys(function ($truck) {
-                                                        return [$truck->id => $truck->name . ' - ' . $truck->plate_number];
-                                                    });
-                                                })
-                                                ->toArray();
+                                            return Truck::select('trucks.id', 'trucks.name', 'trucks.plate_number')
+                                            ->join('truck_types', 'trucks.truck_type_id', '=', 'truck_types.id')
+                                            ->join('destinations', 'truck_types.id', '=', 'destinations.truck_type_id')
+                                            ->where('destinations.from_area', $fromArea)
+                                            ->where('destinations.to_area', $toArea)
+                                            ->where('destinations.company_id', $company_id)
+                                            ->get()
+                                            ->mapWithKeys(function ($truck) {
+                                                return [$truck->id => $truck->name . ' - ' . $truck->plate_number];
+                                            });
                                         }
 
                                         return [];
@@ -250,6 +241,7 @@ class ShipmentResource extends Resource
                                         $toArea = $get('to_area');
                                         $truck_id = $get('truck_id');
                                         $company_id = $get('company_id');
+
                                         if ($fromArea && $toArea && $truck_id && $company_id) {
                                             $destination = Destination::where('company_id', $company_id)
                                                 ->where('from_area', $fromArea)
