@@ -14,7 +14,7 @@ return new class extends Migration
     {
         DB::statement('
         UPDATE destinations
-        JOIN trucks ON destinations.truck_type_id = trucks.truck_type_id
+        JOIN trucks ON destinations.truck_id = trucks.id
         SET destinations.truck_type_id = trucks.truck_type_id
     ');
     }
@@ -22,7 +22,5 @@ return new class extends Migration
     /**
      * Reverse the migrations.
      */
-    public function down(): void
-    {
-    }
+    public function down(): void {}
 };
