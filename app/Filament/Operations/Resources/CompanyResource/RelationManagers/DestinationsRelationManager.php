@@ -6,7 +6,7 @@ use App\Imports\DestinationImport;
 use App\Models\Area;
 use App\Models\City;
 use App\Models\Destination;
-use App\Models\Truck;
+use App\Models\TruckType;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
