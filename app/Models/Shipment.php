@@ -9,6 +9,23 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
+/**
+ * @property ShipmentStatus $status
+ * @property string $pickup_date
+ * @property string $delivery_date
+ * @property string $description
+ * @property string $notes
+ * @property string $instructions
+ * @property string $reference
+ * @property string $tracking_number
+ * @property string $driver_id
+ * @property string $truck_id
+ * @property City $fromCity
+ * @property Area $fromArea
+ * @property City $toCity
+ * @property Area $toArea
+ * 
+ */
 class Shipment extends Model implements HasMedia
 {
     use HasFactory , InteractsWithMedia;

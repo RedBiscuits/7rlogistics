@@ -1,18 +1,17 @@
 <?php
-
 namespace App\Filament\Finance\Resources;
 
 use App\Enums\ShipmentStatus;
+use App\Filament\Finance\Resources\ClaimsResource;
+use App\Filament\Finance\Resources\InvoicesResource;
 use App\Filament\Finance\Resources\ShipmentResource\ListShipments;
 use App\Models\Shipment;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Storage;
 
 class FinanceShipmentResource extends Resource
 {
@@ -26,8 +25,6 @@ class FinanceShipmentResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
-    // protected static bool $shouldRegisterNavigation = false;
-
     public static function form(Form $form): Form
     {
         return $form
@@ -39,92 +36,86 @@ class FinanceShipmentResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('id')->label('#')->sortable(),
-                Tables\Columns\TextColumn::make('user.company.name')->label('User')->sortable(),
-                Tables\Columns\TextColumn::make('user.name')->label('User')->sortable(),
-                Tables\Columns\TextColumn::make('fromCity.name')->label('From City'),
+                Tables\Columns\TextColumn::make('company.name')->label('Company')->sortable(),
+                Tables\Columns\TextColumn::make('user.name')->label('User')->sortable()->getStateUsing(function (Shipment $record) {
+                    return $record->user->name ?? 'N/A';
+                }),
                 Tables\Columns\TextColumn::make('fromArea.name')->label('From Area'),
-                Tables\Columns\TextColumn::make('toCity.name')->label('To City'),
                 Tables\Columns\TextColumn::make('toArea.name')->label('To Area'),
                 Tables\Columns\TextColumn::make('status')->label('Status')->badge(),
                 Tables\Columns\TextColumn::make('price')->label('Price')->money('EGP'),
+                Tables\Columns\IconColumn::make('has_invoice')
+                    ->label('Has Invoice')
+                    ->boolean()
+                    ->getStateUsing(function (Shipment $record) {
+                        return $record->invoice()->exists();
+                    }),
+                Tables\Columns\IconColumn::make('has_claim')
+                    ->label('Has Claim')
+                    ->boolean()
+                    ->getStateUsing(function (Shipment $record) {
+                        return $record->claim()->exists();
+                    }),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('status')->label('Status')
-                    ->options(ShipmentStatus::class)
-                    ->multiple(),
+                Tables\Filters\SelectFilter::make('invoice_status')
+                    ->label('Invoice Status')
+                    ->options([
+                        'with_invoice'    => 'Has Invoice',
+                        'without_invoice' => 'No Invoice',
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        if (empty($data['value'])) {
+                            return $query;
+                        }
+
+                        return match ($data['value']) {
+                            'with_invoice'    => $query->whereHas('invoice'),
+                            'without_invoice' => $query->whereDoesntHave('invoice'),
+                            default           => $query,
+                        };
+                    }),
+                Tables\Filters\SelectFilter::make('claim_status')
+                    ->label('Claim Status')
+                    ->options([
+                        'with_claim'    => 'Has Claim',
+                        'without_claim' => 'No Claim',
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        if (empty($data['value'])) {
+                            return $query;
+                        }
+
+                        return match ($data['value']) {
+                            'with_claim'    => $query->whereHas('claim'),
+                            'without_claim' => $query->whereDoesntHave('claim'),
+                            default         => $query,
+                        };
+                    }),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
+                Action::make('Invoice')
+                    ->icon('heroicon-o-document-text')
+                    ->url(function (Shipment $record) {
+                        $invoice = $record->invoice;
+                        if ($invoice) {
+                            return InvoicesResource::getUrl('edit', ['record' => $invoice->id]);
+                        }
+                        return InvoicesResource::getUrl('create', ['shipment_id' => $record->id]);
+                    })
+                    ->openUrlInNewTab(),
+                // Tables\Actions\ViewAction::make(), // Removed/disabled view action
                 Action::make('Claim')
                     ->icon('heroicon-o-arrow-down-on-square')
-                    ->button()
-                    ->action(function (Shipment $record) {
-                        // Set the PDF path based on the shipment ID to avoid duplicate creation
-                        $pdfPath = 'claims/'.$record->id.'.pdf';
-
-                        // Check if the PDF file already exists in storage
-                        if (Storage::exists($pdfPath)) {
-                            // If the file exists, download it directly
-                            return Storage::download($pdfPath, 'claim_'.$record->id.'.pdf');
+                    ->url(function (Shipment $record) {
+                        $claim = $record->claim;
+                        if ($claim) {
+                            return ClaimsResource::getUrl('edit', ['record' => $claim->id]);
                         }
-
-                        // If the file does not exist, generate it
-                        $pdf = Pdf::loadView('claim', [
-                            'title' => 'Claim',
-                            'name' => $record->user->name,
-                            'id' => $record->id,
-                            'awb' => $record->awb,
-                            'claims' => $record->claim?->packages ?? [],
-                        ]);
-
-                        // Save the generated PDF file to storage
-                        Storage::put($pdfPath, $pdf->output());
-
-                        // Stream the generated PDF file for download
-                        return response()->streamDownload(function () use ($pdf) {
-                            echo $pdf->output();
-                        }, 'claim_'.$record->id.'.pdf');
+                        return ClaimsResource::getUrl('create', ['shipment_id' => $record->id]);
                     })
-                    ->disabled(function (Shipment $record) {
-                        return ! $record->claim()->exists();
-                    }),
-                Action::make('Invoice')
-                    ->icon('heroicon-o-arrow-down-on-square')
-                    ->button()
-                    ->action(function (Shipment $record) {
-                        $pdfPath = 'invoices/'.$record->id.'.pdf';
+                    ->openUrlInNewTab(),
 
-                        // Check if the PDF file already exists in storage
-                        if (Storage::exists($pdfPath)) {
-                            // If the file exists, download it directly
-                            return Storage::download($pdfPath, 'invoice_'.$record->id.'.pdf');
-                        }
-
-                        // If the file does not exist, generate it
-                        $pdf = Pdf::loadView('claim', [
-                            'name' => $record->user->name,
-                            'id' => $record->id,
-                            'awb' => $record->awb,
-                            'claims' => [
-                                (object) [
-                                    'title' => 'Invoice',
-                                    'quantity' => 1,
-                                    'note' => 'Transportation fee',
-                                    'price' => $record->price,
-                                ],
-                            ],
-                        ]);
-
-                        // Save the generated PDF file to storage
-                        Storage::put($pdfPath, $pdf->output());
-
-                        // Stream the generated PDF file for download
-                        return response()->streamDownload(function () use ($pdf) {
-                            echo $pdf->output();
-                        }, 'invoice_'.$record->id.'.pdf');
-                    })->disabled(function (Shipment $record) {
-                        return ! $record->claim()->exists();
-                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -149,6 +140,6 @@ class FinanceShipmentResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->whereDoesntHave('invoice');
+        return parent::getEloquentQuery()->where('status', ShipmentStatus::DELIVERED);
     }
 }

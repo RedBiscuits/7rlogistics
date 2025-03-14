@@ -25,6 +25,8 @@ class InvoicesResource extends Resource
 
     protected static ?string $navigationGroup = 'Finance management';
 
+    public static ?string $label = 'Invoices';
+
     public static function form(Form $form): Form
     {
         return $form

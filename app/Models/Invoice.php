@@ -5,6 +5,21 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int $id
+ * @property int $shipment_id
+ * @property float $price
+ * @property floar $discount
+ * @property int $status
+ * @property int $creator_id
+ * @property int $payment_type
+ * @property string $reference
+ * @property string $notes
+ * @property int $creator_id
+ * @property \Carbon\Carbon $collected_at
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ */
 class Invoice extends Model
 {
     use HasFactory;

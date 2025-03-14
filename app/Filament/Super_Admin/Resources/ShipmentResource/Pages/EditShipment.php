@@ -1,9 +1,8 @@
 <?php
-
 namespace App\Filament\Super_Admin\Resources\ShipmentResource\Pages;
 
 use App\Filament\Super_Admin\Resources\ShipmentResource;
-use App\Models\Destination;
+use App\Models\Invoice;
 use App\Models\Shipment;
 use App\Services\ShipmentService;
 use Filament\Actions;
@@ -11,6 +10,8 @@ use Filament\Actions\Action;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Support\Colors\Color;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Mission;
+use App\Models\TruckDestination;
 
 class EditShipment extends EditRecord
 {
@@ -19,9 +20,44 @@ class EditShipment extends EditRecord
     protected function handleRecordUpdate(Model $record, array $data): Model
     {
 
-
         if ($data['status'] == 0 || $data['status'] == 1) {
             $data['driver_id'] = null;
+        }
+
+        if ($data['status'] == 5) {
+            Invoice::firstOrCreate( [
+                'shipment_id'  => $record->id,
+            ], [
+                'price'        => $record->price,
+                'status'       => 0,
+                'payment_type' => 0,
+                'collected_at' => null,
+                'reference'    => null,
+                'notes'        => null,
+            ]);
+
+            Mission::firstOrCreate( [
+                'shipment_id' => $record->id,
+            ], [
+                'price'       => TruckDestination::where('truck_type_id', $record->truck->truck_type_id)
+                    ->where(function ($query) use ($record) {
+                        $query->where(function ($q) use ($record) {
+                            $q->where('from_area', $record->from_area)
+                                ->where('to_area', $record->to_area);
+                        })->orWhere(function ($q) use ($record) {
+                            $q->where('from_area', $record->to_area)
+                                ->where('to_area', $record->from_area);
+                        });
+                    })->first()->price ?? 0,
+                'status'      => 'pending',
+                'from_area'   => $record->from_area,
+                'to_area'     => $record->to_area,
+                'date'        => $record->date,
+                'time'        => $record->time,
+                'driver_id'   => $record->driver_id ?? $data['driver_id'],
+                'truck_id'    => $record->truck_id ?? $data['truck_id'],
+                'note'        => 'Mission created automatically',
+            ]);
         }
 
         $record->update($data);
