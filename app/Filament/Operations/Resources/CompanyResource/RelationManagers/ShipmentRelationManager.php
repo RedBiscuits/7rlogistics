@@ -3,32 +3,27 @@
 namespace App\Filament\Operations\Resources\CompanyResource\RelationManagers;
 
 // Models
+use App\Filament\Operations\Resources\ShipmentResource;
 use App\Models\Area;
 use App\Models\Destination;
-use App\Models\User;
-use App\Models\Truck;
-
 // Filament & Forms
+use App\Models\TruckType;
+use App\Models\User;
+use Closure;
+use Dotswan\MapPicker\Fields\Map;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
+// Laravel
+use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
+// Third Party
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Notifications\Notification;
-
-// Laravel
+// Resources
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\HtmlString;
-
-// Third Party
-use Closure;
-use Dotswan\MapPicker\Fields\Map;
-
-// Resources
-use App\Filament\Operations\Resources\ShipmentResource;
-use App\Models\TruckType;
 
 class ShipmentRelationManager extends RelationManager
 {
@@ -42,9 +37,10 @@ class ShipmentRelationManager extends RelationManager
                     ->label('User')
                     ->options(function (callable $get) {
                         $company_id = $this->getOwnerRecord()->id;
-                        if (!$company_id) {
+                        if (! $company_id) {
                             return [];
                         }
+
                         return User::where('company_id', $company_id)->pluck('name', 'id');
                     }),
 
@@ -105,8 +101,6 @@ class ShipmentRelationManager extends RelationManager
                                         $set('to_area', null);
                                     })
                                     ->required(),
-
-
 
                                 Forms\Components\Select::make('to_area')
                                     ->label('To Area')
@@ -246,10 +240,10 @@ class ShipmentRelationManager extends RelationManager
                                     ->reactive()
                                     ->options(['Box' => 'Box', 'Pallets' => 'Pallets', 'Other' => 'Other'])
                                     ->rules([
-                                        fn(Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
+                                        fn (Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
 
                                             $truckWeight = TruckType::find($get('../../truck_type_id'))->weight ?? 0;
-                                            $totalPackageWeight = collect($get('../../packages') ?: [])->sum(fn($package) => ($package['weight'] ?: 0) * ($package['quantity'] ?: 0));
+                                            $totalPackageWeight = collect($get('../../packages') ?: [])->sum(fn ($package) => ($package['weight'] ?: 0) * ($package['quantity'] ?: 0));
                                             $availableWeight = $truckWeight - $totalPackageWeight;
 
                                             if ($availableWeight < 0) {
@@ -266,15 +260,15 @@ class ShipmentRelationManager extends RelationManager
                                 Forms\Components\TextInput::make('description')
                                     ->label('Description')
                                     ->reactive()
-                                    ->hidden(fn($get) => $get('type') != 'Other')
-                                    ->required(fn($get) => $get('type') == 'Other')
-                                    ->dehydrated(fn($get) => $get('type') == 'Other'),
+                                    ->hidden(fn ($get) => $get('type') != 'Other')
+                                    ->required(fn ($get) => $get('type') == 'Other')
+                                    ->dehydrated(fn ($get) => $get('type') == 'Other'),
 
                                 Forms\Components\TextInput::make('weight')
                                     ->label('Weight')
                                     ->reactive()
                                     ->required()
-                                    ->afterStateUpdated(fn($state, $set, $get) => $set('package_weight', ($get('weight') ?: 0) * ($get('quantity') ?: 0))),
+                                    ->afterStateUpdated(fn ($state, $set, $get) => $set('package_weight', ($get('weight') ?: 0) * ($get('quantity') ?: 0))),
 
                                 Forms\Components\TextInput::make('length')
                                     ->label('Length')
@@ -296,17 +290,17 @@ class ShipmentRelationManager extends RelationManager
                                     ->reactive()
                                     ->required()
                                     ->integer()
-                                    ->afterStateUpdated(fn($state, $set, $get) => $set('package_weight', ($get('weight') ?: 0) * ($get('quantity') ?: 0))),
+                                    ->afterStateUpdated(fn ($state, $set, $get) => $set('package_weight', ($get('weight') ?: 0) * ($get('quantity') ?: 0))),
 
                                 Forms\Components\TextInput::make('note')
                                     ->label('Note'),
 
                                 Forms\Components\Placeholder::make('package_weight')
                                     ->label('Package Weight')
-                                    ->content(fn($get) => new HtmlString('<h1>' . (($get('weight') ?: 0) * ($get('quantity') ?: 0)) . '</h1>')),
+                                    ->content(fn ($get) => new HtmlString('<h1>'.(($get('weight') ?: 0) * ($get('quantity') ?: 0)).'</h1>')),
                             ])->afterStateUpdated(function ($state, $set, $get) {
                                 $truckWeight = TruckType::find($get('truck_type_id'))->weight ?? 0;
-                                $totalPackageWeight = collect($get('packages') ?: [])->sum(fn($package) => ($package['weight'] ?: 0) * ($package['quantity'] ?: 0));
+                                $totalPackageWeight = collect($get('packages') ?: [])->sum(fn ($package) => ($package['weight'] ?: 0) * ($package['quantity'] ?: 0));
                                 $availableWeight = $truckWeight - $totalPackageWeight;
                                 $set('available_weight', $availableWeight);
                             }),
@@ -314,19 +308,19 @@ class ShipmentRelationManager extends RelationManager
                         Forms\Components\Placeholder::make('total_weight')
                             ->label('Total Weight of All Packages')
                             ->content(function ($get) {
-                                $totalWeight = collect($get('packages') ?: [])->sum(fn($package) => ($package['weight'] ?: 0) * ($package['quantity'] ?: 0));
+                                $totalWeight = collect($get('packages') ?: [])->sum(fn ($package) => ($package['weight'] ?: 0) * ($package['quantity'] ?: 0));
 
-                                return new HtmlString('<h1>' . $totalWeight . '</h1>');
+                                return new HtmlString('<h1>'.$totalWeight.'</h1>');
                             }),
 
                         Forms\Components\Placeholder::make('available_weight')
                             ->label('Available Weight in Selected Truck')
                             ->content(function ($get) {
                                 $truckWeight = TruckType::find($get('truck_type_id'))->weight ?? 0;
-                                $totalPackageWeight = collect($get('packages') ?: [])->sum(fn($package) => ($package['weight'] ?: 0) * ($package['quantity'] ?: 0));
+                                $totalPackageWeight = collect($get('packages') ?: [])->sum(fn ($package) => ($package['weight'] ?: 0) * ($package['quantity'] ?: 0));
                                 $availableWeight = $truckWeight - $totalPackageWeight;
 
-                                return new HtmlString('<h1>' . $availableWeight . '</h1>');
+                                return new HtmlString('<h1>'.$availableWeight.'</h1>');
                             }),
 
                         Forms\Components\Placeholder::make('total_price')
@@ -351,10 +345,10 @@ class ShipmentRelationManager extends RelationManager
                                         ->whereNotNull('price')
                                         ->first();
 
-                                    return new HtmlString('<h1>' . $destination->price . '</h1>');
+                                    return new HtmlString('<h1>'.$destination->price.'</h1>');
                                 }
 
-                                return new HtmlString('<h1>' . 0 . '</h1>');
+                                return new HtmlString('<h1>'. 0 .'</h1>');
                             }),
 
                     ]),
@@ -369,15 +363,16 @@ class ShipmentRelationManager extends RelationManager
             ->columns([
                 Tables\Columns\TextColumn::make('user.name')->label('User')
                     ->getStateUsing(function ($record) {
-                        if (!$record->user) {
+                        if (! $record->user) {
                             return 'Not assigned';
                         }
-                        return $record->user->position . ' - ' . $record->user->name;
+
+                        return $record->user->position.' - '.$record->user->name;
                     }),
                 Tables\Columns\TextColumn::make('fromArea.name')->label('From Area'),
                 Tables\Columns\TextColumn::make('toArea.name')->label('To Area'),
                 Tables\Columns\TextColumn::make('truck.name')->label('Truck')
-                    ->getStateUsing(fn($record) => $record->truck->name . ' - (' . $record->truck->plate_number . ')'),
+                    ->getStateUsing(fn ($record) => $record->truck->name.' - ('.$record->truck->plate_number.')'),
                 Tables\Columns\TextColumn::make('status')->label('Status')->badge(),
                 Tables\Columns\TextColumn::make('price')->label('Price')->money('EGP'),
                 Tables\Columns\TextColumn::make('created_at')->label('Creation Date')->dateTime('Y-m-d H:i A'),
@@ -403,20 +398,21 @@ class ShipmentRelationManager extends RelationManager
                             ->where('truck_type_id', $data['truck_type_id'])
                             ->first();
 
-                        if (!$destination) {
+                        if (! $destination) {
                             throw new \Exception('Destination not found');
                         }
 
                         $data['price'] = $destination->price;
                         $data['company_id'] = $this->getOwnerRecord()->id;
+
                         return $model::create($data);
                     })
-                    ->successRedirectUrl(fn(Model $record): string => ShipmentResource::getUrl('index')),
+                    ->successRedirectUrl(fn (Model $record): string => ShipmentResource::getUrl('index')),
 
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
-                    ->url(fn(Model $record): string => ShipmentResource::getUrl('edit', ['record' => $record])),
+                    ->url(fn (Model $record): string => ShipmentResource::getUrl('edit', ['record' => $record])),
                 // Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([

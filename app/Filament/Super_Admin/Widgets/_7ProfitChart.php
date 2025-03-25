@@ -8,10 +8,8 @@ use Flowframe\Trend\Trend;
 use Flowframe\Trend\TrendValue;
 use Illuminate\Support\Carbon;
 
-
 class _7ProfitChart extends ChartWidget
 {
-
     protected static ?string $heading = 'Money spent over selected year';
 
     protected static ?int $sort = 4;
@@ -33,7 +31,7 @@ class _7ProfitChart extends ChartWidget
     protected function getData(): array
     {
         $query = Shipment::query()->where('status', 5);
-        $year = (int)$this->filter ?: now()->year;
+        $year = (int) $this->filter ?: now()->year;
 
         $data = Trend::query($query)
             ->between(
@@ -63,7 +61,7 @@ class _7ProfitChart extends ChartWidget
 
     public function getDescription(): ?string
     {
-        return 'Total Money spent in ' . ($this->filter ?: now()->year) . ' (Delivered Shipments)';
+        return 'Total Money spent in '.($this->filter ?: now()->year).' (Delivered Shipments)';
     }
 
     protected static function getColumns(): int

@@ -5,15 +5,15 @@ namespace App\Filament\Super_Admin\Resources;
 use App\Filament\Super_Admin\Resources\CompanyResource\Pages;
 use App\Filament\Super_Admin\Resources\CompanyResource\RelationManagers\CitiesRelationManager;
 use App\Filament\Super_Admin\Resources\CompanyResource\RelationManagers\DestinationsRelationManager;
-use App\Filament\Super_Admin\Resources\CompanyResource\RelationManagers\UsersRelationManager;
 use App\Filament\Super_Admin\Resources\CompanyResource\RelationManagers\ShipmentRelationManager;
+use App\Filament\Super_Admin\Resources\CompanyResource\RelationManagers\UsersRelationManager;
 use App\Models\Company;
 use Filament\Forms;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 
 class CompanyResource extends Resource
 {
@@ -94,6 +94,7 @@ class CompanyResource extends Resource
                         if ($media && $media->mime_type === 'application/pdf') {
                             return 'https://cdn-icons-png.flaticon.com/512/337/337946.png';
                         }
+
                         return null;
                     }),
             ])

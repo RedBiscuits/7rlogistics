@@ -21,8 +21,9 @@ class LoginResponse extends AuthLoginResponse implements LoginResponseContract
         $user = Auth::user();
         $url = '/';
 
-        if (!$user) {
+        if (! $user) {
             Auth::logout();
+
             return redirect()->route($url);
         }
 
@@ -37,6 +38,7 @@ class LoginResponse extends AuthLoginResponse implements LoginResponseContract
         } else {
             Auth::logout(); // Log out the user
         }
+
         return redirect()->intended($url);
     }
 }

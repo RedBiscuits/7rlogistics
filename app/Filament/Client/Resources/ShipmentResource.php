@@ -2,10 +2,13 @@
 
 namespace App\Filament\Client\Resources;
 
+use App\Enums\ShipmentStatus;
 use App\Filament\Client\Resources\ShipmentResource\Pages;
 use App\Models\Area;
+use App\Models\Destination;
 use App\Models\Shipment;
-use App\Models\Truck;
+use App\Models\TruckType;
+use App\Utils\AcceptedMedia;
 use Closure;
 use Dotswan\MapPicker\Fields\Map;
 use Filament\Forms;
@@ -19,10 +22,6 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\HtmlString;
-use App\Enums\ShipmentStatus;
-use App\Models\Destination;
-use App\Models\TruckType;
-use App\Utils\AcceptedMedia;
 
 class ShipmentResource extends Resource
 {
@@ -96,8 +95,6 @@ class ShipmentResource extends Resource
                                         $set('to_area', null);
                                     })
                                     ->required(),
-
-
 
                                 Forms\Components\Select::make('to_area')
                                     ->label('To Area')
@@ -235,9 +232,9 @@ class ShipmentResource extends Resource
                                     ->reactive()
                                     ->options(['Box' => 'Box', 'Pallets' => 'Pallets', 'Other' => 'Other'])
                                     ->rules([
-                                        fn(Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
+                                        fn (Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
                                             $truckWeight = TruckType::where('name', $get('requested_truck'))->first()->weight ?? 0;
-                                            $totalPackageWeight = collect($get('packages') ?: [])->sum(fn($package) => ($package['weight'] ?: 0) * ($package['quantity'] ?: 0));
+                                            $totalPackageWeight = collect($get('packages') ?: [])->sum(fn ($package) => ($package['weight'] ?: 0) * ($package['quantity'] ?: 0));
                                             $availableWeight = $truckWeight - $totalPackageWeight;
 
                                             if ($availableWeight < 0) {
@@ -249,14 +246,14 @@ class ShipmentResource extends Resource
                                             }
                                         },
                                     ])
-                                    ->required(fn(Get $get): bool => ! $get('attachment')),
+                                    ->required(fn (Get $get): bool => ! $get('attachment')),
 
                                 Forms\Components\TextInput::make('description')
                                     ->label('Description')
                                     ->reactive()
-                                    ->hidden(fn($get) => $get('type') != 'Other')
-                                    ->required(fn($get) => $get('type') == 'Other')
-                                    ->dehydrated(fn($get) => $get('type') == 'Other'),
+                                    ->hidden(fn ($get) => $get('type') != 'Other')
+                                    ->required(fn ($get) => $get('type') == 'Other')
+                                    ->dehydrated(fn ($get) => $get('type') == 'Other'),
 
                                 Forms\Components\TextInput::make('weight')
                                     ->label('Weight')
@@ -272,7 +269,7 @@ class ShipmentResource extends Resource
 
                                             $truckWeight = TruckType::where('name', $get('requested_truck'))->first()->weight ?? 0;
                                             $totalPackageWeight = collect($get('packages') ?: [])->sum(
-                                                fn($package) => (floatval($package['weight'] ?: 0) * floatval($package['quantity'] ?: 0))
+                                                fn ($package) => (floatval($package['weight'] ?: 0) * floatval($package['quantity'] ?: 0))
                                             );
                                             $availableWeight = $truckWeight - $totalPackageWeight;
 
@@ -284,28 +281,28 @@ class ShipmentResource extends Resource
                                             }
                                         }
                                     })
-                                    ->required(fn(Get $get): bool => ! $get('attachment')),
+                                    ->required(fn (Get $get): bool => ! $get('attachment')),
 
                                 Forms\Components\TextInput::make('length')
                                     ->label('Length')
                                     ->numeric()
-                                    ->required(fn(Get $get): bool => ! $get('attachment')),
+                                    ->required(fn (Get $get): bool => ! $get('attachment')),
 
                                 Forms\Components\TextInput::make('width')
                                     ->label('Width')
                                     ->numeric()
-                                    ->required(fn(Get $get): bool => ! $get('attachment')),
+                                    ->required(fn (Get $get): bool => ! $get('attachment')),
 
                                 Forms\Components\TextInput::make('height')
                                     ->label('Height')
                                     ->numeric()
-                                    ->required(fn(Get $get): bool => ! $get('attachment')),
+                                    ->required(fn (Get $get): bool => ! $get('attachment')),
 
                                 Forms\Components\TextInput::make('quantity')
                                     ->label('Quantity')
                                     ->reactive()
                                     ->integer()
-                                    ->required(fn(Get $get): bool => ! $get('attachment'))
+                                    ->required(fn (Get $get): bool => ! $get('attachment'))
                                     ->debounce(500)
                                     ->afterStateUpdated(function ($state, $set, $get) {
                                         if ($state !== null) {
@@ -315,7 +312,7 @@ class ShipmentResource extends Resource
 
                                             $truckWeight = TruckType::where('name', $get('requested_truck'))->first()->weight ?? 0;
                                             $totalPackageWeight = collect($get('packages') ?: [])->sum(
-                                                fn($package) => (floatval($package['weight'] ?: 0) * floatval($package['quantity'] ?: 0))
+                                                fn ($package) => (floatval($package['weight'] ?: 0) * floatval($package['quantity'] ?: 0))
                                             );
                                             $availableWeight = $truckWeight - $totalPackageWeight;
 
@@ -341,17 +338,16 @@ class ShipmentResource extends Resource
                                     ->previewable(true)
                                     ->acceptedFileTypes(AcceptedMedia::getAcceptedMediaTypes())
                                     ->required(
-                                        fn(Get $get): bool =>
-                                        ! ($get('weight') || $get('length') || $get('width') || $get('height') || $get('quantity'))
+                                        fn (Get $get): bool => ! ($get('weight') || $get('length') || $get('width') || $get('height') || $get('quantity'))
                                     ),
 
                                 Forms\Components\Placeholder::make('package_weight')
                                     ->label('Package Weight')
-                                    ->content(fn($get) => new HtmlString('<h1>' . (($get('weight') ?: 0) * ($get('quantity') ?: 0)) . '</h1>')),
+                                    ->content(fn ($get) => new HtmlString('<h1>'.(($get('weight') ?: 0) * ($get('quantity') ?: 0)).'</h1>')),
                             ])->afterStateUpdated(function ($state, $set, $get) {
 
                                 $truckWeight = TruckType::where('name', $get('requested_truck'))->first()->weight ?? 0;
-                                $totalPackageWeight = collect($get('packages') ?: [])->sum(fn($package) => ($package['weight'] ?: 0) * ($package['quantity'] ?: 0));
+                                $totalPackageWeight = collect($get('packages') ?: [])->sum(fn ($package) => ($package['weight'] ?: 0) * ($package['quantity'] ?: 0));
                                 $availableWeight = $truckWeight - $totalPackageWeight;
                                 $set('available_weight', $availableWeight);
                             }),
@@ -362,15 +358,16 @@ class ShipmentResource extends Resource
                                 // Check if only attachments are provided
                                 $hasOnlyAttachments = collect($get('packages') ?: [])->every(function ($package) {
                                     return $package['attachment'] &&
-                                        !($package['weight'] || $package['length'] || $package['width'] || $package['height'] || $package['quantity']);
+                                        ! ($package['weight'] || $package['length'] || $package['width'] || $package['height'] || $package['quantity']);
                                 });
 
                                 if ($hasOnlyAttachments) {
                                     return new HtmlString('<div class="text-warning-600">Shipment will be reviewed before processing</div>');
                                 }
 
-                                $totalWeight = collect($get('packages') ?: [])->sum(fn($package) => ($package['weight'] ?: 0) * ($package['quantity'] ?: 0));
-                                return new HtmlString('<h1>' . $totalWeight . '</h1>');
+                                $totalWeight = collect($get('packages') ?: [])->sum(fn ($package) => ($package['weight'] ?: 0) * ($package['quantity'] ?: 0));
+
+                                return new HtmlString('<h1>'.$totalWeight.'</h1>');
                             }),
 
                         Forms\Components\Placeholder::make('available_weight')
@@ -379,7 +376,7 @@ class ShipmentResource extends Resource
                                 // Check if only attachments are provided
                                 $hasOnlyAttachments = collect($get('packages') ?: [])->every(function ($package) {
                                     return $package['attachment'] &&
-                                        !($package['weight'] || $package['length'] || $package['width'] || $package['height'] || $package['quantity']);
+                                        ! ($package['weight'] || $package['length'] || $package['width'] || $package['height'] || $package['quantity']);
                                 });
 
                                 if ($hasOnlyAttachments) {
@@ -387,9 +384,10 @@ class ShipmentResource extends Resource
                                 }
 
                                 $truckWeight = TruckType::where('name', $get('requested_truck'))->first()->weight ?? 0;
-                                $totalPackageWeight = collect($get('packages') ?: [])->sum(fn($package) => ($package['weight'] ?: 0) * ($package['quantity'] ?: 0));
+                                $totalPackageWeight = collect($get('packages') ?: [])->sum(fn ($package) => ($package['weight'] ?: 0) * ($package['quantity'] ?: 0));
                                 $availableWeight = $truckWeight - $totalPackageWeight;
-                                return new HtmlString('<h1>' . $availableWeight . '</h1>');
+
+                                return new HtmlString('<h1>'.$availableWeight.'</h1>');
                             }),
 
                         Forms\Components\Placeholder::make('total_price')
@@ -398,7 +396,7 @@ class ShipmentResource extends Resource
                                 // Check if only attachments are provided
                                 $hasOnlyAttachments = collect($get('packages') ?: [])->every(function ($package) {
                                     return $package['attachment'] &&
-                                        !($package['weight'] || $package['length'] || $package['width'] || $package['height'] || $package['quantity']);
+                                        ! ($package['weight'] || $package['length'] || $package['width'] || $package['height'] || $package['quantity']);
                                 });
 
                                 if ($hasOnlyAttachments) {
@@ -411,7 +409,7 @@ class ShipmentResource extends Resource
                                 $company_id = auth()->user()->company_id;
 
                                 if ($fromArea && $toArea && $truckName) {
-                                    return new HtmlString('<h1>' . Destination::where('company_id', $company_id)
+                                    return new HtmlString('<h1>'.Destination::where('company_id', $company_id)
                                         ->where(function ($query) use ($fromArea, $toArea, $truckName) {
                                             $query->where(function ($q) use ($fromArea, $toArea) {
                                                 $q->where('from_area', $fromArea)
@@ -422,10 +420,10 @@ class ShipmentResource extends Resource
                                             })->where('truck_type_id', TruckType::where('name', $truckName)->first()->id);
                                         })
                                         ->whereNotNull('price')
-                                        ->first()->price . '</h1>');
+                                        ->first()->price.'</h1>');
                                 }
 
-                                return new HtmlString('<h1>' . 0 . '</h1>');
+                                return new HtmlString('<h1>'. 0 .'</h1>');
                             }),
 
                     ]),

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Filament\Finance\Widgets;
 
 use App\Enums\ClaimStatus;
@@ -14,7 +15,8 @@ class _4LatestInvoices extends BaseWidget
     use HasWidgetShield;
 
     protected int|string|array $columnSpan = 'full';
-    protected static ?string $heading          = 'Latest Invoices';
+
+    protected static ?string $heading = 'Latest Invoices';
 
     protected static ?int $sort = 4;
 
@@ -34,11 +36,11 @@ class _4LatestInvoices extends BaseWidget
                 Tables\Columns\TextColumn::make('shipment.price')->label('Price')->money('EGP'),
                 Tables\Columns\TextColumn::make('shipment.company.due_days')->label('Due Days')->getStateUsing(function ($record) {
                     $dueDate = $record->created_at->addDays($record->shipment->company->due_days);
-                    $diff    = number_format($dueDate->diffInDays(now(), false), 0);
+                    $diff = number_format($dueDate->diffInDays(now(), false), 0);
+
                     return ($diff >= 0 ? '+' : '-')
-                    . $diff . ' days ( ' . $dueDate->format('d-m-Y') . ' )';
-                })->badge()->color(fn($record) =>
-                    now()->addDays($record->shipment->company->due_days)->isPast() ? 'danger' : 'success'
+                    .$diff.' days ( '.$dueDate->format('d-m-Y').' )';
+                })->badge()->color(fn ($record) => now()->addDays($record->shipment->company->due_days)->isPast() ? 'danger' : 'success'
                 ),
 
                 Tables\Columns\TextColumn::make('collected_at')->label('Collected At')
@@ -46,8 +48,8 @@ class _4LatestInvoices extends BaseWidget
                         return $record->collected_at ? $record->collected_at->format('d-m-Y H:i') : 'Not collected yet';
                     })
                     ->badge()
-                    ->color(fn($record) => $record->collected_at ? 'success' : 'danger')
-                    ->icon(fn($record) => $record->collected_at ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle')
+                    ->color(fn ($record) => $record->collected_at ? 'success' : 'danger')
+                    ->icon(fn ($record) => $record->collected_at ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle')
                     ->extraAttributes([
                         'class' => 'px-4 py-2 rounded-full',
                     ]),
@@ -75,7 +77,7 @@ class _4LatestInvoices extends BaseWidget
                     ->searchable()
                     ->alignment('right')
                     ->weight('bold')
-                    ->color(fn($record) => $record->price > 10000 ? 'danger' : 'success'),
+                    ->color(fn ($record) => $record->price > 10000 ? 'danger' : 'success'),
             ]);
     }
 }

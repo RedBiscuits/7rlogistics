@@ -3,16 +3,13 @@
 namespace App\Filament\Super_Admin\Resources;
 
 use App\Filament\Super_Admin\Resources\ContactRequestsResource\Pages;
-use App\Filament\Super_Admin\Resources\ContactRequestsResource\RelationManagers;
 use App\Models\ContactRequests;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Table;
 use Filament\Tables\Filters\Filter;
-use Filament\Tables\Filters\TextFilter;
-use Filament\Tables\Filters\DateFilter;
+use Filament\Tables\Table;
 
 class ContactRequestsResource extends Resource
 {
@@ -66,21 +63,21 @@ class ContactRequestsResource extends Resource
             ->filters([
                 Filter::make('name')
                     ->form([
-                        Forms\Components\TextInput::make('name')
+                        Forms\Components\TextInput::make('name'),
                     ])
                     ->query(function ($query, array $data) {
                         return $query->when($data['name'], fn ($query, $name) => $query->where('name', 'like', "%{$name}%"));
                     }),
                 Filter::make('email')
                     ->form([
-                        Forms\Components\TextInput::make('email')
+                        Forms\Components\TextInput::make('email'),
                     ])
                     ->query(function ($query, array $data) {
                         return $query->when($data['email'], fn ($query, $email) => $query->where('email', 'like', "%{$email}%"));
                     }),
                 Filter::make('created_at')
                     ->form([
-                        Forms\Components\DatePicker::make('created_at')
+                        Forms\Components\DatePicker::make('created_at'),
                     ])
                     ->query(function ($query, array $data) {
                         return $query->when($data['created_at'], fn ($query, $date) => $query->whereDate('created_at', $date));
@@ -91,7 +88,7 @@ class ContactRequestsResource extends Resource
                             ->options([
                                 '1' => 'Read',
                                 '0' => 'Unread',
-                            ])
+                            ]),
                     ])
                     ->query(function ($query, array $data) {
                         return $query->when($data['is_read'] !== null, fn ($query, $is_read) => $query->where('is_read', $is_read));
@@ -104,7 +101,7 @@ class ContactRequestsResource extends Resource
                     ->action(function (ContactRequests $record): void {
                         $record->update(['is_read' => true]);
                     })
-                    ->visible(fn (ContactRequests $record): bool => !$record->is_read),
+                    ->visible(fn (ContactRequests $record): bool => ! $record->is_read),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])

@@ -11,11 +11,11 @@ use Illuminate\Support\Carbon;
 class _4ShipmentsChart extends ChartWidget
 {
     protected static ?string $heading = 'Shipments over selected year';
+
     protected static ?int $sort = 5;
 
     // Enable dropdown filter
     protected static bool $isFilterable = true;
-
 
     protected function getFilters(): ?array
     {
@@ -32,7 +32,7 @@ class _4ShipmentsChart extends ChartWidget
     protected function getData(): array
     {
         $query = Shipment::query()->where('company_id', auth()->user()->company_id);
-        $year = (int)$this->filter ?: now()->year;
+        $year = (int) $this->filter ?: now()->year;
 
         $query->whereYear('created_at', $year);
 
@@ -48,7 +48,7 @@ class _4ShipmentsChart extends ChartWidget
             'datasets' => [
                 [
                     'label' => 'Shipments created',
-                    'data' => $data->map(fn(TrendValue $value) => $value->aggregate),
+                    'data' => $data->map(fn (TrendValue $value) => $value->aggregate),
                 ],
             ],
             'labels' => $data->map(function (TrendValue $value) {
@@ -64,6 +64,6 @@ class _4ShipmentsChart extends ChartWidget
 
     public function getDescription(): ?string
     {
-        return 'Number of Shipments in ' . ($this->filter ?: now()->year);
+        return 'Number of Shipments in '.($this->filter ?: now()->year);
     }
 }

@@ -50,9 +50,10 @@ class UserResource extends Resource
                 Forms\Components\Select::make('roles')
                     ->relationship('roles', 'name', function ($query, $get) {
                         $query = $query->where('name', '!=', 'Super Admin');
-                        if (!$get('company_id')) {
+                        if (! $get('company_id')) {
                             $query->where('name', '!=', 'Client');
                         }
+
                         return $query;
                     })
                     ->multiple()
@@ -70,9 +71,9 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('id')->sortable(),
                 Tables\Columns\TextColumn::make('name')->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('company.name')->sortable()->searchable()->label('Company')
-                    ->getStateUsing(fn(User $record) => $record->company->name ?? '7R Logistics'),
+                    ->getStateUsing(fn (User $record) => $record->company->name ?? '7R Logistics'),
                 Tables\Columns\TextColumn::make('position')->sortable()->searchable()
-                    ->getStateUsing(fn(User $record) => $record->position ?? 'N/A'),
+                    ->getStateUsing(fn (User $record) => $record->position ?? 'N/A'),
                 Tables\Columns\TextColumn::make('email')->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('roles.name')->sortable()->label('Role'),
                 Tables\Columns\TextColumn::make('created_at')

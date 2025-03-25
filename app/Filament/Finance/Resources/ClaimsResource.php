@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Filament\Finance\Resources;
 
 use App\Enums\ClaimStatus;
@@ -49,7 +50,7 @@ class ClaimsResource extends Resource
                     ->numeric()
                     ->nullable()
                     ->rules([
-                        fn(Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
+                        fn (Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
                             if (Shipment::where('id', $get('shipment_id'))
                                 //                  Shipment price      <          Discount
                                 ->where('price', '<', $value)
@@ -114,15 +115,15 @@ class ClaimsResource extends Resource
                                     ->reactive()
                                     ->required()
                                     ->integer()
-                                    ->afterStateUpdated(fn($state, $set, $get) => $set('total_price', ($get('price') ?: 0) * ($get('quantity') ?: 0))),
+                                    ->afterStateUpdated(fn ($state, $set, $get) => $set('total_price', ($get('price') ?: 0) * ($get('quantity') ?: 0))),
 
                             ]),
                         Forms\Components\Placeholder::make('total_price')
                             ->label('Total Claim Price')
                             ->content(function ($get) {
-                                $totalWeight = collect($get('packages') ?: [])->sum(fn($package) => ($package['price'] ?: 0) * ($package['quantity'] ?: 0));
+                                $totalWeight = collect($get('packages') ?: [])->sum(fn ($package) => ($package['price'] ?: 0) * ($package['quantity'] ?: 0));
 
-                                return new HtmlString('<h1>' . $totalWeight . '</h1>');
+                                return new HtmlString('<h1>'.$totalWeight.'</h1>');
                             }),
                     ]),
 
@@ -142,11 +143,11 @@ class ClaimsResource extends Resource
                 Tables\Columns\TextColumn::make('shipment.price')->label('Shipment Price')->money('EGP'),
                 Tables\Columns\TextColumn::make('shipment.company.due_days')->label('Due Days')->getStateUsing(function ($record) {
                     $dueDate = $record->created_at->addDays($record->shipment->company->due_days);
-                    $diff    = number_format($dueDate->diffInDays(now(), false), 0);
+                    $diff = number_format($dueDate->diffInDays(now(), false), 0);
+
                     return ($diff >= 0 ? '+' : '-')
-                    . $diff . ' days ( ' . $dueDate->format('d-m-Y') . ' )';
-                })->badge()->color(fn($record) =>
-                    now()->addDays($record->shipment->company->due_days)->isPast() ? 'danger' : 'success'
+                    .$diff.' days ( '.$dueDate->format('d-m-Y').' )';
+                })->badge()->color(fn ($record) => now()->addDays($record->shipment->company->due_days)->isPast() ? 'danger' : 'success'
                 ),
 
                 Tables\Columns\TextColumn::make('collected_at')->label('Collected At')
@@ -154,8 +155,8 @@ class ClaimsResource extends Resource
                         return $record->collected_at ? $record->collected_at->format('d-m-Y H:i') : 'Not collected yet';
                     })
                     ->badge()
-                    ->color(fn($record) => $record->collected_at ? 'success' : 'danger')
-                    ->icon(fn($record) => $record->collected_at ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle')
+                    ->color(fn ($record) => $record->collected_at ? 'success' : 'danger')
+                    ->icon(fn ($record) => $record->collected_at ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle')
                     ->extraAttributes([
                         'class' => 'px-4 py-2 rounded-full',
                     ]),
@@ -172,15 +173,15 @@ class ClaimsResource extends Resource
                     ->label('Claim Packages Notes')
                     ->getStateUsing(function ($record) {
                         $notes = $record->packages->pluck('note')
-                            ->map(fn($note) => ClaimType::from($note)->getLabel())
+                            ->map(fn ($note) => ClaimType::from($note)->getLabel())
                             ->take(1) // Only take first 2 items
                             ->implode(', ');
-                        
+
                         // Add ellipsis if there are more items
                         if ($record->packages->count() > 2) {
                             $notes .= '...';
                         }
-                        
+
                         return $notes;
                     })
                     ->wrap()
@@ -199,7 +200,7 @@ class ClaimsResource extends Resource
                     ->searchable()
                     ->alignment('right')
                     ->weight('bold')
-                    ->color(fn($record) => $record->packages->sum('price') > 1000 ? 'danger' : 'success'),
+                    ->color(fn ($record) => $record->packages->sum('price') > 1000 ? 'danger' : 'success'),
 
             ])
             ->filters([
@@ -230,9 +231,9 @@ class ClaimsResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => ListClaims::route('/'),
+            'index' => ListClaims::route('/'),
             'create' => CreateClaims::route('/create'),
-            'edit'   => EditClaims::route('/{record}/edit'),
+            'edit' => EditClaims::route('/{record}/edit'),
         ];
     }
 

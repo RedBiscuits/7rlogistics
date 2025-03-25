@@ -3,8 +3,8 @@
 namespace App\Filament\Super_Admin\Resources\TruckTypeResource\RelationManagers;
 
 use App\Models\Area;
-use App\Models\TruckDestination;
 use App\Models\Truck;
+use App\Models\TruckDestination;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
@@ -163,6 +163,7 @@ class TrucksDestinationsRelationManager extends RelationManager
                         }
 
                         $data['truck_type_id'] = $this->getOwnerRecord()->id;
+
                         return $model::create($data);
                     })
                     ->successNotificationTitle(function ($record) {
@@ -190,11 +191,11 @@ class TrucksDestinationsRelationManager extends RelationManager
 
             'Available' => Tab::make()
                 ->badge($this->getOwnerRecord()->trucksDestinations()->whereNotNull('price')->count())
-                ->modifyQueryUsing(fn(Builder $query) => $query->whereNotNull('price')),
+                ->modifyQueryUsing(fn (Builder $query) => $query->whereNotNull('price')),
 
             'Pending' => Tab::make()
                 ->badge($this->getOwnerRecord()->trucksDestinations()->whereNull('price')->count())
-                ->modifyQueryUsing(fn(Builder $query) => $query->whereNull('price')),
+                ->modifyQueryUsing(fn (Builder $query) => $query->whereNull('price')),
         ];
     }
 }

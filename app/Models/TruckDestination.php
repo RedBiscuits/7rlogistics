@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class TruckDestination extends Model
 {
     protected $fillable = ['to_area', 'from_area', 'truck_type_id', 'price'];
+
     protected $table = 'trucks_destinations';
 
     public function toArea()

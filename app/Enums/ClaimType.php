@@ -11,11 +11,11 @@ enum ClaimType: string
 
     public function getLabel(): string
     {
-        return match($this) {
+        return match ($this) {
             self::EXTRA_PICKUP => 'Extra Pickup Location',
             self::DETENTION => 'Detention',
             self::OFFICIAL_RECEIPT => 'Official Receipt',
             self::OTHER => 'Other',
         };
     }
-} 
+}

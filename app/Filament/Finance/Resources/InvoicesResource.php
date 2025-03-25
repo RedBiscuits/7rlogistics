@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Filament\Finance\Resources;
 
 use App\Enums\ClaimStatus;
@@ -49,7 +50,7 @@ class InvoicesResource extends Resource
                     ->numeric()
                     ->nullable()
                     ->rules([
-                        fn(Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
+                        fn (Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
                             if (Shipment::where('id', $get('shipment_id'))
                             //                  Shipment price      <          Discount
                                 ->where('price', '<', $value)
@@ -107,11 +108,11 @@ class InvoicesResource extends Resource
                 Tables\Columns\TextColumn::make('shipment.price')->label('Price')->money('EGP'),
                 Tables\Columns\TextColumn::make('shipment.company.due_days')->label('Due Days')->getStateUsing(function ($record) {
                     $dueDate = $record->created_at->addDays($record->shipment->company->due_days);
-                    $diff    = number_format($dueDate->diffInDays(now(), false), 0);
+                    $diff = number_format($dueDate->diffInDays(now(), false), 0);
+
                     return ($diff >= 0 ? '+' : '-')
-                    . $diff . ' days ( ' . $dueDate->format('d-m-Y') . ' )';
-                })->badge()->color(fn($record) =>
-                    now()->addDays($record->shipment->company->due_days)->isPast() ? 'danger' : 'success'
+                    .$diff.' days ( '.$dueDate->format('d-m-Y').' )';
+                })->badge()->color(fn ($record) => now()->addDays($record->shipment->company->due_days)->isPast() ? 'danger' : 'success'
                 ),
 
                 Tables\Columns\TextColumn::make('collected_at')->label('Collected At')
@@ -119,8 +120,8 @@ class InvoicesResource extends Resource
                         return $record->collected_at ? $record->collected_at->format('d-m-Y H:i') : 'Not collected yet';
                     })
                     ->badge()
-                    ->color(fn($record) => $record->collected_at ? 'success' : 'danger')
-                    ->icon(fn($record) => $record->collected_at ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle')
+                    ->color(fn ($record) => $record->collected_at ? 'success' : 'danger')
+                    ->icon(fn ($record) => $record->collected_at ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle')
                     ->extraAttributes([
                         'class' => 'px-4 py-2 rounded-full',
                     ]),
@@ -148,7 +149,7 @@ class InvoicesResource extends Resource
                     ->searchable()
                     ->alignment('right')
                     ->weight('bold')
-                    ->color(fn($record) => $record->price > 10000 ? 'danger' : 'success'),
+                    ->color(fn ($record) => $record->price > 10000 ? 'danger' : 'success'),
 
             ])
             ->filters([
@@ -179,9 +180,9 @@ class InvoicesResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => ListInvoices::route('/'),
+            'index' => ListInvoices::route('/'),
             'create' => CreateInvoices::route('/create'),
-            'edit'   => EditInvoices::route('/{record}/edit'),
+            'edit' => EditInvoices::route('/{record}/edit'),
         ];
     }
 

@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\Area;
 use App\Models\City;
-use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class CitySeeder extends Seeder
@@ -67,12 +66,10 @@ class CitySeeder extends Seeder
             'city_id' => $giza->id,
         ]);
 
-
         Area::firstOrCreate([
             'name' => 'Inshas',
             'city_id' => $sharqia->id,
         ]);
-
 
         Area::firstOrCreate([
             'name' => 'New Administrative Capital',

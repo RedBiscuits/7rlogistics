@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Filament\Super_Admin\Resources;
 
 use App\Enums\ShipmentStatus;
@@ -31,11 +32,11 @@ class MissionResource extends Resource
                     ->relationship(
                         'shipment',
                         'id',
-                        fn(Builder $query) => $query->where('status', '=', ShipmentStatus::DELIVERED)
+                        fn (Builder $query) => $query->where('status', '=', ShipmentStatus::DELIVERED)
                     )
-                    ->getOptionLabelFromRecordUsing(fn($record) => "{$record->id} - "
-                        . ($record->company->name ?? 'No Company') . " - "
-                        . ($record->truck->plate_number ?? 'No Truck'))
+                    ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->id} - "
+                        .($record->company->name ?? 'No Company').' - '
+                        .($record->truck->plate_number ?? 'No Truck'))
                     ->searchable()
                     ->preload()
                     ->live()
@@ -74,8 +75,8 @@ class MissionResource extends Resource
                 Forms\Components\TimePicker::make('time'),
                 Forms\Components\Select::make('status')
                     ->options([
-                        'pending'   => 'Pending',
-                        'paid'      => 'Paid',
+                        'pending' => 'Pending',
+                        'paid' => 'Paid',
                         'cancelled' => 'Cancelled',
                     ])
                     ->default('pending')
@@ -103,8 +104,8 @@ class MissionResource extends Resource
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
                     ->options([
-                        'pending'   => 'Pending',
-                        'paid'      => 'Paid',
+                        'pending' => 'Pending',
+                        'paid' => 'Paid',
                         'cancelled' => 'Cancelled',
                     ]),
                 Tables\Filters\SelectFilter::make('fromArea')
@@ -146,9 +147,9 @@ class MissionResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListMissions::route('/'),
+            'index' => Pages\ListMissions::route('/'),
             'create' => Pages\CreateMission::route('/create'),
-            'edit'   => Pages\EditMission::route('/{record}/edit'),
+            'edit' => Pages\EditMission::route('/{record}/edit'),
         ];
     }
 

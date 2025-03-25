@@ -31,7 +31,7 @@ class _3ProfitChart extends ChartWidget
     protected function getData(): array
     {
         $query = Shipment::query()->where('company_id', auth()->user()->company_id)->where('status', 5);
-        $year = (int)$this->filter ?: now()->year;
+        $year = (int) $this->filter ?: now()->year;
 
         $data = Trend::query($query)
             ->between(
@@ -61,7 +61,7 @@ class _3ProfitChart extends ChartWidget
 
     public function getDescription(): ?string
     {
-        return 'Total Money spent in ' . ($this->filter ?: now()->year) . ' (Delivered Shipments)';
+        return 'Total Money spent in '.($this->filter ?: now()->year).' (Delivered Shipments)';
     }
 
     protected static function getColumns(): int

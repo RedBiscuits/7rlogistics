@@ -10,7 +10,6 @@ class TruckType extends Model
 
     protected $table = 'truck_types';
 
-
     public function trucksDestinations()
     {
         return $this->hasMany(TruckDestination::class, 'truck_type_id');
@@ -20,5 +19,4 @@ class TruckType extends Model
     {
         return $this->hasMany(Truck::class);
     }
-
 }

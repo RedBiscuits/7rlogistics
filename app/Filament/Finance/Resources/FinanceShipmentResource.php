@@ -1,9 +1,8 @@
 <?php
+
 namespace App\Filament\Finance\Resources;
 
 use App\Enums\ShipmentStatus;
-use App\Filament\Finance\Resources\ClaimsResource;
-use App\Filament\Finance\Resources\InvoicesResource;
 use App\Filament\Finance\Resources\ShipmentResource\ListShipments;
 use App\Models\Shipment;
 use Filament\Forms\Form;
@@ -61,7 +60,7 @@ class FinanceShipmentResource extends Resource
                 Tables\Filters\SelectFilter::make('invoice_status')
                     ->label('Invoice Status')
                     ->options([
-                        'with_invoice'    => 'Has Invoice',
+                        'with_invoice' => 'Has Invoice',
                         'without_invoice' => 'No Invoice',
                     ])
                     ->query(function (Builder $query, array $data) {
@@ -70,15 +69,15 @@ class FinanceShipmentResource extends Resource
                         }
 
                         return match ($data['value']) {
-                            'with_invoice'    => $query->whereHas('invoice'),
+                            'with_invoice' => $query->whereHas('invoice'),
                             'without_invoice' => $query->whereDoesntHave('invoice'),
-                            default           => $query,
+                            default => $query,
                         };
                     }),
                 Tables\Filters\SelectFilter::make('claim_status')
                     ->label('Claim Status')
                     ->options([
-                        'with_claim'    => 'Has Claim',
+                        'with_claim' => 'Has Claim',
                         'without_claim' => 'No Claim',
                     ])
                     ->query(function (Builder $query, array $data) {
@@ -87,9 +86,9 @@ class FinanceShipmentResource extends Resource
                         }
 
                         return match ($data['value']) {
-                            'with_claim'    => $query->whereHas('claim'),
+                            'with_claim' => $query->whereHas('claim'),
                             'without_claim' => $query->whereDoesntHave('claim'),
-                            default         => $query,
+                            default => $query,
                         };
                     }),
             ])
@@ -101,6 +100,7 @@ class FinanceShipmentResource extends Resource
                         if ($invoice) {
                             return InvoicesResource::getUrl('edit', ['record' => $invoice->id]);
                         }
+
                         return InvoicesResource::getUrl('create', ['shipment_id' => $record->id]);
                     })
                     ->openUrlInNewTab(),
@@ -112,6 +112,7 @@ class FinanceShipmentResource extends Resource
                         if ($claim) {
                             return ClaimsResource::getUrl('edit', ['record' => $claim->id]);
                         }
+
                         return ClaimsResource::getUrl('create', ['shipment_id' => $record->id]);
                     })
                     ->openUrlInNewTab(),

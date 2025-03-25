@@ -77,7 +77,7 @@ class Shipment extends Model implements HasMedia
     {
         return $this->belongsTo(Company::class);
     }
-    
+
     public function destination()
     {
         return $this->belongsTo(Destination::class);

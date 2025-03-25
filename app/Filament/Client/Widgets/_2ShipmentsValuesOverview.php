@@ -3,9 +3,9 @@
 namespace App\Filament\Client\Widgets;
 
 use App\Models\Shipment;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
-use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 
 class _2ShipmentsValuesOverview extends BaseWidget
 {

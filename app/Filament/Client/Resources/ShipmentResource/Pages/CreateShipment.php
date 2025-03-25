@@ -4,7 +4,6 @@ namespace App\Filament\Client\Resources\ShipmentResource\Pages;
 
 use App\Filament\Client\Resources\ShipmentResource;
 use Filament\Resources\Pages\CreateRecord;
-use Illuminate\Database\Eloquent\Model;
 
 class CreateShipment extends CreateRecord
 {
@@ -14,7 +13,7 @@ class CreateShipment extends CreateRecord
     {
         $data['user_id'] = auth()->user()->id;
         $data['company_id'] = auth()->user()->company_id;
-        
+
         $destination = auth()->user()->company->destinations()
             ->whereNotNull('price')
             ->where(function ($query) use ($data) {
@@ -37,6 +36,4 @@ class CreateShipment extends CreateRecord
 
         return $data;
     }
-
-
 }

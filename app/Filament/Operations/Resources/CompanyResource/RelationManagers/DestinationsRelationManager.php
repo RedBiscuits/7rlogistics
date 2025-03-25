@@ -56,7 +56,6 @@ class DestinationsRelationManager extends RelationManager
                     ->reactive()
                     ->searchable()
 
-
                     ->required(),
 
                 Forms\Components\Select::make('to_city')
@@ -66,7 +65,6 @@ class DestinationsRelationManager extends RelationManager
                     })
                     ->reactive()
                     ->searchable()
-
 
                     ->afterStateUpdated(fn (callable $set) => $set('to', null))
                     ->required(),
@@ -84,19 +82,18 @@ class DestinationsRelationManager extends RelationManager
                     ->reactive()
                     ->searchable()
 
-
                     ->required(),
 
                 Forms\Components\Select::make('truck_type_id')
                     ->label('Truck')
                     ->options(function (callable $get) {
-                        return TruckType::all()->mapWithKeys(function($truckType) {
+                        return TruckType::all()->mapWithKeys(function ($truckType) {
                             return [$truckType->id => $truckType->name];
                         });
                     })
                     ->reactive()
                     ->searchable()
-                    ->afterStateUpdated(function (callable $set, callable $get)  {
+                    ->afterStateUpdated(function (callable $set, callable $get) {
                         $destination = Destination::where('company_id', $this->getOwnerRecord()->id)
                             ->where(function ($query) use ($get) {
                                 $query->where(function ($q) use ($get) {
@@ -170,16 +167,17 @@ class DestinationsRelationManager extends RelationManager
                             ->directory('uploads'),
                     ])->action(function (array $data) {
                         // Get the correct storage path
-                        $filePath = storage_path('app/public/' . $data['attachment']);
+                        $filePath = storage_path('app/public/'.$data['attachment']);
 
                         // Debug the file path if needed
                         // \Log::info('File path: ' . $filePath);
 
-                        if (!file_exists($filePath)) {
+                        if (! file_exists($filePath)) {
                             Notification::make()
-                                ->title('File not found at: ' . $filePath)
+                                ->title('File not found at: '.$filePath)
                                 ->danger()
                                 ->send();
+
                             return;
                         }
 
@@ -240,6 +238,7 @@ class DestinationsRelationManager extends RelationManager
                         }
 
                         $data['company_id'] = $this->getOwnerRecord()->id;
+
                         return $model::create($data);
                     })
                     ->successNotificationTitle(function ($record) {

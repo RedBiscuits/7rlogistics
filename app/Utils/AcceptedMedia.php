@@ -24,7 +24,7 @@ class AcceptedMedia
             'application/zip',
             'application/x-rar-compressed',
             'text/plain',
-            'text/csv'
+            'text/csv',
         ];
     }
 }

@@ -3,13 +3,14 @@
 namespace App\Filament\Operations\Resources;
 
 use App\Filament\Operations\Resources\TruckTypeResource\Pages;
+use App\Filament\Operations\Resources\TruckTypeResource\RelationManagers\TrucksDestinationsRelationManager;
 use App\Models\TruckType;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use App\Filament\Operations\Resources\TruckTypeResource\RelationManagers\TrucksDestinationsRelationManager;
+
 class TruckTypeResource extends Resource
 {
     protected static ?string $model = TruckType::class;
@@ -40,15 +41,15 @@ class TruckTypeResource extends Resource
                 Tables\Columns\TextColumn::make('id')->label('ID'),
                 Tables\Columns\TextColumn::make('name'),
                 Tables\Columns\TextColumn::make('capacity')->label('Capacity (kg)')->sortable()->searchable()
-                    ->getStateUsing(fn($record) => $record->capacity ?? "--"),
+                    ->getStateUsing(fn ($record) => $record->capacity ?? '--'),
                 Tables\Columns\TextColumn::make('weight')->label('Weight (kg)')->sortable()->searchable()
-                    ->getStateUsing(fn($record) => $record->weight ?? "--"),
+                    ->getStateUsing(fn ($record) => $record->weight ?? '--'),
                 Tables\Columns\TextColumn::make('length')->label('Length (m)')->sortable()->searchable()
-                    ->getStateUsing(fn($record) => $record->length ?? "--"),
+                    ->getStateUsing(fn ($record) => $record->length ?? '--'),
                 Tables\Columns\TextColumn::make('width')->label('Width (m)')->sortable()->searchable()
-                    ->getStateUsing(fn($record) => $record->width ?? "--"),
+                    ->getStateUsing(fn ($record) => $record->width ?? '--'),
                 Tables\Columns\TextColumn::make('height')->label('Height (m)')->sortable()->searchable()
-                    ->getStateUsing(fn($record) => $record->height ?? "--"),
+                    ->getStateUsing(fn ($record) => $record->height ?? '--'),
 
                 Tables\Columns\TextColumn::make('trucks_count')->counts('trucks')
                     ->label('Trucks Count')->sortable()->searchable(),

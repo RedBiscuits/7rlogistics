@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Filament\Finance\Widgets;
 
 use App\Models\Claim;
@@ -26,21 +27,21 @@ class _3ShipmentsStatusOverview extends BaseWidget
 
         return [
             Stat::make('Claims Money', $stats->total_money ?? 0)
-                ->description($stats->total_claims . ' total claims')
+                ->description($stats->total_claims.' total claims')
                 ->icon('heroicon-o-currency-dollar')
                 ->chart([7, 2, 10, 3, 15, 4, 17])
                 ->url('finance/claims')
                 ->color('danger'),
 
             Stat::make('Awaiting Collection Claims', $stats->pending_money ?? 0)
-                ->description($stats->pending_claims . ' awaiting collection claims')
+                ->description($stats->pending_claims.' awaiting collection claims')
                 ->icon('heroicon-o-currency-dollar')
                 ->chart([7, 2, 10, 3, 15, 4, 17])
                 ->color('danger')
                 ->url('finance/claims?tableFilters[status][value]=pending'),
 
             Stat::make('Collected Claims Money', $stats->completed_money ?? 0)
-                ->description($stats->completed_claims . ' completed claims')
+                ->description($stats->completed_claims.' completed claims')
                 ->icon('heroicon-o-check-circle')
                 ->chart([7, 2, 10, 3, 15, 4, 17])
                 ->url('finance/claims?tableFilters[status][value]=completed&tableFilters[status][values][0]=1')

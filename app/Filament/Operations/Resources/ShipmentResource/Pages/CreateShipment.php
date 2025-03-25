@@ -4,8 +4,9 @@ namespace App\Filament\Operations\Resources\ShipmentResource\Pages;
 
 use App\Filament\Operations\Resources\ShipmentResource;
 use App\Models\Destination;
-use Filament\Resources\Pages\CreateRecord;
 use App\Models\Truck;
+use Filament\Resources\Pages\CreateRecord;
+
 class CreateShipment extends CreateRecord
 {
     protected static string $resource = ShipmentResource::class;
@@ -22,7 +23,7 @@ class CreateShipment extends CreateRecord
                         ->where('from_area', $data['to_area']);
                 });
             })
-            ->where('truck_type_id' , Truck::find($data['truck_id'])->truckType->id)
+            ->where('truck_type_id', Truck::find($data['truck_id'])->truckType->id)
             ->first();
 
         if ($destination) {
@@ -34,7 +35,6 @@ class CreateShipment extends CreateRecord
         if ($data['status'] == 0 || $data['status'] == 1) {
             $data['driver_id'] = null;
         }
-
 
         return $data;
     }

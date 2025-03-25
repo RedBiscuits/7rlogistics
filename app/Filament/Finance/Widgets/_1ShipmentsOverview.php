@@ -3,11 +3,10 @@
 namespace App\Filament\Finance\Widgets;
 
 use App\Models\Shipment;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
+use Filament\Support\Colors\Color;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
-use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
-
-use Filament\Support\Colors\Color;
 
 class _1ShipmentsOverview extends BaseWidget
 {

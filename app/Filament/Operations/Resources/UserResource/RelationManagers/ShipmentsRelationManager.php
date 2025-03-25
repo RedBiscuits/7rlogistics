@@ -6,7 +6,6 @@ use App\Filament\Operations\Resources\ShipmentResource;
 use App\Models\Area;
 use App\Models\City;
 use App\Models\Destination;
-use App\Models\Truck;
 use App\Models\TruckType;
 use Closure;
 use Filament\Forms;

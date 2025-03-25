@@ -1,11 +1,12 @@
 <?php
+
 namespace App\Components\Shipment;
 
-use Filament\Forms\Components\Section;
+use App\Enums\ClaimType;
 use App\Enums\ShipmentStatus;
 use Filament\Forms;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Set;
-use App\Enums\ClaimType;
 
 class ClaimInformationComponent
 {
@@ -36,29 +37,27 @@ class ClaimInformationComponent
                             ->label('Amount')
                             ->numeric()
                             ->required()
-                            ->prefix('EGP')
-                           ,
+                            ->prefix('EGP'),
                     ])
                     ->columns(3)
                     ->defaultItems(1)
                     ->addActionLabel('Add New Claim')
                     ->minItems(1)
-                    ->visible(fn($get) => $get('has_claim') && $get('status') === ShipmentStatus::DELIVERED->value)
+                    ->visible(fn ($get) => $get('has_claim') && $get('status') === ShipmentStatus::DELIVERED->value)
                     ->reactive()
                     ->debounce(1000)
                     ->afterStateUpdated(function ($state, Set $set) {
-                        $totalAmount = collect($state)->sum(fn($item) =>
-                            (float)($item['quantity'] ?? 0) * (float)($item['amount'] ?? 0)
+                        $totalAmount = collect($state)->sum(fn ($item) => (float) ($item['quantity'] ?? 0) * (float) ($item['amount'] ?? 0)
                         );
                         $set('total_claim_amount', $totalAmount);
                     }),
 
                 Forms\Components\Placeholder::make('total_claim_amount')
                     ->label('Total Claim Amount')
-                    ->content(fn($get) => 'EGP ' . number_format($get('total_claim_amount') ?? 0, 2))
-                    ->visible(fn($get) => $get('has_claim') && $get('status') === ShipmentStatus::DELIVERED->value),
+                    ->content(fn ($get) => 'EGP '.number_format($get('total_claim_amount') ?? 0, 2))
+                    ->visible(fn ($get) => $get('has_claim') && $get('status') === ShipmentStatus::DELIVERED->value),
             ])
-            ->visible(fn($get) => $get('status') === ShipmentStatus::DELIVERED->value)
+            ->visible(fn ($get) => $get('status') === ShipmentStatus::DELIVERED->value)
             ->collapsible();
     }
 }
