@@ -1,31 +1,28 @@
 <?php
-
 namespace App\Filament\Operations\Resources;
 
+use App\Components\Shipment\ClaimInformationComponent;
 use App\Enums\ShipmentStatus;
 use App\Filament\Operations\Resources\ShipmentResource\Pages;
 use App\Models\Area;
-
 use App\Models\Company;
 use App\Models\Destination;
 use App\Models\Driver;
 use App\Models\Shipment;
 use App\Models\Truck;
-use App\Models\TruckType;
-use Closure;
+use App\Models\User;
+use App\Utils\AcceptedMedia;
 use Dotswan\MapPicker\Fields\Map;
 use Filament\Forms;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
-use App\Models\User;
-use App\Utils\AcceptedMedia;
-use Filament\Notifications\Notification;
 
 class ShipmentResource extends Resource
 {
@@ -56,12 +53,12 @@ class ShipmentResource extends Resource
                     ->label('User')
                     ->options(function (callable $get) {
                         $company_id = $get('company_id');
-                        if (!$company_id) {
+                        if (! $company_id) {
                             return [];
                         }
                         return User::where('company_id', $company_id)->pluck('name', 'id');
                     })
-                    ->disabled(fn($get) => !$get('company_id')),
+                    ->disabled(fn($get) => ! $get('company_id')),
 
                 Forms\Components\ToggleButtons::make('status')
                     ->inline()
@@ -82,6 +79,8 @@ class ShipmentResource extends Resource
                     ->hidden(fn($get) => $get('status') == 0 || $get('status') == 1)
                     ->required(fn($get) => $get('status') != 0 && $get('status') != 1)
                     ->dehydrated(fn($get) => $get('status') != 0 && $get('status') != 1),
+
+                ClaimInformationComponent::render(),
 
                 Forms\Components\Card::make('Receiver Information')
                     ->schema([
@@ -149,8 +148,8 @@ class ShipmentResource extends Resource
                                     ->label('To Area')
                                     ->options(function (callable $get, callable $set) {
                                         $company_id = $get('company_id');
-                                        $fromArea = $get('from_area');
-                                        $dests = Destination::where('company_id', $company_id)
+                                        $fromArea   = $get('from_area');
+                                        $dests      = Destination::where('company_id', $company_id)
                                             ->whereNotNull('price')
                                             ->get();
 
@@ -172,7 +171,7 @@ class ShipmentResource extends Resource
 
                                 Map::make('location')
                                     ->label('Location')
-                                    // ->columnSpanFull()
+                                // ->columnSpanFull()
                                     ->default([
                                         'lat' => 40.4168,
                                         'lng' => -3.7038,
@@ -204,24 +203,21 @@ class ShipmentResource extends Resource
                                     ->extraTileControl([])
                                     ->extraControl([
                                         'zoomDelta' => 1,
-                                        'zoomSnap' => 2,
+                                        'zoomSnap'  => 2,
                                     ]),
 
                                 Forms\Components\Select::make('truck_id')
                                     ->label('Assigned Truck')
                                     ->reactive()
                                     ->helperText(function (callable $get, $state, $record) {
-
-
                                         if ($record) {
                                             return "User requested a truck type: " . $record->requested_truck;
                                         }
-
                                         return 'Assign a specific truck';
                                     })
                                     ->options(function (callable $get, callable $set) {
-                                        $fromArea = $get('from_area');
-                                        $toArea = $get('to_area');
+                                        $fromArea   = $get('from_area');
+                                        $toArea     = $get('to_area');
                                         $company_id = $get('company_id');
                                         if ($fromArea && $toArea) {
                                             return Truck::select('trucks.id', 'trucks.name', 'trucks.plate_number')
@@ -230,10 +226,10 @@ class ShipmentResource extends Resource
                                                 ->where(function ($query) use ($fromArea, $toArea) {
                                                     $query->where(function ($q) use ($fromArea, $toArea) {
                                                         $q->where('destinations.from_area', $fromArea)
-                                                          ->where('destinations.to_area', $toArea);
+                                                            ->where('destinations.to_area', $toArea);
                                                     })->orWhere(function ($q) use ($fromArea, $toArea) {
                                                         $q->where('destinations.from_area', $toArea)
-                                                          ->where('destinations.to_area', $fromArea);
+                                                            ->where('destinations.to_area', $fromArea);
                                                     });
                                                 })
                                                 ->where('destinations.company_id', $company_id)
@@ -246,22 +242,15 @@ class ShipmentResource extends Resource
                                         return [];
                                     })
                                     ->afterStateUpdated(function (Forms\Components\Select $component, $state, callable $get, callable $set) {
-                                        $fromArea = $get('from_area');
-                                        $toArea = $get('to_area');
-                                        $truck_id = $get('truck_id');
+                                        $fromArea   = $get('from_area');
+                                        $toArea     = $get('to_area');
+                                        $truck_id   = $get('truck_id');
                                         $company_id = $get('company_id');
 
                                         if ($fromArea && $toArea && $truck_id && $company_id) {
                                             $destination = Destination::where('company_id', $company_id)
-                                                ->where(function ($query) use ($fromArea, $toArea) {
-                                                    $query->where(function ($q) use ($fromArea, $toArea) {
-                                                        $q->where('destinations.from_area', $fromArea)
-                                                          ->where('destinations.to_area', $toArea);
-                                                    })->orWhere(function ($q) use ($fromArea, $toArea) {
-                                                        $q->where('destinations.from_area', $toArea)
-                                                          ->where('destinations.to_area', $fromArea);
-                                                    });
-                                                })
+                                                ->where('from_area', $fromArea)
+                                                ->where('to_area', $toArea)
                                                 ->where('truck_type_id', Truck::find($truck_id)->truckType->id)
                                                 ->whereNotNull('price');
 
@@ -311,13 +300,13 @@ class ShipmentResource extends Resource
                                     ->numeric()
                                     ->afterStateUpdated(function ($state, $set, $get) {
                                         if ($state !== null) {
-                                            $weight = floatval($state);
+                                            $weight   = floatval($state);
                                             $quantity = floatval($get('quantity') ?: 0);
                                             $set('package_weight', $weight * $quantity);
 
-                                            $truckWeight = Truck::find($get('../../truck_id'))->truckType->weight ?? 0;
+                                            $truckWeight        = Truck::find($get('../../truck_id'))->truckType->weight ?? 0;
                                             $totalPackageWeight = collect($get('../../packages') ?: [])->sum(fn($package) => ($package['weight'] ?: 0) * ($package['quantity'] ?: 0));
-                                            $availableWeight = $truckWeight - $totalPackageWeight;
+                                            $availableWeight    = $truckWeight - $totalPackageWeight;
 
                                             if ($availableWeight < 0) {
                                                 Notification::make()
@@ -352,10 +341,10 @@ class ShipmentResource extends Resource
                                     ->afterStateUpdated(function ($state, $set, $get) {
                                         if ($state !== null) {
                                             $quantity = floatval($state);
-                                            $weight = floatval($get('weight') ?: 0);
+                                            $weight   = floatval($get('weight') ?: 0);
                                             $set('package_weight', $weight * $quantity);
 
-                                            $truckWeight = Truck::find($get('truck_id'))->truckType->weight ?? 0;
+                                            $truckWeight        = Truck::find($get('truck_id'))->truckType->weight ?? 0;
                                             $totalPackageWeight = collect($get('packages') ?: [])->sum(
                                                 fn($package) => (floatval($package['weight'] ?: 0) * floatval($package['quantity'] ?: 0))
                                             );
@@ -386,11 +375,11 @@ class ShipmentResource extends Resource
                                     ->label('Package Weight')
                                     ->content(fn($get) => new HtmlString('<h1>' . (($get('weight') ?: 0) * ($get('quantity') ?: 0)) . '</h1>')),
                             ])->afterStateUpdated(function ($state, $set, $get) {
-                                $truckWeight = Truck::find($get('truck_id'))->truckType->weight ?? 0;
-                                $totalPackageWeight = collect($get('packages') ?: [])->sum(fn($package) => ($package['weight'] ?: 0) * ($package['quantity'] ?: 0));
-                                $availableWeight = $truckWeight - $totalPackageWeight;
-                                $set('available_weight', $availableWeight);
-                            }),
+                            $truckWeight        = Truck::find($get('truck_id'))->truckType->weight ?? 0;
+                            $totalPackageWeight = collect($get('packages') ?: [])->sum(fn($package) => ($package['weight'] ?: 0) * ($package['quantity'] ?: 0));
+                            $availableWeight    = $truckWeight - $totalPackageWeight;
+                            $set('available_weight', $availableWeight);
+                        }),
 
                         Forms\Components\Placeholder::make('total_weight')
                             ->label('Total Weight of All Packages')
@@ -403,9 +392,9 @@ class ShipmentResource extends Resource
                         Forms\Components\Placeholder::make('available_weight')
                             ->label('Available Weight in Selected Truck')
                             ->content(function ($get) {
-                                $truckWeight = Truck::find($get('truck_id'))->truckType->weight ?? 0;
+                                $truckWeight        = Truck::find($get('truck_id'))->truckType->weight ?? 0;
                                 $totalPackageWeight = collect($get('packages') ?: [])->sum(fn($package) => ($package['weight'] ?: 0) * ($package['quantity'] ?: 0));
-                                $availableWeight = $truckWeight - $totalPackageWeight;
+                                $availableWeight    = $truckWeight - $totalPackageWeight;
 
                                 return new HtmlString('<h1>' . $availableWeight . '</h1>');
                             }),
@@ -474,6 +463,16 @@ class ShipmentResource extends Resource
                 Tables\Filters\SelectFilter::make('status')->label('Status')
                     ->options(ShipmentStatus::class)
                     ->multiple(),
+                Tables\Filters\SelectFilter::make('fromArea')
+                    ->relationship('fromArea', 'name'),
+                Tables\Filters\SelectFilter::make('toArea')
+                    ->relationship('toArea', 'name'),
+                Tables\Filters\SelectFilter::make('truck')
+                    ->relationship('truck', 'plate_number'),
+                Tables\Filters\SelectFilter::make('driver')
+                    ->relationship('driver', 'name'),
+                Tables\Filters\SelectFilter::make('company')
+                    ->relationship('company', 'name'),
 
             ])
             ->actions([
@@ -498,10 +497,10 @@ class ShipmentResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListShipments::route('/'),
+            'index'  => Pages\ListShipments::route('/'),
             'create' => Pages\CreateShipment::route('/create'),
             // 'view' => Pages\ViewShipment::route('/{record}'),
-            'edit' => Pages\EditShipment::route('/{record}/edit'),
+            'edit'   => Pages\EditShipment::route('/{record}/edit'),
         ];
     }
 
