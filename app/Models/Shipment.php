@@ -11,6 +11,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 
 /**
  * @property ShipmentStatus $status
+ * @property string $id
  * @property string $pickup_date
  * @property string $delivery_date
  * @property string $description
@@ -24,7 +25,17 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @property Area $fromArea
  * @property City $toCity
  * @property Area $toArea
- * 
+ * @property Invoice $invoice
+ * @property Claim $claim
+ * @property User $creator
+ * @property User $driver
+ * @property User $user
+ * @property Truck $truck
+ * @property Destination $destination
+ * @property Area $fromArea
+ * @property Area $toArea
+ * @property City $fromCity
+ * @property City $toCity
  */
 class Shipment extends Model implements HasMedia
 {

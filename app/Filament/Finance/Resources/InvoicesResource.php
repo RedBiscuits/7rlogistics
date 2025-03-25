@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Filament\Finance\Resources;
 
 use App\Enums\ClaimStatus;
@@ -34,7 +33,7 @@ class InvoicesResource extends Resource
                 Forms\Components\Select::make('shipment_id')
                     ->label('Shipment')
                     ->options(function (callable $get) {
-                        $ships = Shipment::whereDoesntHave('invoice')->select('id', 'awb')->get()->pluck('awb', 'id');
+                        $ships = Shipment::whereDoesntHave('invoice')->select('id', 'id')->get()->pluck('id', 'id');
 
                         return $ships ?? [];
                     })
@@ -50,11 +49,13 @@ class InvoicesResource extends Resource
                     ->numeric()
                     ->nullable()
                     ->rules([
-                        fn (Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
-                            $price = Shipment::find($get('shipment_id'))->price ?? 0;
-
-                            if ($value > $price) {
-                                $fail('Price exceeds shipment price');
+                        fn(Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
+                            if (Shipment::where('id', $get('shipment_id'))
+                            //                  Shipment price      <          Discount
+                                ->where('price', '<', $value)
+                                ->exists()
+                            ) {
+                                $fail('Price exceeds shipment price.');
                             }
                         },
                     ]),
@@ -98,14 +99,34 @@ class InvoicesResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('id')->label('#')->sortable(),
-                Tables\Columns\TextColumn::make('shipment_id')->label('TCN')->sortable(),
-                Tables\Columns\TextColumn::make('creator.name')
-                    ->label('Created By')
-                    ->sortable()
+                Tables\Columns\TextColumn::make('shipment_id')->label('Shipment')->sortable(),
+                Tables\Columns\TextColumn::make('shipment.truck.truckType.name')->label('Truck Type'),
+                Tables\Columns\TextColumn::make('shipment.driver.name')->label('Driver'),
+                Tables\Columns\TextColumn::make('shipment.fromArea.name')->label('From Area'),
+                Tables\Columns\TextColumn::make('shipment.toArea.name')->label('To Area'),
+                Tables\Columns\TextColumn::make('shipment.price')->label('Price')->money('EGP'),
+                Tables\Columns\TextColumn::make('shipment.company.due_days')->label('Due Days')->getStateUsing(function ($record) {
+                    $dueDate = $record->created_at->addDays($record->shipment->company->due_days);
+                    $diff    = number_format($dueDate->diffInDays(now(), false), 0);
+                    return ($diff >= 0 ? '+' : '-')
+                    . $diff . ' days ( ' . $dueDate->format('d-m-Y') . ' )';
+                })->badge()->color(fn($record) =>
+                    now()->addDays($record->shipment->company->due_days)->isPast() ? 'danger' : 'success'
+                ),
+
+                Tables\Columns\TextColumn::make('collected_at')->label('Collected At')
                     ->getStateUsing(function ($record) {
-                        return "{$record->id} - {$record->creator->name}";
-                    }),
-                Tables\Columns\TextColumn::make('discount')->label('Discount')->money('EGP'),
+                        return $record->collected_at ? $record->collected_at->format('d-m-Y H:i') : 'Not collected yet';
+                    })
+                    ->badge()
+                    ->color(fn($record) => $record->collected_at ? 'success' : 'danger')
+                    ->icon(fn($record) => $record->collected_at ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle')
+                    ->extraAttributes([
+                        'class' => 'px-4 py-2 rounded-full',
+                    ]),
+                Tables\Columns\TextColumn::make('shipment.created_at')->label('Shipment Creation')->dateTime('d-m-Y H:i'),
+                Tables\Columns\TextColumn::make('created_at')->label('Invoice Creation')->dateTime('d-m-Y H:i'),
+
                 Tables\Columns\TextColumn::make('payment_type')->label('Payment Type')
                     ->sortable()
                     ->badge()
@@ -121,7 +142,13 @@ class InvoicesResource extends Resource
                     }),
                 Tables\Columns\TextColumn::make('price')
                     ->label('Price')
-                    ->money('EGP'),
+                    ->money('EGP')
+                    ->badge()
+                    ->sortable()
+                    ->searchable()
+                    ->alignment('right')
+                    ->weight('bold')
+                    ->color(fn($record) => $record->price > 10000 ? 'danger' : 'success'),
 
             ])
             ->filters([
@@ -152,9 +179,14 @@ class InvoicesResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ListInvoices::route('/'),
+            'index'  => ListInvoices::route('/'),
             'create' => CreateInvoices::route('/create'),
-            'edit' => EditInvoices::route('/{record}/edit'),
+            'edit'   => EditInvoices::route('/{record}/edit'),
         ];
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
     }
 }

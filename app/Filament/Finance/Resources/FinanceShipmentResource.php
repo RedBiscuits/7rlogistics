@@ -142,4 +142,9 @@ class FinanceShipmentResource extends Resource
     {
         return parent::getEloquentQuery()->where('status', ShipmentStatus::DELIVERED);
     }
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
 }

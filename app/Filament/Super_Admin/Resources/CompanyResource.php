@@ -43,6 +43,11 @@ class CompanyResource extends Resource
                     ->maxLength(255),
                 Forms\Components\TextInput::make('contact_person')
                     ->maxLength(255),
+                Forms\Components\TextInput::make('due_days')
+                    ->numeric()
+                    ->default(0)
+                    ->minValue(0)
+                    ->maxValue(255),
                 SpatieMediaLibraryFileUpload::make('attachments')
                     ->collection('attachments')
                     ->label('Attachments')
