@@ -4,9 +4,28 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
-    <meta name="description" content="A well made and handcrafted Bootstrap 5 template">
+    <meta name="description" content="7R Logistics - Premier freight and transportation solutions for businesses in Egypt. Professional logistics services, supply chain management, warehousing, and reliable delivery. Expert freight forwarding and transportation logistics company with nationwide coverage and real-time tracking.">
+    <meta name="keywords" content="logistics company, freight services, transportation solutions, supply chain management, warehousing, delivery services, shipping logistics, cargo transport, freight forwarding, logistics Egypt">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="Yousef Elkammar">
+    <meta name="HandheldFriendly" content="true">
+    <link rel="canonical" href="https://7rlogistics.com">
+    
+    <!-- Open Graph / Social Media Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://7rlogistics.com">
+    <meta property="og:title" content="7R Logistics | Professional Freight & Transportation Solutions in Egypt">
+    <meta property="og:description" content="Premier logistics and freight transportation solutions for businesses. Efficient supply chain management and reliable delivery services across Egypt.">
+    <meta property="og:image" content="https://7rlogistics.com/img/logo.webp">
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="7R Logistics | Professional Freight & Transportation Solutions">
+    <meta name="twitter:description" content="Premier logistics and freight transportation solutions for businesses. Efficient supply chain management and reliable delivery services.">
+    <meta name="twitter:image" content="https://7rlogistics.com/img/logo.webp">
+    
     <link rel="apple-touch-icon" sizes="180x180" href="img/apple-touch-icon.png">
-    <title>7R Logistics</title>
+    <title>7R Logistics | Professional Freight & Transportation Solutions in Egypt</title>
 
     <link rel="icon" type="image/webp" sizes="32x32" href="img/logo.webp">
     <link rel="icon" type="image/webp" sizes="16x16" href="img/logo.webp">
@@ -14,17 +33,40 @@
     <!-- Bootstrap CSS -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
 
-
     <meta name="author" content="Yousef Elkammar">
     <meta name="HandheldFriendly" content="true">
     <link rel="stylesheet" href="css/theme.min.css">
     <link rel="stylesheet" href="css/home.css">
-    <script rel="script" src="js/home.js"></script>
+    <script rel="script" src="js/home.js" defer></script>
     <!-- Bootstrap JS Bundle (includes Popper) -->
-    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="js/bootstrap.bundle.min.js" defer></script>
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="js/home.js" as="script">
+    <link rel="preload" href="js/bootstrap.bundle.min.js" as="script">
+    <link rel="preload" href="fonts/your-main-font.woff2" as="font" type="font/woff2" crossorigin>
+    
+    <!-- Structured Data for Local Business -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "LogisticsService",
+      "name": "7R Logistics",
+      "image": "https://7rlogistics.net/img/logo.webp",
+      "url": "https://7rlogistics.net",
+      "telephone": "+20 110 1167 717",
+      "email": "ops@7rlogistics.net",
+      "description": "Premier freight and transportation logistics solutions for businesses. Specializing in efficient supply chain management, warehousing, and delivery services.",
+      "areaServed": "Egypt",
+      "serviceType": ["Freight Services", "Transportation Logistics", "Supply Chain Management", "Warehousing", "Cargo Transport"],
+      "priceRange": "$$"
+    }
+    </script>
 </head>
 
 <body class="bg-black text-white mt-0 overflow-x-hidden" data-bs-spy="scroll" data-bs-target="#navScroll">
+    <!-- Skip to main content link for accessibility -->
+    <a href="#main-content" class="skip-link visually-hidden-focusable">Skip to main content</a>
 
     <nav id="navScroll" class="navbar navbar-dark bg-black fixed-top px-vw-5" tabindex="0">
         <div class="container">
@@ -36,7 +78,7 @@
                 </button>
 
                 <!-- Logo -->
-                <img src="{{ asset('img/logo.webp') }}" alt="7R Logistics" width="36" height="28">
+                <img src="{{ asset('img/logo.webp') }}" alt="7R Logistics logo - Professional freight and transportation services" width="36" height="28">
                 <span class="ms-md-1 mt-1 fw-bolder me-md-5">Logistics</span>
             </div>
 
@@ -49,7 +91,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link fs-5" onclick="openContactPopup()" aria-label="Contact">
+                        <a class="nav-link fs-5" href="#" onclick="openContactPopup()" aria-label="Contact" tabindex="0" role="button">
                             Contact
                         </a>
                     </li>
@@ -85,7 +127,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link fs-5" onclick="openContactPopup()" aria-label="Contact">
+                            <a class="nav-link fs-5" href="#" onclick="openContactPopup()" aria-label="Contact" tabindex="0" role="button">
                                 Contact
                             </a>
                         </li>
@@ -105,21 +147,17 @@
         </div>
     </nav>
 
-    <main>
-        <div class="w-100 overflow-hidden position-relative bg-black text-white" data-aos="fade" id="home">
+    <main id="main-content">
+        <section class="w-100 overflow-hidden position-relative bg-black text-white" data-aos="fade" id="home">
             <div class="position-absolute w-100 h-100 bg-black opacity-75 top-0 start-0"></div>
             <div class="container py-vh-4 position-relative mt-5 px-vw-5 text-center">
                 <div class="row d-flex align-items-center justify-content-center py-vh-5">
                     <div class="col-12 col-xl-10">
                         <span class="h5 text-secondary fw">Our Mission</span>
-                        <h1 class="display-huge mt-3 mb-3 lh-1"> Transportation Solutions, Built for you.</h1>
+                        <h1 class="display-huge mt-3 mb-3 lh-1">Professional Freight & Transportation Logistics Solutions</h1>
                     </div>
                     <div class="col-12 col-xl-8">
-                        <p class="lead text-secondary"> To deliver tailored, reliable, and innovative transportation and
-                            logistics solutions
-                            that prioritize our clients' needs, ensuring timely deliveries, transparent
-                            communication, and exceptional service while building trust and long-term
-                            partnerships.</p>
+                        <p class="lead text-secondary">We provide comprehensive logistics solutions including freight forwarding, supply chain management, warehousing, and transportation services tailored to your business needs. Our reliable delivery network ensures your cargo reaches its destination safely and on time.</p>
                     </div>
                     <div class="col-12 text-center">
                         <p class="btn btn-xl btn-light" onclick="openContactPopup()">Contact us
@@ -132,56 +170,50 @@
                     </div>
                 </div>
             </div>
+        </section>
 
-        </div>
-
-        <!-- TODO update images text -->
-        <div class="w-100 position-relative bg-black text-white bg-cover d-flex align-items-center">
+        <section class="w-100 position-relative bg-black text-white bg-cover d-flex align-items-center">
             <div class="container-fluid px-vw-5">
                 <div class="position-absolute w-100 h-50 bg-dark bottom-0 start-0"></div>
                 <div class="row d-flex align-items-center position-relative justify-content-center px-0 g-5"
                     style="min-height: 600px;">
                     <div class="col-12 col-lg-6" style="height: 500px;">
                         <div class="img-container" style="position: relative; width: 100%; height: 100%;">
-                            <img src="img/webp/aaa.webp" alt="abstract image"
+                            <img src="img/webp/aaa.webp" alt="7R Logistics transportation services"
                                 width="600" height="500"
                                 class="img-fluid position-relative rounded-5 shadow" data-aos="fade-up"
                                 data-aos-duration="2000"
-                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;">
+                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;" loading="lazy">
                         </div>
-
                     </div>
                     <div class="col-12 col-md-6 col-lg-3" style="height: 450px;">
                         <div class="img-container" style="position: relative; width: 100%; height: 100%;">
-                            <img src="img/webp/abstract6.webp" alt="abstract image"
+                            <img src="img/webp/abstract6.webp" alt="7R Logistics freight solutions"
                                 width="300" height="450"
                                 class="img-fluid position-relative rounded-5 shadow" data-aos="fade-up"
                                 data-aos-duration="2000"
-                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;">
+                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;" loading="lazy">
                         </div>
                     </div>
                     <div class="col-12 col-md-6 col-lg-3" style="height: 250px;">
                         <div class="img-container" style="position: relative; width: 100%; height: 100%;">
-
-                            <img src="img/webp/abstract9.webp" alt="abstract image"
+                            <img src="img/webp/abstract9.webp" alt="7R Logistics freight solutions"
                                 width="300" height="250"
                                 class="img-fluid position-relative rounded-5 shadow" data-aos="fade-up"
                                 data-aos-duration="2000"
-                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;">
+                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;" loading="lazy">
                         </div>
-
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-
-        <div class="bg-dark" id="about">
+        <section class="bg-dark" id="about">
             <div class="container px-vw-5 py-vh-5">
                 <div class="row d-flex align-items-center">
                     <div class="col-12 col-lg-7 text-lg-end" data-aos="fade-right">
                         <span class="h5 text-secondary fw-lighter">What we do</span>
-                        <h2 class="display-4">At 7R’s Logistics, we specialize in
+                        <h2 class="display-4">At 7R's Logistics, we specialize in
                             providing premier inland
                             transportation services that combine
                             innovation, reliability, and efficiency.</h2>
@@ -215,11 +247,10 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div class="bg-black py-vh-3">
+        <section class="bg-black py-vh-3">
             <div class="container bg-black px-vw-5 py-vh-3 rounded-5 shadow">
-
                 <div class="row gx-5">
                     <div class="p-5 pt-0 mt-5" data-aos="fade">
                         <h2 class="display-4">Wide range of solutions to meet your transportation needs.</h2>
@@ -227,7 +258,6 @@
                     <div class="col-12 col-md-6">
                         <div class="card bg-transparent mb-5" data-aos="zoom-in-up">
                             <div class="bg-dark shadow rounded-5 p-0">
-
                                 <div class="p-5">
                                     <h2 class="fw-lighter"><strong>Tailored Logistics Services</strong></h2>
                                     <p class="pb-4 text-secondary">Customized transportation solutions designed for
@@ -257,7 +287,6 @@
                         </div>
                     </div>
                     <div class="col-12 col-md-6">
-
                         <div class="card bg-transparent mb-5 mt-5" data-aos="zoom-in-up">
                             <div class="bg-dark shadow rounded-5 p-0">
                                 <div class="p-5">
@@ -283,22 +312,18 @@
                         </div>
                     </div>
                 </div>
-
             </div>
-
-        </div>
-        <div class="bg-dark position-relative">
+        </section>
+        <section class="bg-dark position-relative">
             <div class="container px-vw-5 py-vh-5">
                 <div class="row d-flex align-items-center">
                     <div class="col-12 col-lg-7">
-                        <!-- Image and Description Slider -->
                         <div id="imageSlider" class="carousel slide" data-bs-ride="carousel">
                             <div class="carousel-inner">
-                                <!-- First Item (already updated) -->
                                 <div class="carousel-item active">
                                     <div class="carousel-card-wrapper">
                                         <img class="carousel-card-image" src="img/webp/dababah.webp"
-                                            alt="Dababah truck" loading="lazy">
+                                            alt="Dababah freight truck for logistics and transportation services" loading="lazy">
                                         <div class="carousel-card-content">
                                             <h3 class="truck-name">Dababah</h3>
                                             <div class="specs-grid">
@@ -356,11 +381,10 @@
                                     </div>
                                 </div>
 
-                                <!-- Second Item -->
                                 <div class="carousel-item">
                                     <div class="carousel-card-wrapper">
                                         <img class="carousel-card-image" src="img/webp/dababah_box.webp"
-                                            alt="Dababah Box truck" loading="lazy">
+                                            alt="Dababah Box freight truck for secure cargo transportation" loading="lazy">
                                         <div class="carousel-card-content">
                                             <h3 class="truck-name">Dababah Box</h3>
                                             <div class="specs-grid">
@@ -419,7 +443,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Third Item -->
                                 <div class="carousel-item">
                                     <div class="carousel-card-wrapper">
                                         <img class="carousel-card-image" src="img/webp/jumbo.webp" alt="Jumbo truck"
@@ -481,7 +504,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Fourth Item -->
                                 <div class="carousel-item">
                                     <div class="carousel-card-wrapper">
                                         <img class="carousel-card-image" src="img/webp/jumbo_box.webp"
@@ -544,7 +566,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- Carousel Controls -->
                             <button class="carousel-control-prev" type="button" data-bs-target="#imageSlider"
                                 data-bs-slide="prev">
                                 <span class="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -567,19 +588,14 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-
-
-
-
-        <div class="container-fluid px-vw-5 position-relative" data-aos="fade" id="numbers">
+        <section class="container-fluid px-vw-5 position-relative" data-aos="fade" id="numbers">
             <div class="position-absolute w-100 h-50 bg-black top-0 start-0"></div>
             <div class="position-relative py-vh-5 bg-cover bg-center rounded-5"
                 style="background-image: url(img/webp/abstract12.webp)">
                 <div class="container bg-black px-vw-5 py-vh-3 rounded-5 shadow">
                     <div class="row d-flex align-items-center">
-
                         <div class="col-6 d-flex align-items-center bg-dark shadow rounded-5 p-0"
                             data-aos="zoom-in-up">
                             <div class="row d-flex justify-content-center">
@@ -620,10 +636,9 @@
                         </div>
                     </div>
                 </div>
-
             </div>
-        </div>
-        <div class="bg-dark py-vh-5" id="partners">
+        </section>
+        <section class="bg-dark py-vh-5" id="partners">
             <div class="container px-vw-5">
                 <div class="row d-flex gx-5 align-items-center">
                     <div class="col-12 col-lg-6">
@@ -651,8 +666,6 @@
                                 </div>
                             </div>
                         </div>
-
-
                     </div>
                     <div class="col-12 col-lg-6">
                         <div class="p-5 pt-0" data-aos="fade">
@@ -687,17 +700,13 @@
                     </div>
                 </div>
             </div>
-
-        </div>
-
+        </section>
     </main>
 
     <footer class="bg-black border-top border-dark" id="footer">
         <div class="container py-vh-4 text-secondary fw-lighter">
             <div class="row">
                 <div class="col-12 col-lg-5 py-4 text-center text-lg-start">
-
-
                     <div class="mt-3">
                         <img src="img/webp/qr.webp" alt="QR Code" width="200" height="200" />
                     </div>
@@ -708,7 +717,6 @@
                         <li class="nav-item">
                             <a href="/about" class="link-fancy link-fancy-light">About us</a>
                         </li>
-
                         <li class="nav-item">
                             <p class="link-fancy link-fancy-light" onclick="openContactPopup()">Contact</p>
                         </li>
@@ -720,7 +728,6 @@
                         <li class="nav-item">
                             <a href="/pricing" class="link-fancy link-fancy-light">Pricing</a>
                         </li>
-
                         <li class="nav-item">
                             <a href="/client/login" class="link-fancy link-fancy-light">Customers</a>
                         </li>
@@ -751,13 +758,6 @@
             <span class="text-muted">Crafted with dedication by 7R Logistics Tech Team</span>
         </div>
     </footer>
-
-
-
-
-
-
-
 
     <script src="js/bootstrap.bundle.min.js"></script>
     <script src="js/aos.js"></script>

@@ -11,7 +11,7 @@ Route::get('/', function () {
     return view('home/index');
 });
 
-Route::get('/content', function () {
+Route::get('/about', function () {
     return view('home/content/index');
 });
 
