@@ -82,7 +82,7 @@ class InvoicesResource extends Resource
                     ->default(null),
 
                 Forms\Components\TextInput::make('reference')
-                    ->label('Cheque reference')
+                    ->label('Reference Number')
                     ->nullable(),
 
                 Forms\Components\TextInput::make('notes')
@@ -112,12 +112,13 @@ class InvoicesResource extends Resource
 
                     return ($diff >= 0 ? '+' : '-')
                     .$diff.' days ( '.$dueDate->format('d-m-Y').' )';
-                })->badge()->color(fn ($record) => now()->addDays($record->shipment->company->due_days)->isPast() ? 'danger' : 'success'
+                })->badge()
+                ->color(fn ($record) => now()->addDays($record->shipment->company->due_days)->isPast() ? 'danger' : 'success'
                 ),
 
                 Tables\Columns\TextColumn::make('collected_at')->label('Collected At')
                     ->getStateUsing(function ($record) {
-                        return $record->collected_at ? $record->collected_at->format('d-m-Y H:i') : 'Not collected yet';
+                        return $record->collected_at ? \Carbon\Carbon::parse($record->collected_at)->format('d-m-Y H:i') : 'Not collected yet';
                     })
                     ->badge()
                     ->color(fn ($record) => $record->collected_at ? 'success' : 'danger')
