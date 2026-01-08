@@ -6,6 +6,7 @@ use App\Filament\Super_Admin\Resources\DriverResource\Pages;
 use App\Filament\Super_Admin\Resources\DriverResource\RelationManagers\MissionsRelationManager;
 use App\Models\Driver;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -72,6 +73,36 @@ class DriverResource extends Resource
 
                 TextInput::make('contact_number_3')
                     ->tel()
+                    ->maxLength(255),
+
+                Placeholder::make('password_status')
+                    ->label('Current Password Status')
+                    ->content(function (?Driver $record) {
+                        if (!$record) {
+                            return 'No password set';
+                        }
+                        return $record->hasPassword() ? 'Password is set' : 'No password set';
+                    })
+                    ->badge()
+                    ->color(function (?Driver $record) {
+                        if (!$record) {
+                            return 'gray';
+                        }
+                        return $record->hasPassword() ? 'success' : 'gray';
+                    })
+                    ->visible(fn (?Driver $record) => $record !== null),
+
+                TextInput::make('password')
+                    ->password()
+                    ->revealable()
+                    ->label('Password')
+                    ->helperText(function (?Driver $record) {
+                        if ($record && $record->hasPassword()) {
+                            return 'Enter a new password to change it, or leave empty to keep the current password.';
+                        }
+                        return 'Set a password for driver login. Leave empty to use biometric authentication only.';
+                    })
+                    ->dehydrated(fn ($state) => filled($state))
                     ->maxLength(255),
 
                 SpatieMediaLibraryFileUpload::make('attachments')

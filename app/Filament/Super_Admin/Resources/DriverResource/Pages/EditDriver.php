@@ -16,4 +16,16 @@ class EditDriver extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        // Only update password if it's provided (not empty)
+        // The dehydrated() method on the form field already handles this,
+        // but this provides an extra safety check
+        if (empty($data['password'])) {
+            unset($data['password']);
+        }
+
+        return $data;
+    }
 }

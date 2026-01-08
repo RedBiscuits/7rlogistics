@@ -3,6 +3,7 @@
 namespace App\Filament\Operations\Resources;
 
 use App\Filament\Operations\Resources\DriverResource\Pages;
+use App\Filament\Operations\Resources\DriverResource\RelationManagers\AttendancesRelationManager;
 use App\Filament\Operations\Resources\DriverResource\RelationManagers\MissionsRelationManager;
 use App\Models\Driver;
 use Filament\Forms\Components\DatePicker;
@@ -74,6 +75,44 @@ class DriverResource extends Resource
                     ->tel()
                     ->maxLength(255),
 
+                \Filament\Forms\Components\Placeholder::make('biometric_enabled')
+                    ->label('Biometric Authentication')
+                    ->content(fn (?Driver $record) => $record && $record->hasBiometricEnabled() ? 'Enabled' : 'Disabled')
+                    ->badge()
+                    ->color(fn (?Driver $record) => $record && $record->hasBiometricEnabled() ? 'success' : 'gray'),
+
+                SpatieMediaLibraryFileUpload::make('license_front')
+                    ->collection('license_front')
+                    ->label('License Front Photo')
+                    ->downloadable()
+                    ->openable()
+                    ->image()
+                    ->previewable(),
+
+                SpatieMediaLibraryFileUpload::make('license_back')
+                    ->collection('license_back')
+                    ->label('License Back Photo')
+                    ->downloadable()
+                    ->openable()
+                    ->image()
+                    ->previewable(),
+
+                SpatieMediaLibraryFileUpload::make('id_photo')
+                    ->collection('id_photo')
+                    ->label('ID Photo')
+                    ->downloadable()
+                    ->openable()
+                    ->image()
+                    ->previewable(),
+
+                SpatieMediaLibraryFileUpload::make('profile_photo')
+                    ->collection('profile_photo')
+                    ->label('Profile Photo')
+                    ->downloadable()
+                    ->openable()
+                    ->image()
+                    ->previewable(),
+
                 SpatieMediaLibraryFileUpload::make('attachments')
                     ->collection('attachments')
                     ->label('Attachments')
@@ -114,7 +153,28 @@ class DriverResource extends Resource
                 TextColumn::make('driving_license_expire_date')
                     ->date()
                     ->sortable()
-                    ->default(null),
+                    ->default(null)
+                    ->badge()
+                    ->color(function ($record) {
+                        if (!$record->driving_license_expire_date) {
+                            return 'gray';
+                        }
+                        $days = $record->getLicenseExpiryDays();
+                        if ($days <= 10) {
+                            return 'danger';
+                        }
+                        if ($days <= 30) {
+                            return 'warning';
+                        }
+                        return 'success';
+                    })
+                    ->formatStateUsing(function ($record) {
+                        if (!$record->driving_license_expire_date) {
+                            return 'Not set';
+                        }
+                        $days = $record->getLicenseExpiryDays();
+                        return $record->driving_license_expire_date->format('Y-m-d') . " ({$days} days)";
+                    }),
                 TextColumn::make('car_license_expire_date')
                     ->date()
                     ->sortable()
@@ -124,7 +184,16 @@ class DriverResource extends Resource
                     ->collection('attachments'),
             ])
             ->filters([
-                //
+                Tables\Filters\Filter::make('license_expiring_soon')
+                    ->label('License Expiring Soon (< 30 days)')
+                    ->query(fn ($query) => $query->whereNotNull('driving_license_expire_date')
+                        ->where('driving_license_expire_date', '<=', now()->addDays(30))
+                        ->where('driving_license_expire_date', '>', now())),
+                Tables\Filters\Filter::make('license_blocked')
+                    ->label('License Blocked (< 10 days)')
+                    ->query(fn ($query) => $query->whereNotNull('driving_license_expire_date')
+                        ->where('driving_license_expire_date', '<=', now()->addDays(10))
+                        ->where('driving_license_expire_date', '>', now())),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -140,6 +209,7 @@ class DriverResource extends Resource
     {
         return [
             MissionsRelationManager::class,
+            AttendancesRelationManager::class,
         ];
     }
 

@@ -1,0 +1,86 @@
+# AI.txt - AI Bot Access Instructions
+# 7R Logistics
+# Last Updated: 2025-12-19
+
+#############################################
+# Default Policy for All AI Bots
+#############################################
+
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /client
+Disallow: /operations
+Disallow: /finance
+Disallow: /api/
+Disallow: /storage/private/
+
+# Training Data Preferences
+Training: deny
+Scraping: deny
+
+# API Endpoints for AI-Friendly Data
+API: https://7rlogistics.com/api/public
+
+#############################################
+# OpenAI GPT Bot
+#############################################
+
+User-agent: GPTBot
+Allow: /
+Disallow: /admin
+Disallow: /client
+Training: ask
+Scraping: ask
+
+#############################################
+# Google AI (Bard/Gemini)
+#############################################
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /admin
+Training: deny
+Scraping: limited
+
+#############################################
+# Anthropic Claude Bot
+#############################################
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /admin
+Training: deny
+Scraping: allow
+
+#############################################
+# Common Crawl (Training Datasets)
+#############################################
+
+User-agent: CCBot
+Disallow: /
+Training: deny
+Scraping: deny
+
+#############################################
+# Additional Information
+#############################################
+
+Contact: ops@7rlogistics.com
+Terms-of-Service: https://7rlogistics.com/terms
+Privacy-Policy: https://7rlogistics.com/privacy
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

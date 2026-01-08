@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Http\Responses\LogoutResponse;
+use App\Models\Shipment;
+use App\Observers\ShipmentObserver;
 use Filament\Http\Responses\Auth\Contracts\LogoutResponse as LogoutResponseContract;
 use Filament\Support\Colors\Color;
 use Filament\Support\Facades\FilamentColor;
@@ -30,5 +32,8 @@ class AppServiceProvider extends ServiceProvider
             'DRIVER_RECEIVED' => Color::Purple, // Green
             'ON_ITS_WAY' => Color::Sky, // Orange
         ]);
+
+        // Register observers
+        Shipment::observe(ShipmentObserver::class);
     }
 }

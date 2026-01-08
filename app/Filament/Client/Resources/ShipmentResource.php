@@ -121,6 +121,16 @@ class ShipmentResource extends Resource
                                     })
                                     ->required(),
 
+                                Forms\Components\TextInput::make('from_location')
+                                    ->label('From Location')
+                                    ->maxLength(255)
+                                    ->columnSpanFull(),
+
+                                Forms\Components\TextInput::make('to_location')
+                                    ->label('To Location')
+                                    ->maxLength(255)
+                                    ->columnSpanFull(),
+
                                 Map::make('location')
                                     ->label('Location')
                                     // ->columnSpanFull()

@@ -1,2 +1,135 @@
+# 7R Logistics - Robots.txt
+# Last Updated: 2025-12-19
+
+#############################################
+# Global Rules for All Bots
+#############################################
+
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /admin
+Disallow: /client
+Disallow: /operations
+Disallow: /finance
+Disallow: /api/
+Disallow: /livewire/
+Disallow: /*.pdf$
+Disallow: /storage/private/
+Disallow: /vendor/
+Disallow: /_debugbar/
+Crawl-delay: 1
+
+#############################################
+# Search Engine Specific Rules
+#############################################
+
+# Google Bot - Prioritized Access
+User-agent: Googlebot
+Crawl-delay: 0.5
+Disallow: /admin
+Disallow: /client
+Disallow: /operations
+Disallow: /finance
+Disallow: /api/
+Disallow: /livewire/
+
+# Bing Bot
+User-agent: Bingbot
+Crawl-delay: 0.5
+Disallow: /admin
+Disallow: /client
+Disallow: /operations
+Disallow: /finance
+
+# Yandex Bot
+User-agent: Yandex
+Crawl-delay: 1
+
+#############################################
+# SEO Tool Bots (Rate Limited)
+#############################################
+
+# Ahrefs Bot (SEO Analysis)
+User-agent: AhrefsBot
+Crawl-delay: 5
+
+# Semrush Bot (SEO Analysis)
+User-agent: SemrushBot
+Crawl-delay: 5
+
+# Moz Bot (SEO Analysis)
+User-agent: rogerbot
+Crawl-delay: 5
+
+# Majestic Bot (Link Analysis)
+User-agent: MJ12bot
+Crawl-delay: 10
+
+#############################################
+# AI Training Bots
+#############################################
+
+# OpenAI GPTBot
+User-agent: GPTBot
+Disallow: /admin
+Disallow: /client
+Disallow: /operations
+Disallow: /finance
+Crawl-delay: 2
+
+# Google AI (Bard/Gemini)
+User-agent: Google-Extended
+Disallow: /admin
+Disallow: /client
+Crawl-delay: 2
+
+# Anthropic Claude Bot
+User-agent: ClaudeBot
+Disallow: /admin
+Crawl-delay: 2
+
+# Common Crawl (Training Data)
+User-agent: CCBot
+Disallow: /
+
+#############################################
+# Social Media Bots (Open Graph Scraping)
+#############################################
+
+# Facebook Bot
+User-agent: facebookexternalhit
+Allow: /
+
+# Twitter Bot
+User-agent: Twitterbot
+Allow: /
+
+# LinkedIn Bot
+User-agent: LinkedInBot
+Allow: /
+
+#############################################
+# Bad Bots (Block)
+#############################################
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: BLEXBot
+Disallow: /
+
+#############################################
+# Sitemaps
+#############################################
+
+Sitemap: https://7rlogistics.com/sitemap.xml
+Sitemap: https://7rlogistics.com/sitemap-pages.xml

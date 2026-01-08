@@ -23,6 +23,11 @@ class _4LatestShipments extends BaseWidget
         return $table
             ->query(
                 Shipment::latest()
+                    ->with([
+                        'company',
+                        'fromArea.city',
+                        'toArea.city'
+                    ])
             )
             ->columns([
                 Tables\Columns\TextColumn::make('company.name')->label('Company')->sortable(),

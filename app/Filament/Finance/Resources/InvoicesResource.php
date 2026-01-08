@@ -98,6 +98,21 @@ class InvoicesResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('id', 'desc')
+            ->modifyQueryUsing(fn ($query) => 
+                $query->with([
+                    'shipment' => function ($q) {
+                        $q->with([
+                            'truck.truckType',
+                            'driver',
+                            'fromArea',
+                            'toArea',
+                            'company'
+                        ]);
+                    },
+                    'creator'
+                ])
+            )
             ->columns([
                 Tables\Columns\TextColumn::make('id')->label('#')->sortable(),
                 Tables\Columns\TextColumn::make('shipment_id')->label('Shipment')->sortable(),

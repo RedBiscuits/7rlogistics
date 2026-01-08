@@ -1,0 +1,1638 @@
+{
+	"info": {
+		"_postman_id": "7r-logistics-driver-api-2024",
+		"name": "7R Logistics - Driver Mobile App API",
+		"description": "Complete API collection for Driver Mobile App. All endpoints use standardized response format: { \"success\": boolean, \"data\": T | null, \"error\": string | null }",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "7r-logistics"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Login (Username/Password)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.success && jsonData.data && jsonData.data.token) {",
+									"        pm.environment.set(\"auth_token\", jsonData.data.token);",
+									"        pm.environment.set(\"driver_id\", jsonData.data.id);",
+									"        pm.environment.set(\"username\", jsonData.data.username);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"DRIVER001\",\n    \"password\": \"password123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login with username (driver code) and password. Returns token and biometric status."
+					},
+					"response": []
+				},
+				{
+					"name": "Login (Biometric Token)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"DRIVER001\",\n    \"biometric_token\": \"bio_token_abc123xyz789_1234567890\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login using biometric token (after biometric verification)."
+					},
+					"response": []
+				},
+				{
+					"name": "Biometric Verify (Public)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.success && jsonData.data && jsonData.data.token) {",
+									"        pm.environment.set(\"auth_token\", jsonData.data.token);",
+									"        pm.environment.set(\"driver_id\", jsonData.data.user.id);",
+									"        pm.environment.set(\"username\", jsonData.data.user.username);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"token\": \"bio_token_abc123xyz789_1234567890\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/biometric/verify",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"biometric",
+								"verify"
+							]
+						},
+						"description": "Public endpoint to verify biometric token and get API token. No authentication required."
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/auth/logout",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"logout"
+							]
+						},
+						"description": "Logout and revoke current token."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/auth/profile",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"profile"
+							]
+						},
+						"description": "Get current authenticated driver profile."
+					},
+					"response": []
+				},
+				{
+					"name": "Register Device",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"device_token\": \"fcm_token_or_apns_token_here\",\n    \"device_type\": 0,\n    \"app_version\": \"1.0.0\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register-device",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"register-device"
+							]
+						},
+						"description": "Register device for push notifications. device_type: 0 = Android, 1 = iOS"
+					},
+					"response": []
+				},
+				{
+					"name": "Biometric Enroll",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": \"{{driver_id}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/biometric/enroll",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"biometric",
+								"enroll"
+							]
+						},
+						"description": "Enroll biometric authentication. Returns a biometric token to store securely on device."
+					},
+					"response": []
+				},
+				{
+					"name": "Biometric Revoke",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"token\": \"bio_token_abc123xyz789_1234567890\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/biometric/revoke",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"biometric",
+								"revoke"
+							]
+						},
+						"description": "Revoke/disable biometric authentication for current driver."
+					},
+					"response": []
+				}
+			],
+			"description": "Authentication endpoints for driver login, logout, profile, device registration, and biometric authentication."
+		},
+		{
+			"name": "Dashboard",
+			"item": [
+				{
+					"name": "Get Dashboard",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/dashboard",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"dashboard"
+							]
+						},
+						"description": "Get dashboard overview with attendance status, shipment counts, notifications, and license status."
+					},
+					"response": []
+				}
+			],
+			"description": "Dashboard endpoints for overview data."
+		},
+		{
+			"name": "Attendance",
+			"item": [
+				{
+					"name": "Check In",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"latitude\": 30.0444,\n    \"longitude\": 31.2357,\n    \"location_id\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/attendance/check-in",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"attendance",
+								"check-in"
+							]
+						},
+						"description": "Check in for attendance. Requires valid GPS coordinates within allowed location radius. Returns 'allowed: false' if outside radius or already checked in."
+					},
+					"response": []
+				},
+				{
+					"name": "Check In (lat/lng)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"lat\": 30.0444,\n    \"lng\": 31.2357,\n    \"location_id\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/attendance/check-in",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"attendance",
+								"check-in"
+							]
+						},
+						"description": "Check in using 'lat' and 'lng' instead of 'latitude' and 'longitude'."
+					},
+					"response": []
+				},
+				{
+					"name": "Check Out",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"latitude\": 30.0444,\n    \"longitude\": 31.2357\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/attendance/check-out",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"attendance",
+								"check-out"
+							]
+						},
+						"description": "Check out from attendance. GPS coordinates are optional."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Today's Attendance",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/attendance/today",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"attendance",
+								"today"
+							]
+						},
+						"description": "Get today's attendance record. Returns null if no record exists."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Attendance Status",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/attendance/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"attendance",
+								"status"
+							]
+						},
+						"description": "Get current attendance status (checked_in, current_attendance, hours_today)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Attendance History",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/attendance/history?page=1&limit=20&from=2024-01-01&to=2024-12-31",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"attendance",
+								"history"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)"
+								},
+								{
+									"key": "limit",
+									"value": "20",
+									"description": "Items per page (default: 20)"
+								},
+								{
+									"key": "from",
+									"value": "2024-01-01",
+									"description": "Start date (YYYY-MM-DD) - optional"
+								},
+								{
+									"key": "to",
+									"value": "2024-12-31",
+									"description": "End date (YYYY-MM-DD) - optional"
+								}
+							]
+						},
+						"description": "Get attendance history with optional date range filter and pagination."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Monthly Summary",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/attendance/monthly-summary?year=2024&month=12",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"attendance",
+								"monthly-summary"
+							],
+							"query": [
+								{
+									"key": "year",
+									"value": "2024",
+									"description": "Year (default: current year)"
+								},
+								{
+									"key": "month",
+									"value": "12",
+									"description": "Month 1-12 (default: current month)"
+								}
+							]
+						},
+						"description": "Get monthly attendance summary with total days, hours, and average hours per day."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Attendance Locations",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/attendance/locations?latitude=30.0444&longitude=31.2357",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"attendance",
+								"locations"
+							],
+							"query": [
+								{
+									"key": "latitude",
+									"value": "30.0444",
+									"description": "Optional: Current latitude to calculate distance"
+								},
+								{
+									"key": "longitude",
+									"value": "31.2357",
+									"description": "Optional: Current longitude to calculate distance"
+								}
+							]
+						},
+						"description": "Get all active attendance locations. If coordinates provided, returns sorted by distance."
+					},
+					"response": []
+				}
+			],
+			"description": "Attendance management endpoints for check-in, check-out, history, and location management."
+		},
+		{
+			"name": "Shipments",
+			"item": [
+				{
+					"name": "List Shipments",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/shipments?status=pending&page=1&limit=15",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"shipments"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "pending",
+									"description": "Filter by status: pending, accepted, on_way, awaiting_loading, picked_up, in_transit, delivered, exception"
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)"
+								},
+								{
+									"key": "limit",
+									"value": "15",
+									"description": "Items per page (default: 15)"
+								}
+							]
+						},
+						"description": "Get list of shipments assigned to driver. Filter by mobile app status string values."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Shipment Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/shipments/{{shipment_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"shipments",
+								"{{shipment_id}}"
+							]
+						},
+						"description": "Get detailed information about a specific shipment."
+					},
+					"response": []
+				},
+				{
+					"name": "Accept Shipment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/shipments/{{shipment_id}}/accept",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"shipments",
+								"{{shipment_id}}",
+								"accept"
+							]
+						},
+						"description": "Accept/acknowledge a shipment assignment. Changes status to 'accepted'."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Shipment Status",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"picked_up\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/shipments/{{shipment_id}}/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"shipments",
+								"{{shipment_id}}",
+								"status"
+							]
+						},
+						"description": "Update shipment status. Valid statuses: pending, accepted, on_way, awaiting_loading, picked_up, in_transit, delivered, exception"
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Pickup Photo (Base64)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"photo\": \"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k=\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/shipments/{{shipment_id}}/photos/pickup",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"shipments",
+								"{{shipment_id}}",
+								"photos",
+								"pickup"
+							]
+						},
+						"description": "Upload pickup photo as base64 encoded string in JSON body."
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Pickup Photo (Multipart)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "form-data",
+							"form-data": [
+								{
+									"key": "image",
+									"type": "file",
+									"src": [],
+									"description": "Image file (JPEG, PNG, max 5MB)"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/shipments/{{shipment_id}}/photos/pickup",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"shipments",
+								"{{shipment_id}}",
+								"photos",
+								"pickup"
+							]
+						},
+						"description": "Upload pickup photo as multipart/form-data file upload."
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Delivery Photo (Base64)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"photo\": \"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k=\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/shipments/{{shipment_id}}/photos/delivery",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"shipments",
+								"{{shipment_id}}",
+								"photos",
+								"delivery"
+							]
+						},
+						"description": "Upload delivery photo as base64 encoded string."
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Delivery Photo (Multipart)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "form-data",
+							"form-data": [
+								{
+									"key": "image",
+									"type": "file",
+									"src": [],
+									"description": "Image file (JPEG, PNG, max 5MB)"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/shipments/{{shipment_id}}/photos/delivery",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"shipments",
+								"{{shipment_id}}",
+								"photos",
+								"delivery"
+							]
+						},
+						"description": "Upload delivery photo as multipart/form-data file upload."
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Toll Photo (Base64)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"photo\": \"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k=\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/shipments/{{shipment_id}}/photos/toll",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"shipments",
+								"{{shipment_id}}",
+								"photos",
+								"toll"
+							]
+						},
+						"description": "Upload toll receipt photo as base64 encoded string."
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Toll Photo (Multipart)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "form-data",
+							"form-data": [
+								{
+									"key": "image",
+									"type": "file",
+									"src": [],
+									"description": "Image file (JPEG, PNG, max 5MB)"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/shipments/{{shipment_id}}/photos/toll",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"shipments",
+								"{{shipment_id}}",
+								"photos",
+								"toll"
+							]
+						},
+						"description": "Upload toll receipt photo as multipart/form-data file upload."
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Signature",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"signature\": \"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/shipments/{{shipment_id}}/signature",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"shipments",
+								"{{shipment_id}}",
+								"signature"
+							]
+						},
+						"description": "Upload delivery signature as base64 encoded image (PNG/SVG)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Pending Count",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/shipments/count/pending",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"shipments",
+								"count",
+								"pending"
+							]
+						},
+						"description": "Get count of pending shipments (status: accepted/assigned)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Active Count",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/shipments/count/active",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"shipments",
+								"count",
+								"active"
+							]
+						},
+						"description": "Get count of active shipments (in progress)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Delivered Today Count",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/shipments/count/delivered-today",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"shipments",
+								"count",
+								"delivered-today"
+							]
+						},
+						"description": "Get count of shipments delivered today."
+					},
+					"response": []
+				}
+			],
+			"description": "Shipment management endpoints for listing, viewing, accepting, updating status, and uploading photos/signatures."
+		},
+		{
+			"name": "Notifications",
+			"item": [
+				{
+					"name": "List Notifications",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/notifications?unread=true&page=1&limit=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"notifications"
+							],
+							"query": [
+								{
+									"key": "unread",
+									"value": "true",
+									"description": "Filter by unread status (true/false) - optional"
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)"
+								},
+								{
+									"key": "limit",
+									"value": "20",
+									"description": "Items per page (default: 20)"
+								}
+							]
+						},
+						"description": "Get list of notifications. Filter by unread status if needed."
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Notification as Read",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/notifications/{{notification_id}}/read",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"notifications",
+								"{{notification_id}}",
+								"read"
+							]
+						},
+						"description": "Mark a specific notification as read."
+					},
+					"response": []
+				},
+				{
+					"name": "Mark All as Read",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/notifications/read-all",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"notifications",
+								"read-all"
+							]
+						},
+						"description": "Mark all notifications as read."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Unread Count",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/notifications/count/unread",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"notifications",
+								"count",
+								"unread"
+							]
+						},
+						"description": "Get count of unread notifications."
+					},
+					"response": []
+				}
+			],
+			"description": "Notification management endpoints for listing, marking as read, and getting counts."
+		},
+		{
+			"name": "Driver Profile",
+			"item": [
+				{
+					"name": "Get Profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/driver/profile",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"driver",
+								"profile"
+							]
+						},
+						"description": "Get driver profile information."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Profile",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstName\": \"Ahmed\",\n    \"lastName\": \"Mohamed\",\n    \"phone\": \"+201234567890\",\n    \"avatar\": \"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k=\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/driver/profile",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"driver",
+								"profile"
+							]
+						},
+						"description": "Update driver profile. All fields are optional. Avatar can be base64 image or URL."
+					},
+					"response": []
+				},
+				{
+					"name": "Get License Status",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/driver/license-status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"driver",
+								"license-status"
+							]
+						},
+						"description": "Get driver license status and expiry information."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Documents",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/driver/documents",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"driver",
+								"documents"
+							]
+						},
+						"description": "Get driver documents (license photos, ID photo, profile photo) with URLs."
+					},
+					"response": []
+				}
+			],
+			"description": "Driver profile management endpoints for viewing and updating profile information."
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000/api",
+			"type": "string"
+		},
+		{
+			"key": "auth_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "driver_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "username",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "shipment_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "notification_id",
+			"value": "1",
+			"type": "string"
+		}
+	]
+}
+
+
+
+
+

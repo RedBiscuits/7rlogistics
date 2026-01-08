@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 /**
  * @property ShipmentStatus $status
@@ -46,6 +47,9 @@ class Shipment extends Model implements HasMedia
     protected $casts = [
         'status' => ShipmentStatus::class,
         'pickup_date' => 'date:Y-m-d H:i',
+        'driver_acknowledged_at' => 'datetime',
+        'driver_on_way_to_collect_at' => 'datetime',
+        'awaiting_collection_at' => 'datetime',
     ];
 
     protected static function boot()
@@ -131,6 +135,95 @@ class Shipment extends Model implements HasMedia
     public function claim()
     {
         return $this->hasOne(Claim::class);
+    }
+
+    public function notifications()
+    {
+        return $this->hasMany(DriverNotification::class);
+    }
+
+    public function getDeliveryProofs()
+    {
+        return $this->getMedia('delivery_proofs');
+    }
+
+    public function hasMinimumProofs(): bool
+    {
+        $proofs = $this->getMedia('delivery_proofs');
+        return $proofs->count() >= 2;
+    }
+
+    /**
+     * Get pickup photos count
+     */
+    public function getPickupPhotosCount(): int
+    {
+        return $this->getMedia('pickup_photos')->count();
+    }
+
+    /**
+     * Get delivery photos count
+     */
+    public function getDeliveryPhotosCount(): int
+    {
+        return $this->getMedia('delivery_photos')->count();
+    }
+
+    /**
+     * Check if shipment has minimum pickup photos (2 required)
+     */
+    public function hasMinimumPickupPhotos(): bool
+    {
+        return $this->getPickupPhotosCount() >= 2;
+    }
+
+    /**
+     * Check if shipment has minimum delivery photos (2 required)
+     */
+    public function hasMinimumDeliveryPhotos(): bool
+    {
+        return $this->getDeliveryPhotosCount() >= 2;
+    }
+
+    /**
+     * Check if shipment has a signature
+     */
+    public function hasSignature(): bool
+    {
+        return $this->getMedia('signature')->count() > 0;
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('delivery_proofs')
+            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/jpg']);
+
+        $this->addMediaCollection('receipt_proofs')
+            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/jpg']);
+
+        $this->addMediaCollection('pod_proofs')
+            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/jpg']);
+
+        // New collections for mobile app
+        $this->addMediaCollection('pickup_photos')
+            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/jpg']);
+
+        $this->addMediaCollection('delivery_photos')
+            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/jpg']);
+
+        $this->addMediaCollection('toll_photos')
+            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/jpg']);
+
+        $this->addMediaCollection('signature')
+            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/jpg', 'image/webp']);
+    }
+
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        $this->addMediaConversion('thumb')
+            ->width(300)
+            ->height(300)
+            ->performOnCollections('delivery_proofs', 'receipt_proofs', 'pod_proofs', 'pickup_photos', 'delivery_photos', 'toll_photos', 'signature');
     }
 
     // public function getLatitudeAttribute()

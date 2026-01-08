@@ -1,0 +1,37 @@
+/* TEAM */
+    Project Manager & Developer: Yousef Elkammar
+    GitHub: https://github.com/RedBiscuits
+    Location: Egypt
+
+/* THANKS */
+    To our clients and partners who trust us with their logistics needs.
+
+/* SITE */
+    Standards: HTML5, CSS3, JavaScript (ES6+)
+    Components: Laravel 11, Filament 3, Bootstrap 5
+    Software: PHP 8.2+, MySQL, Nginx
+    
+    Stack:
+    - Laravel Framework (PHP)
+    - Filament Admin Panel
+    - Livewire (Frontend Reactivity)
+    - Bootstrap & TailwindCSS
+    - WebP Image Optimization
+    
+    Last update: 2025/12/19
+    Language: English / العربية
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

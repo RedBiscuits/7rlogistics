@@ -171,6 +171,16 @@ class ShipmentResource extends Resource
                                     })
                                     ->required(),
 
+                                Forms\Components\TextInput::make('from_location')
+                                    ->label('From Location')
+                                    ->maxLength(255)
+                                    ->columnSpanFull(),
+
+                                Forms\Components\TextInput::make('to_location')
+                                    ->label('To Location')
+                                    ->maxLength(255)
+                                    ->columnSpanFull(),
+
                                 Map::make('location')
                                     ->label('Location')
                                 // ->columnSpanFull()
@@ -445,6 +455,70 @@ class ShipmentResource extends Resource
                     ->maxFiles(5)
                     ->previewable(false),
 
+                Forms\Components\Section::make('Delivery Proofs')
+                    ->schema([
+                        SpatieMediaLibraryFileUpload::make('delivery_proofs')
+                            ->collection('delivery_proofs')
+                            ->label('Delivery Proof Images')
+                            ->downloadable()
+                            ->openable()
+                            ->multiple()
+                            ->maxFiles(10)
+                            ->previewable()
+                            ->helperText('Upload delivery proof images (minimum 2 required for DELIVERED status)'),
+                    ])
+                    ->collapsible()
+                    ->collapsed()
+                    ->visible(fn ($record) => $record && $record->exists),
+
+                Forms\Components\Section::make('Mobile App Photos')
+                    ->schema([
+                        SpatieMediaLibraryFileUpload::make('pickup_photos')
+                            ->collection('pickup_photos')
+                            ->label('Pickup Photos')
+                            ->downloadable()
+                            ->openable()
+                            ->multiple()
+                            ->maxFiles(10)
+                            ->previewable()
+                            ->image()
+                            ->helperText('Photos uploaded via mobile app when picking up shipment'),
+
+                        SpatieMediaLibraryFileUpload::make('delivery_photos')
+                            ->collection('delivery_photos')
+                            ->label('Delivery Photos')
+                            ->downloadable()
+                            ->openable()
+                            ->multiple()
+                            ->maxFiles(10)
+                            ->previewable()
+                            ->image()
+                            ->helperText('Photos uploaded via mobile app when delivering shipment'),
+
+                        SpatieMediaLibraryFileUpload::make('toll_photos')
+                            ->collection('toll_photos')
+                            ->label('Toll Photos')
+                            ->downloadable()
+                            ->openable()
+                            ->multiple()
+                            ->maxFiles(10)
+                            ->previewable()
+                            ->image()
+                            ->helperText('Photos uploaded via mobile app for toll receipts'),
+
+                        SpatieMediaLibraryFileUpload::make('signature')
+                            ->collection('signature')
+                            ->label('Delivery Signature')
+                            ->downloadable()
+                            ->openable()
+                            ->previewable()
+                            ->image()
+                            ->helperText('Signature captured via mobile app upon delivery'),
+                    ])
+                    ->collapsible()
+                    ->collapsed()
+                    ->visible(fn ($record) => $record && $record->exists),
+
             ]);
     }
 
@@ -459,6 +533,24 @@ class ShipmentResource extends Resource
                 Tables\Columns\TextColumn::make('truck')->label('Truck')
                     ->getStateUsing(fn ($record) => $record->truck ? $record->truck->name.' - ('.$record->truck->plate_number.')' : ''),
                 Tables\Columns\TextColumn::make('status')->label('Status')->badge(),
+                Tables\Columns\TextColumn::make('driver_acknowledged_at')
+                    ->label('Acknowledged')
+                    ->dateTime('Y-m-d H:i')
+                    ->badge()
+                    ->color(fn ($record) => $record->driver_acknowledged_at ? 'success' : 'danger')
+                    ->icon(fn ($record) => $record->driver_acknowledged_at ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('driver_on_way_to_collect_at')
+                    ->label('On Way to Collect')
+                    ->dateTime('Y-m-d H:i')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('awaiting_collection_at')
+                    ->label('Awaiting Collection')
+                    ->dateTime('Y-m-d H:i')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('price')->label('Price')->money('EGP'),
                 Tables\Columns\TextColumn::make('created_at')->label('Creation Date')->dateTime('Y-m-d H:i A'),
             ])

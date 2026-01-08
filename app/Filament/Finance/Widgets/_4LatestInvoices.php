@@ -25,12 +25,29 @@ class _4LatestInvoices extends BaseWidget
         return $table
             ->query(
                 Invoice::query()
+                    ->with([
+                        'shipment' => function ($query) {
+                            $query->with([
+                                'truck.truckType',
+                                'driver',
+                                'fromArea',
+                                'toArea',
+                                'company'
+                            ]);
+                        }
+                    ])
             )
             ->columns([
                 Tables\Columns\TextColumn::make('id')->label('#')->sortable(),
                 Tables\Columns\TextColumn::make('shipment_id')->label('Shipment')->sortable(),
                 Tables\Columns\TextColumn::make('shipment.truck.truckType.name')->label('Truck Type'),
                 Tables\Columns\TextColumn::make('shipment.driver.name')->label('Driver'),
+                Tables\Columns\TextColumn::make('shipment.driver_acknowledged_at')
+                    ->label('Driver Acknowledged')
+                    ->dateTime('d-m-Y H:i')
+                    ->badge()
+                    ->color(fn ($record) => $record->shipment->driver_acknowledged_at ? 'success' : 'danger')
+                    ->icon(fn ($record) => $record->shipment->driver_acknowledged_at ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle'),
                 Tables\Columns\TextColumn::make('shipment.fromArea.name')->label('From Area'),
                 Tables\Columns\TextColumn::make('shipment.toArea.name')->label('To Area'),
                 Tables\Columns\TextColumn::make('shipment.price')->label('Price')->money('EGP'),
@@ -45,7 +62,7 @@ class _4LatestInvoices extends BaseWidget
 
                 Tables\Columns\TextColumn::make('collected_at')->label('Collected At')
                     ->getStateUsing(function ($record) {
-                        return $record->collected_at ? $record->collected_at->format('d-m-Y H:i') : 'Not collected yet';
+                        return $record->collected_at ? \Carbon\Carbon::parse($record->collected_at)->format('d-m-Y H:i') : 'Not collected yet';
                     })
                     ->badge()
                     ->color(fn ($record) => $record->collected_at ? 'success' : 'danger')

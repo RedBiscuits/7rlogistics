@@ -1,0 +1,33 @@
+# Security.txt - Responsible Vulnerability Disclosure
+# 7R Logistics
+# Last Updated: 2025-12-19
+
+Contact: mailto:ops@7rlogistics.com
+Contact: https://7rlogistics.com/contact
+Expires: 2026-12-19T00:00:00.000Z
+Preferred-Languages: en, ar
+Canonical: https://7rlogistics.com/.well-known/security.txt
+
+# Security policy
+Policy: https://7rlogistics.com/security-policy
+
+# Acknowledgments page (future)
+# Acknowledgments: https://7rlogistics.com/security-hall-of-fame
+
+# Please report security vulnerabilities responsibly
+# We aim to respond within 48 hours
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
