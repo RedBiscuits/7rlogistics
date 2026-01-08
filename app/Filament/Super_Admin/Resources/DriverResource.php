@@ -79,16 +79,12 @@ class DriverResource extends Resource
                     ->label('Current Password Status')
                     ->content(function (?Driver $record) {
                         if (!$record) {
-                            return 'No password set';
+                            return new \Illuminate\Support\HtmlString('<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">No password set</span>');
                         }
-                        return $record->hasPassword() ? 'Password is set' : 'No password set';
-                    })
-                    ->badge()
-                    ->color(function (?Driver $record) {
-                        if (!$record) {
-                            return 'gray';
+                        if ($record->hasPassword()) {
+                            return new \Illuminate\Support\HtmlString('<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">✓ Password is set</span>');
                         }
-                        return $record->hasPassword() ? 'success' : 'gray';
+                        return new \Illuminate\Support\HtmlString('<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">No password set</span>');
                     })
                     ->visible(fn (?Driver $record) => $record !== null),
 
