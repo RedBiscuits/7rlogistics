@@ -74,7 +74,7 @@ class ShipmentController extends Controller
 
         // Verify shipment belongs to driver
         if ($shipment->driver_id !== $driver->id) {
-            return $this->errorResponse('Unauthorized', 403);
+            return $this->errorResponse(__('api.unauthorized'), 403);
         }
 
         $shipment->load([
@@ -98,7 +98,7 @@ class ShipmentController extends Controller
 
         // Verify shipment belongs to driver
         if ($shipment->driver_id !== $driver->id) {
-            return $this->errorResponse('Unauthorized', 403);
+            return $this->errorResponse(__('api.unauthorized'), 403);
         }
 
         // Check license
@@ -128,7 +128,7 @@ class ShipmentController extends Controller
 
         // Verify shipment belongs to driver
         if ($shipment->driver_id !== $driver->id) {
-            return $this->errorResponse('Unauthorized', 403);
+            return $this->errorResponse(__('api.unauthorized'), 403);
         }
 
         // Check license
@@ -159,7 +159,7 @@ class ShipmentController extends Controller
 
         // Verify shipment belongs to driver
         if ($shipment->driver_id !== $driver->id) {
-            return $this->errorResponse('Unauthorized', 403);
+            return $this->errorResponse(__('api.unauthorized'), 403);
         }
 
         try {
@@ -169,7 +169,7 @@ class ShipmentController extends Controller
 
             return $this->successResponse(new ShipmentResource($shipment));
         } catch (\Exception $e) {
-            return $this->errorResponse('Failed to upload photo: ' . $e->getMessage(), 500);
+            return $this->errorResponse(__('api.failed_upload_photo', ['error' => $e->getMessage()]), 500);
         }
     }
 
@@ -180,7 +180,7 @@ class ShipmentController extends Controller
 
         // Verify shipment belongs to driver
         if ($shipment->driver_id !== $driver->id) {
-            return $this->errorResponse('Unauthorized', 403);
+            return $this->errorResponse(__('api.unauthorized'), 403);
         }
 
         try {
@@ -190,7 +190,7 @@ class ShipmentController extends Controller
 
             return $this->successResponse(new ShipmentResource($shipment));
         } catch (\Exception $e) {
-            return $this->errorResponse('Failed to upload photo: ' . $e->getMessage(), 500);
+            return $this->errorResponse(__('api.failed_upload_photo', ['error' => $e->getMessage()]), 500);
         }
     }
 
@@ -201,7 +201,7 @@ class ShipmentController extends Controller
 
         // Verify shipment belongs to driver
         if ($shipment->driver_id !== $driver->id) {
-            return $this->errorResponse('Unauthorized', 403);
+            return $this->errorResponse(__('api.unauthorized'), 403);
         }
 
         try {
@@ -211,7 +211,7 @@ class ShipmentController extends Controller
 
             return $this->successResponse(new ShipmentResource($shipment));
         } catch (\Exception $e) {
-            return $this->errorResponse('Failed to upload photo: ' . $e->getMessage(), 500);
+            return $this->errorResponse(__('api.failed_upload_photo', ['error' => $e->getMessage()]), 500);
         }
     }
 
@@ -222,7 +222,7 @@ class ShipmentController extends Controller
 
         // Verify shipment belongs to driver
         if ($shipment->driver_id !== $driver->id) {
-            return $this->errorResponse('Unauthorized', 403);
+            return $this->errorResponse(__('api.unauthorized'), 403);
         }
 
         try {
@@ -232,7 +232,7 @@ class ShipmentController extends Controller
 
             return $this->successResponse(new ShipmentResource($shipment));
         } catch (\Exception $e) {
-            return $this->errorResponse('Failed to upload signature: ' . $e->getMessage(), 500);
+            return $this->errorResponse(__('api.failed_upload_signature', ['error' => $e->getMessage()]), 500);
         }
     }
 
@@ -287,7 +287,7 @@ class ShipmentController extends Controller
 
         // Verify shipment belongs to driver
         if ($shipment->driver_id !== $driver->id) {
-            return $this->errorResponse('Unauthorized', 403);
+            return $this->errorResponse(__('api.unauthorized'), 403);
         }
 
         try {
@@ -299,11 +299,11 @@ class ShipmentController extends Controller
             }
 
             return $this->successResponse([
-                'message' => 'Proofs uploaded successfully',
+                'message' => __('api.proofs_uploaded'),
                 'count' => count($images),
             ]);
         } catch (\Exception $e) {
-            return $this->errorResponse('Failed to upload proofs: ' . $e->getMessage(), 500);
+            return $this->errorResponse(__('api.failed_upload_proofs', ['error' => $e->getMessage()]), 500);
         }
     }
 }

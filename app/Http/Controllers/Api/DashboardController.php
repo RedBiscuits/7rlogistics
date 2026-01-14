@@ -25,6 +25,12 @@ class DashboardController extends Controller
         /** @var \App\Models\Driver $driver */
         $driver = $request->user();
 
+        // Save driver's language preference from Accept-Language header
+        $currentLocale = app()->getLocale();
+        if ($driver->lang !== $currentLocale) {
+            $driver->update(['lang' => $currentLocale]);
+        }
+
         // Current attendance status
         $todayAttendance = DriverAttendance::forDriver($driver->id)
             ->forDate(now()->toDateString())

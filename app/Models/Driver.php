@@ -30,6 +30,7 @@ class Driver extends Model implements HasMedia
         'contact_number_3',
         'biometric_token',
         'password',
+        'lang',
     ];
 
     protected $hidden = [

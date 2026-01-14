@@ -38,7 +38,7 @@ class AttendanceController extends Controller
         if ($todayAttendance) {
             return $this->successResponse([
                 'allowed' => false,
-                'message' => 'You are already checked in today',
+                'message' => __('api.already_checked_in'),
             ]);
         }
 
@@ -50,13 +50,13 @@ class AttendanceController extends Controller
         );
 
         if (!$validation['valid']) {
-            $message = 'You are not at an allowed location';
+            $message = __('api.not_at_allowed_location');
             if (isset($validation['nearest']) && $validation['nearest']) {
                 $nearest = $validation['nearest'];
                 $distance = round($nearest['distance']);
-                $message .= '. Nearest location: ' . $nearest['location_name'] . ' (' . $distance . 'm away).';
+                $message .= '. ' . __('api.nearest_location', ['name' => $nearest['location_name'], 'distance' => $distance]);
             } elseif (empty(AttendanceLocation::active()->count())) {
-                $message .= '. No attendance locations have been configured yet.';
+                $message .= '. ' . __('api.no_locations_configured');
             }
             
             return $this->successResponse([
@@ -79,7 +79,7 @@ class AttendanceController extends Controller
 
         return $this->successResponse([
             'allowed' => true,
-            'message' => 'تم تسجيل الحضور بنجاح',
+            'message' => __('api.check_in_success'),
             'record' => new AttendanceResource($attendance),
         ]);
     }
@@ -98,7 +98,7 @@ class AttendanceController extends Controller
         if (!$attendance) {
             return $this->successResponse([
                 'allowed' => false,
-                'message' => 'No active check-in found',
+                'message' => __('api.no_active_checkin'),
             ]);
         }
 
@@ -117,7 +117,7 @@ class AttendanceController extends Controller
 
         return $this->successResponse([
             'allowed' => true,
-            'message' => 'تم تسجيل الانصراف بنجاح',
+            'message' => __('api.check_out_success'),
             'record' => new AttendanceResource($attendance),
         ]);
     }

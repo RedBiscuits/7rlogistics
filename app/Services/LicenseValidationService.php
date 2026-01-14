@@ -16,7 +16,7 @@ class LicenseValidationService
                 'blocked' => true,
                 'warning' => false,
                 'days_remaining' => null,
-                'message' => 'License expiry date not set. Please contact management.',
+                'message' => __('api.license_not_set'),
             ];
         }
 
@@ -44,15 +44,15 @@ class LicenseValidationService
         $daysRemaining = $driver->getLicenseExpiryDays();
 
         if ($daysRemaining === null) {
-            return 'License expiry date not set. Please contact management for data update.';
+            return __('api.license_not_set_contact');
         }
 
         if ($daysRemaining <= 10) {
-            return "License expires in {$daysRemaining} days. Please contact management for data update.";
+            return __('api.license_expires_blocked', ['days' => $daysRemaining]);
         }
 
         if ($daysRemaining <= 30) {
-            return "License expires in {$daysRemaining} days. Please renew your license soon.";
+            return __('api.license_expires_warning', ['days' => $daysRemaining]);
         }
 
         return null;

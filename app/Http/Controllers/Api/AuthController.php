@@ -29,13 +29,13 @@ class AuthController extends Controller
         $driver = Driver::where('code', $request->driver_code)->first();
 
         if (!$driver) {
-            return $this->errorResponse('Invalid credentials', 401);
+            return $this->errorResponse(__('api.invalid_credentials'), 401);
         }
 
         // Biometric authentication
         if ($request->has('biometric_token')) {
             if (!$driver->validateBiometricToken($request->biometric_token)) {
-                return $this->errorResponse('Invalid biometric token', 401);
+                return $this->errorResponse(__('api.invalid_biometric_token'), 401);
             }
         } 
         // Password authentication
@@ -52,7 +52,7 @@ class AuthController extends Controller
             }
             
             if (!$passwordValid) {
-                return $this->errorResponse('Invalid credentials', 401);
+                return $this->errorResponse(__('api.invalid_credentials'), 401);
             }
         }
 
@@ -95,7 +95,7 @@ class AuthController extends Controller
         );
 
         return $this->successResponse([
-            'message' => 'Device registered successfully',
+            'message' => __('api.device_registered'),
             'device' => $device,
         ]);
     }
@@ -111,7 +111,7 @@ class AuthController extends Controller
 
         // Verify userId matches current driver
         if ($request->userId !== (string) $driver->id) {
-            return $this->errorResponse('Invalid user ID', 400);
+            return $this->errorResponse(__('api.invalid_user_id'), 400);
         }
 
         // Generate a biometric token
@@ -144,7 +144,7 @@ class AuthController extends Controller
         }
 
         if (!$matchedDriver) {
-            return $this->errorResponse('Invalid biometric token', 401);
+            return $this->errorResponse(__('api.invalid_biometric_token'), 401);
         }
 
         // Create new token for session
@@ -170,7 +170,7 @@ class AuthController extends Controller
 
         // Verify the token matches
         if (!$driver->hasBiometricEnabled() || !$driver->validateBiometricToken($request->token)) {
-            return $this->errorResponse('Invalid biometric token', 400);
+            return $this->errorResponse(__('api.invalid_biometric_token'), 400);
         }
 
         // Revoke the token
@@ -198,7 +198,7 @@ class AuthController extends Controller
         }
         
         if (!$passwordValid) {
-            return $this->errorResponse('Invalid password', 401);
+            return $this->errorResponse(__('api.invalid_password'), 401);
         }
 
         // Store the token (will be encrypted by model mutator)
@@ -206,7 +206,7 @@ class AuthController extends Controller
         $driver->save();
 
         return $this->successResponse([
-            'message' => 'Biometric token registered successfully',
+            'message' => __('api.biometric_registered'),
             'biometric_enabled' => true,
         ]);
     }
@@ -220,7 +220,7 @@ class AuthController extends Controller
         $driver->save();
 
         return $this->successResponse([
-            'message' => 'Biometric authentication disabled successfully',
+            'message' => __('api.biometric_disabled'),
             'biometric_enabled' => false,
         ]);
     }

@@ -46,7 +46,7 @@ class NotificationController extends Controller
 
         // Verify notification belongs to driver
         if ($notification->driver_id !== $driver->id) {
-            return $this->errorResponse('Unauthorized', 403);
+            return $this->errorResponse(__('api.unauthorized'), 403);
         }
 
         $notification->update([

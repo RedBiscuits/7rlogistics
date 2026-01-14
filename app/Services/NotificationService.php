@@ -16,19 +16,29 @@ class NotificationService
 {
     public function notifyShipmentAssigned(Driver $driver, Shipment $shipment): void
     {
+        $locale = $driver->lang ?? 'ar';
+        
+        $title = __('api.notification_shipment_assigned_title', [], $locale);
+        $body = __('api.notification_shipment_assigned_body', ['id' => $shipment->id], $locale);
+        $bodyDetailed = __('api.notification_shipment_assigned_body_detailed', [
+            'id' => $shipment->id,
+            'from' => $shipment->fromArea->name ?? '',
+            'to' => $shipment->toArea->name ?? '',
+        ], $locale);
+
         // Create database notification
         DriverNotification::create([
             'driver_id' => $driver->id,
             'shipment_id' => $shipment->id,
-            'title' => 'New Shipment Assigned',
-            'body' => "Shipment #{$shipment->id} has been assigned to you",
+            'title' => $title,
+            'body' => $body,
             'type' => NotificationType::SHIPMENT_ASSIGNED,
         ]);
 
         // Send push notification
         $this->sendPushNotification($driver, [
-            'title' => 'New Shipment Assigned',
-            'body' => "Shipment #{$shipment->id} - {$shipment->fromArea->name} to {$shipment->toArea->name}",
+            'title' => $title,
+            'body' => $bodyDetailed,
             'data' => [
                 'type' => 'shipment_assigned',
                 'shipment_id' => $shipment->id,
@@ -41,16 +51,22 @@ class NotificationService
         $daysRemaining = $driver->getLicenseExpiryDays();
         
         if ($daysRemaining && $daysRemaining <= 30) {
+            $locale = $driver->lang ?? 'ar';
+            
+            $title = __('api.notification_license_expiry_title', [], $locale);
+            $body = __('api.notification_license_expiry_body', ['days' => $daysRemaining], $locale);
+            $bodyDetailed = __('api.notification_license_expiry_body_detailed', ['days' => $daysRemaining], $locale);
+
             DriverNotification::create([
                 'driver_id' => $driver->id,
-                'title' => 'License Expiring Soon',
-                'body' => "Your license expires in {$daysRemaining} days",
+                'title' => $title,
+                'body' => $body,
                 'type' => NotificationType::LICENSE_EXPIRY,
             ]);
 
             $this->sendPushNotification($driver, [
-                'title' => 'License Expiring Soon',
-                'body' => "Your license expires in {$daysRemaining} days. Please contact management.",
+                'title' => $title,
+                'body' => $bodyDetailed,
                 'data' => [
                     'type' => 'license_expiry',
                     'days_remaining' => $daysRemaining,
@@ -71,22 +87,31 @@ class NotificationService
             return; // Already notified
         }
 
+        $locale = $driver->lang ?? 'ar';
         $areaName = $shipment->fromArea ? $shipment->fromArea->name : 'Unknown Area';
         $pickupDate = $shipment->pickup_date->format('Y-m-d H:i');
+
+        $title = __('api.notification_pickup_reminder_title', [], $locale);
+        $body = __('api.notification_pickup_reminder_body', ['awb' => $shipment->awb, 'area' => $areaName], $locale);
+        $bodyDetailed = __('api.notification_pickup_reminder_body_detailed', [
+            'awb' => $shipment->awb,
+            'date' => $pickupDate,
+            'area' => $areaName,
+        ], $locale);
 
         // Create database notification
         DriverNotification::create([
             'driver_id' => $driver->id,
             'shipment_id' => $shipment->id,
-            'title' => 'Pickup Reminder',
-            'body' => "AWB: {$shipment->awb} - Pickup tomorrow from {$areaName}",
+            'title' => $title,
+            'body' => $body,
             'type' => NotificationType::PICKUP_REMINDER,
         ]);
 
         // Send push notification
         $this->sendPushNotification($driver, [
-            'title' => 'Pickup Reminder',
-            'body' => "AWB: {$shipment->awb} - Pickup tomorrow at {$pickupDate} from {$areaName}",
+            'title' => $title,
+            'body' => $bodyDetailed,
             'data' => [
                 'type' => 'pickup_reminder',
                 'shipment_id' => $shipment->id,
