@@ -52,7 +52,16 @@ class ShipmentController extends Controller
             $statusString = $request->status;
             try {
                 $statusEnum = $this->statusMapping->fromMobileApp($statusString);
-                $query->where('status', $statusEnum);
+                
+                // For 'awaiting_acceptance', include both ASSIGNEDMISSION and APPROVED
+                if ($statusEnum === ShipmentStatus::ASSIGNEDMISSION) {
+                    $query->whereIn('status', [
+                        ShipmentStatus::ASSIGNEDMISSION,
+                        ShipmentStatus::APPROVED,
+                    ]);
+                } else {
+                    $query->where('status', $statusEnum);
+                }
             } catch (\InvalidArgumentException $e) {
                 // Invalid status, return empty result
                 $query->whereRaw('1 = 0');
@@ -242,7 +251,10 @@ class ShipmentController extends Controller
         $driver = $request->user();
 
         $count = Shipment::where('driver_id', $driver->id)
-            ->where('status', ShipmentStatus::ASSIGNEDMISSION)
+            ->whereIn('status', [
+                ShipmentStatus::ASSIGNEDMISSION,
+                ShipmentStatus::APPROVED,
+            ])
             ->count();
 
         return $this->successResponse($count);

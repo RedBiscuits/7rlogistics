@@ -59,6 +59,7 @@ enum ShipmentStatus: int implements HasColor, HasLabel
     {
         return match ($this) {
             self::ASSIGNEDMISSION => [self::DRIVER_ACKNOWLEDGED],
+            self::APPROVED => [self::DRIVER_ACKNOWLEDGED], // APPROVED can also transition to acknowledged
             self::DRIVER_ACKNOWLEDGED => [self::DRIVER_ON_WAY_TO_COLLECT],
             self::DRIVER_ON_WAY_TO_COLLECT => [self::AWAITING_COLLECTION],
             self::AWAITING_COLLECTION => [self::DRIVER_RECEIVED],
@@ -84,6 +85,7 @@ enum ShipmentStatus: int implements HasColor, HasLabel
         return match ($this) {
             self::PENDING => 'pending',
             self::ASSIGNEDMISSION => 'awaiting_acceptance',
+            self::APPROVED => 'awaiting_acceptance', // APPROVED also awaits driver acceptance
             self::DRIVER_ACKNOWLEDGED => 'accepted',
             self::DRIVER_ON_WAY_TO_COLLECT => 'on_way',
             self::AWAITING_COLLECTION => 'awaiting_loading',
@@ -91,7 +93,6 @@ enum ShipmentStatus: int implements HasColor, HasLabel
             self::ON_ITS_WAY => 'in_transit',
             self::DELIVERED => 'delivered',
             self::CANCELLED => 'exception',
-            self::APPROVED => 'delivered',
         };
     }
 

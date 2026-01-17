@@ -7,6 +7,7 @@ use App\Filament\Super_Admin\Resources\DriverResource\RelationManagers\MissionsR
 use App\Models\Driver;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -48,6 +49,18 @@ class DriverResource extends Resource
                     ->maxLength(255),
 
                 DatePicker::make('driving_license_expire_date'),
+
+                Select::make('license_type')
+                    ->label('License Type')
+                    ->options([
+                        'A' => 'Type A (Motorcycle)',
+                        'B' => 'Type B (Car)',
+                        'C' => 'Type C (Truck)',
+                        'D' => 'Type D (Bus)',
+                        'E' => 'Type E (Trailer)',
+                    ])
+                    ->searchable()
+                    ->nullable(),
 
                 TextInput::make('car_type')
                     ->maxLength(255),
@@ -142,6 +155,13 @@ class DriverResource extends Resource
                     ->date()
                     ->sortable()
                     ->default(null),
+                TextColumn::make('license_type')
+                    ->label('License Type')
+                    ->searchable()
+                    ->sortable()
+                    ->badge()
+                    ->color('info')
+                    ->default('N/A'),
                 TextColumn::make('car_license_expire_date')
                     ->date()
                     ->sortable()

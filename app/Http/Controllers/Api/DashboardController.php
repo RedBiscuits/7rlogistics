@@ -44,7 +44,10 @@ class DashboardController extends Controller
 
         // Shipment counts
         $upcomingShipments = $driver->missions()
-            ->where('status', ShipmentStatus::ASSIGNEDMISSION)
+            ->whereIn('status', [
+                ShipmentStatus::ASSIGNEDMISSION,
+                ShipmentStatus::APPROVED,
+            ])
             ->count();
 
         $currentShipments = $driver->missions()

@@ -20,6 +20,7 @@ class Driver extends Model implements HasMedia
         'id_expire_date',
         'driving_license_number',
         'driving_license_expire_date',
+        'license_type',
         'car_type',
         'car_license',
         'car_license_expire_date',

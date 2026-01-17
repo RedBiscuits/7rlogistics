@@ -19,18 +19,26 @@ class ShipmentResource extends JsonResource
         $statusMapping = app(StatusMappingService::class);
         $imageService = app(ImageUploadService::class);
 
-        // Build pickup address from fromArea and fromCity
+        // Build pickup address - use from_location if available, otherwise build from area/city
         $pickupAddress = null;
         $pickupLat = null;
         $pickupLng = null;
-        if ($this->fromArea && $this->fromCity) {
-            $pickupAddress = $this->fromArea->name . ', ' . $this->fromCity->name;
-            // Try to get coordinates from area, or use shipment's coordinates if available
+        
+        if ($this->fromArea) {
+            // Build from area and optionally city
+            $pickupAddress = $this->fromArea->name;
+            if ($this->fromCity) {
+                $pickupAddress .= ', ' . $this->fromCity->name;
+            }
+        }
+        
+        // Get coordinates from area if available
+        if ($this->fromArea) {
             $pickupLat = isset($this->fromArea->latitude) ? (float) $this->fromArea->latitude : null;
             $pickupLng = isset($this->fromArea->longitude) ? (float) $this->fromArea->longitude : null;
         }
 
-        // Build delivery address
+        // Build delivery address - use to_location if available, otherwise receiver_address
         $deliveryAddress = $this->receiver_address;
         $deliveryLat = $this->latitude;
         $deliveryLng = $this->longitude;

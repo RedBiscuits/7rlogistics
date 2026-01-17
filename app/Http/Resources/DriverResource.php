@@ -49,7 +49,7 @@ class DriverResource extends JsonResource
             'avatar' => $profilePhoto ? $profilePhoto->getUrl() : null,
             'licenseNumber' => $this->driving_license_number,
             'licenseExpiry' => $this->driving_license_expire_date?->format('Y-m-d'),
-            'licenseType' => null, // Not available in current schema
+            'licenseType' => $this->license_type,
             'vehicleId' => $vehicleId,
             'vehiclePlate' => $vehiclePlate,
             'vehicleModel' => $vehicleModel,

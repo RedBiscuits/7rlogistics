@@ -49,6 +49,18 @@ class DriverResource extends Resource
 
                 DatePicker::make('driving_license_expire_date'),
 
+                \Filament\Forms\Components\Select::make('license_type')
+                    ->label('License Type')
+                    ->options([
+                        'A' => 'Type A (Motorcycle)',
+                        'B' => 'Type B (Car)',
+                        'C' => 'Type C (Truck)',
+                        'D' => 'Type D (Bus)',
+                        'E' => 'Type E (Trailer)',
+                    ])
+                    ->searchable()
+                    ->nullable(),
+
                 TextInput::make('car_type')
                     ->maxLength(255),
 
@@ -175,6 +187,13 @@ class DriverResource extends Resource
                         $days = $record->getLicenseExpiryDays();
                         return $record->driving_license_expire_date->format('Y-m-d') . " ({$days} days)";
                     }),
+                TextColumn::make('license_type')
+                    ->label('License Type')
+                    ->searchable()
+                    ->sortable()
+                    ->badge()
+                    ->color('info')
+                    ->default('N/A'),
                 TextColumn::make('car_license_expire_date')
                     ->date()
                     ->sortable()
