@@ -29,16 +29,15 @@ class AttendanceController extends Controller
         /** @var \App\Models\Driver $driver */
         $driver = $request->user();
 
-        // Check if already checked in today
+        // Check if already checked in today (once per day validation)
         $todayAttendance = DriverAttendance::forDriver($driver->id)
             ->forDate(now()->toDateString())
-            ->checkedIn()
             ->first();
 
         if ($todayAttendance) {
             return $this->successResponse([
                 'allowed' => false,
-                'message' => __('api.already_checked_in'),
+                'message' => __('api.already_checked_in_today'),
             ]);
         }
 

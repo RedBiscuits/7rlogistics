@@ -79,7 +79,7 @@ class ShipmentResource extends Resource
                     ->reactive()
                     ->searchable()
                     ->hidden(fn ($get) => $get('status') == 0 || $get('status') == 1)
-                    ->required(fn ($get) => $get('status') != 0 && $get('status') != 1)
+                    ->required(fn ($get) => $get('status') != 0 && $get('status') != 1 && $get('status') != 6)
                     ->dehydrated(fn ($get) => $get('status') != 0 && $get('status') != 1)
                     ->helperText(function (callable $get) {
                         $driverId = $get('driver_id');

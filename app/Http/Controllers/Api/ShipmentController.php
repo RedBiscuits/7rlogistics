@@ -36,6 +36,7 @@ class ShipmentController extends Controller
         $driver = $request->user();
 
         $query = Shipment::where('driver_id', $driver->id)
+            ->where('created_at', '>=', now()->subDays(40))
             ->with([
                 'driver',
                 'truck.truckType',

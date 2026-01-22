@@ -42,8 +42,11 @@ class DashboardController extends Controller
             ->completed()
             ->sum('hours_worked');
 
-        // Shipment counts
+        // Shipment counts - limited to last 40 days
+        $dateLimit = now()->subDays(40);
+        
         $upcomingShipments = $driver->missions()
+            ->where('created_at', '>=', $dateLimit)
             ->whereIn('status', [
                 ShipmentStatus::ASSIGNEDMISSION,
                 ShipmentStatus::APPROVED,
@@ -51,6 +54,7 @@ class DashboardController extends Controller
             ->count();
 
         $currentShipments = $driver->missions()
+            ->where('created_at', '>=', $dateLimit)
             ->whereIn('status', [
                 ShipmentStatus::DRIVER_ACKNOWLEDGED,
                 ShipmentStatus::DRIVER_ON_WAY_TO_COLLECT,
@@ -61,6 +65,7 @@ class DashboardController extends Controller
             ->count();
 
         $completedShipments = $driver->missions()
+            ->where('created_at', '>=', $dateLimit)
             ->where('status', ShipmentStatus::DELIVERED)
             ->count();
 

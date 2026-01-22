@@ -57,6 +57,16 @@ class ShipmentResource extends JsonResource
             $signature = $this->signature;
         }
 
+        // Build requestedVehicle: "truckType - plate_number"
+        $requestedVehicle = null;
+        if ($this->truck) {
+            $truckTypeName = $this->truck->truckType?->name ?? '';
+            $plateNumber = $this->truck->plate_number ?? '';
+            if ($truckTypeName || $plateNumber) {
+                $requestedVehicle = trim($truckTypeName . ' - ' . $plateNumber);
+            }
+        }
+
         return [
             'id' => (string) $this->id,
             'trackingNumber' => $this->awb ?? $this->tracking_number ?? (string) $this->id,
@@ -71,6 +81,7 @@ class ShipmentResource extends JsonResource
             'deliveryLng' => $deliveryLng,
             'fromLocation' => $this->from_location,
             'toLocation' => $this->to_location,
+            'requestedVehicle' => $requestedVehicle,
             'specialInstructions' => $this->instructions ?? $this->notes ?? $this->description ?? null,
             'estimatedDelivery' => $this->pickup_date?->format('Y-m-d\TH:i:s\Z'),
             'createdAt' => $this->created_at->format('Y-m-d\TH:i:s\Z'),

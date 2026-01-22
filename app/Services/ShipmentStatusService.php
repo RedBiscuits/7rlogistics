@@ -10,8 +10,8 @@ class ShipmentStatusService
 {
     public function acknowledgeShipment(Shipment $shipment): Shipment
     {
-        if ($shipment->status !== ShipmentStatus::ASSIGNEDMISSION) {
-            throw new \InvalidArgumentException('Shipment must be in ASSIGNED_MISSION status to be acknowledged.');
+        if (!in_array($shipment->status, [ShipmentStatus::ASSIGNEDMISSION, ShipmentStatus::APPROVED])) {
+            throw new \InvalidArgumentException('Shipment must be in ASSIGNED_MISSION or APPROVED status to be acknowledged.');
         }
 
         $shipment->update([

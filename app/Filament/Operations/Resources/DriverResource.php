@@ -52,11 +52,9 @@ class DriverResource extends Resource
                 \Filament\Forms\Components\Select::make('license_type')
                     ->label('License Type')
                     ->options([
-                        'A' => 'Type A (Motorcycle)',
-                        'B' => 'Type B (Car)',
-                        'C' => 'Type C (Truck)',
-                        'D' => 'Type D (Bus)',
-                        'E' => 'Type E (Trailer)',
+                        'درجة أولي' => 'درجة أولي',
+                        'درجة تانية' => 'درجة تانية',
+                        'درجة ثالثة' => 'درجة ثالثة',
                     ])
                     ->searchable()
                     ->nullable(),
@@ -119,11 +117,12 @@ class DriverResource extends Resource
 
                 SpatieMediaLibraryFileUpload::make('profile_photo')
                     ->collection('profile_photo')
-                    ->label('Profile Photo')
+                    ->label('Avatar / Profile Photo')
                     ->downloadable()
                     ->openable()
                     ->image()
-                    ->previewable(),
+                    ->previewable()
+                    ->helperText('This image is returned as "avatar" in the driver profile API'),
 
                 SpatieMediaLibraryFileUpload::make('attachments')
                     ->collection('attachments')
@@ -141,6 +140,12 @@ class DriverResource extends Resource
     {
         return $table
             ->columns([
+                SpatieMediaLibraryImageColumn::make('avatar')
+                    ->label('Avatar')
+                    ->collection('profile_photo')
+                    ->circular()
+                    ->defaultImageUrl(url('/images/default-avatar.png'))
+                    ->size(40),
                 TextColumn::make('id')
                     ->label('ID')
                     ->sortable(),
