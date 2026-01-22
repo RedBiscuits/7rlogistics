@@ -39,11 +39,11 @@ $dryRun = false;
 
 // Source IDs (test shipments to be renumbered)
 // PRODUCTION: These are the test shipments that jumped from 219 to 225
-$sourceIds = [225, 226, 227, 228, 229, 230, 231, 232];
+$sourceIds = [1000233, 1000234, 1000235, 1000236];
 
 // Target IDs (what they should become)
 // PRODUCTION: These should continue the sequence from 219
-$targetIds = [219, 220, 221, 222, 223, 224, 225, 226];
+$targetIds = [227, 228, 229, 230];
 
 // The shift amount (target - source for first pair)
 $shift = $targetIds[0] - $sourceIds[0]; // -6
@@ -443,8 +443,7 @@ if (!$dryRun) {
 // ============================================================
 printStep(7, "Auto-increment reset suggestion");
 
-$maxId = DB::table('shipments')->max('id');
-$nextAutoIncrement = $maxId + 1;
+$nextAutoIncrement = 231;
 
 echo "Current max shipment ID: $maxId\n";
 echo "Suggested auto-increment value: $nextAutoIncrement\n";
