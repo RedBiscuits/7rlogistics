@@ -44,7 +44,7 @@ class AttendancesRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('check_out_at')
                     ->label('Check-out')
                     ->dateTime('d-m-Y H:i')
-                    ->default('N/A')
+                    ->placeholder('N/A')
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('hours_worked')
