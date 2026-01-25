@@ -43,7 +43,7 @@ $sourceIds = [1000233, 1000234, 1000235, 1000236];
 
 // Target IDs (what they should become)
 // PRODUCTION: These should continue the sequence from 219
-$targetIds = [227, 228, 229, 230];
+$targetIds = [227, 220, 221, 222, 223, 224, 225, 226];
 
 // The shift amount (target - source for first pair)
 $shift = $targetIds[0] - $sourceIds[0]; // -6
@@ -443,12 +443,13 @@ if (!$dryRun) {
 // ============================================================
 printStep(7, "Auto-increment reset suggestion");
 
-$nextAutoIncrement = 231;
+$maxId = DB::table('shipments')->max('id');
+$nextAutoIncrement = $maxId + 1;
 
 echo "Current max shipment ID: $maxId\n";
 echo "Suggested auto-increment value: $nextAutoIncrement\n";
 echo "\nTo reset auto-increment, run this SQL:\n";
-echo "  ALTER TABLE shipments AUTO_INCREMENT = $nextAutoIncrement;\n";
+echo " $nextAutoIncrement;\n";
 
 printHeader("SCRIPT COMPLETED");
 

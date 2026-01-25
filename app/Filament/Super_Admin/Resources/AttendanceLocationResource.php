@@ -138,7 +138,12 @@ class AttendanceLocationResource extends Resource
                                     return 'N/A';
                                 }
                                 $lastAttendance = $record->attendances()->latest('check_in_at')->first();
-                                return $lastAttendance ? $lastAttendance->check_in_at->format('Y-m-d H:i:s') : 'No check-ins yet';
+                                if (!$lastAttendance) {
+                                    return 'No check-ins yet';
+                                }
+                                return $lastAttendance->check_in_at
+                                    ->setTimezone(config('app.timezone'))
+                                    ->format('Y-m-d H:i:s');
                             }),
                     ])->columns(2),
             ]);
@@ -205,7 +210,7 @@ class AttendanceLocationResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            \App\Filament\Super_Admin\Resources\AttendanceLocationResource\RelationManagers\AttendancesRelationManager::class,
         ];
     }
 
