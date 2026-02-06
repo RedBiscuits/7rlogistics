@@ -13,3 +13,8 @@ Schedule::command('shipments:send-pickup-reminders')
     ->daily()
     ->at('09:00')
     ->description('Send pickup reminder notifications to drivers 1 day before pickup date');
+
+// Schedule reminders for shipments awaiting driver acceptance every 10 minutes
+Schedule::command('shipments:send-pending-acceptance-reminders')
+    ->everyTenMinutes()
+    ->description('Send reminders to drivers for shipments awaiting acceptance');

@@ -56,8 +56,10 @@ class AuthController extends Controller
             }
         }
 
-        // Create token
-        $token = $driver->createToken('driver-api-token')->plainTextToken;
+        // Create short-lived token (15 minutes TTL)
+        $token = $driver
+            ->createToken('driver-api-token', ['*'], now()->addMinutes(15))
+            ->plainTextToken;
 
         return $this->successResponse([
             'id' => (string) $driver->id,
@@ -147,8 +149,10 @@ class AuthController extends Controller
             return $this->errorResponse(__('api.invalid_biometric_token'), 401);
         }
 
-        // Create new token for session
-        $token = $matchedDriver->createToken('driver-api-token')->plainTextToken;
+        // Create new short-lived token for session (15 minutes TTL)
+        $token = $matchedDriver
+            ->createToken('driver-api-token', ['*'], now()->addMinutes(15))
+            ->plainTextToken;
 
         return $this->successResponse([
             'token' => $token,

@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Super_Admin\Resources\AttendanceResource;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -33,6 +34,9 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => Color::Green,
             ])
             ->discoverResources(in: app_path('Filament/Super_Admin/Resources'), for: 'App\\Filament\\Super_Admin\\Resources')
+            ->resources([
+                AttendanceResource::class,
+            ])
             ->discoverPages(in: app_path('Filament/Super_Admin/Pages'), for: 'App\\Filament\\Super_Admin\\Pages')
             ->pages([
                 Pages\Dashboard::class,

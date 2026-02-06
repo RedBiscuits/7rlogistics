@@ -52,4 +52,6 @@ return [
     'notification_pickup_reminder_title' => 'Pickup Reminder',
     'notification_pickup_reminder_body' => 'AWB: :awb - Pickup tomorrow from :area',
     'notification_pickup_reminder_body_detailed' => 'AWB: :awb - Pickup tomorrow at :date from :area',
+    'notification_pending_acceptance_title' => 'Shipment Awaiting Acceptance',
+    'notification_pending_acceptance_body' => 'Shipment #:id is still awaiting your acceptance',
 ];

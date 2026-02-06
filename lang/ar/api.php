@@ -52,4 +52,6 @@ return [
     'notification_pickup_reminder_title' => 'تذكير بالاستلام',
     'notification_pickup_reminder_body' => 'رقم الشحنة: :awb - الاستلام غداً من :area',
     'notification_pickup_reminder_body_detailed' => 'رقم الشحنة: :awb - الاستلام غداً في :date من :area',
+    'notification_pending_acceptance_title' => 'شحنة في انتظار القبول',
+    'notification_pending_acceptance_body' => 'الشحنة رقم #:id لا تزال في انتظار قبولك',
 ];

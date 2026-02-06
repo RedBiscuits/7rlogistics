@@ -8,6 +8,8 @@ use App\Models\Driver;
 use App\Models\DriverDevice;
 use App\Models\DriverNotification;
 use App\Models\Shipment;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 use Kreait\Firebase\Exception\Messaging\InvalidArgument;
 use Kreait\Firebase\Exception\Messaging\NotFound;
 use Kreait\Laravel\Firebase\Facades\Firebase;
@@ -122,6 +124,34 @@ class NotificationService
         ]);
     }
 
+    public function notifyPendingAcceptanceReminder(Driver $driver, Shipment $shipment): void
+    {
+        $locale = $driver->lang ?? 'ar';
+
+        $title = __('api.notification_pending_acceptance_title', [], $locale);
+        $body = __('api.notification_pending_acceptance_body', [
+            'id' => $shipment->id,
+        ], $locale);
+
+        // Store as a general notification to keep history
+        DriverNotification::create([
+            'driver_id' => $driver->id,
+            'shipment_id' => $shipment->id,
+            'title' => $title,
+            'body' => $body,
+            'type' => NotificationType::GENERAL,
+        ]);
+
+        $this->sendPushNotification($driver, [
+            'title' => $title,
+            'body' => $body,
+            'data' => [
+                'type' => 'shipment_pending_acceptance',
+                'shipment_id' => $shipment->id,
+            ],
+        ]);
+    }
+
     public function sendPushNotification(Driver $driver, array $payload): void
     {
         $devices = $driver->devices()->active()->get();
@@ -222,29 +252,45 @@ class NotificationService
 
     public function registerDevice(Driver $driver, string $token, int $deviceType): DriverDevice
     {
-        // Check if device already exists
-        $device = DriverDevice::where('device_token', $token)->first();
+        $payload = [
+            'driver_id' => $driver->id,
+            'device_type' => $deviceType,
+            'is_active' => true,
+            'last_used_at' => now(),
+        ];
 
-        if ($device) {
-            // Update existing device
-            $device->update([
-                'driver_id' => $driver->id,
-                'device_type' => $deviceType,
-                'is_active' => true,
-                'last_used_at' => now(),
-            ]);
-        } else {
-            // Create new device
-            $device = DriverDevice::create([
-                'driver_id' => $driver->id,
-                'device_token' => $token,
-                'device_type' => $deviceType,
-                'is_active' => true,
-                'last_used_at' => now(),
-            ]);
-        }
+        return DB::transaction(function () use ($driver, $token, $deviceType, $payload) {
+            // Lock existing row to avoid duplicate key under concurrent requests
+            $device = DriverDevice::where('device_token', $token)->lockForUpdate()->first();
 
-        return $device;
+            if ($device) {
+                $device->update($payload);
+                return $device;
+            }
+
+            try {
+                return DriverDevice::create([
+                    'driver_id' => $driver->id,
+                    'device_token' => $token,
+                    'device_type' => $deviceType,
+                    'is_active' => true,
+                    'last_used_at' => now(),
+                ]);
+            } catch (\PDOException|QueryException $e) {
+                // Duplicate entry (race: another request created the same token)
+                $isDuplicate = str_contains($e->getMessage(), 'Duplicate entry')
+                    || (string) $e->getCode() === '23000'
+                    || (int) $e->getCode() === 1062;
+                if ($isDuplicate) {
+                    $device = DriverDevice::where('device_token', $token)->first();
+                    if ($device) {
+                        $device->update($payload);
+                        return $device;
+                    }
+                }
+                throw $e;
+            }
+        });
     }
 }
 

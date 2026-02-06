@@ -82,6 +82,7 @@ class ShipmentResource extends JsonResource
             'fromLocation' => $this->from_location,
             'toLocation' => $this->to_location,
             'requestedVehicle' => $requestedVehicle,
+            'carType' => $this->truck?->truckType?->name,
             'specialInstructions' => $this->instructions ?? $this->notes ?? $this->description ?? null,
             'estimatedDelivery' => $this->pickup_date?->format('Y-m-d\TH:i:s\Z'),
             'createdAt' => $this->created_at->format('Y-m-d\TH:i:s\Z'),
