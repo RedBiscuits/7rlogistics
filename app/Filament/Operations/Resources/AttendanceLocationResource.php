@@ -194,6 +194,7 @@ class AttendanceLocationResource extends Resource
                     ->falseLabel('Inactive only'),
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\Action::make('view_on_map')
                     ->label('View on Map')
                     ->icon('heroicon-o-map')
@@ -225,6 +226,7 @@ class AttendanceLocationResource extends Resource
         return [
             'index' => Pages\ListAttendanceLocations::route('/'),
             'create' => Pages\CreateAttendanceLocation::route('/create'),
+            'view' => Pages\ViewAttendanceLocation::route('/{record}'),
             'edit' => Pages\EditAttendanceLocation::route('/{record}/edit'),
         ];
     }

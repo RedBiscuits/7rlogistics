@@ -36,11 +36,13 @@ class AttendanceResource extends Resource
                             ->label('Driver')
                             ->relationship('driver', 'name')
                             ->searchable()
+                            ->preload()
                             ->required(),
                         Forms\Components\Select::make('attendance_location_id')
                             ->label('Location')
                             ->relationship('location', 'name')
                             ->searchable()
+                            ->preload()
                             ->required(),
                         Forms\Components\DatePicker::make('date')
                             ->label('Date')
@@ -53,16 +55,30 @@ class AttendanceResource extends Resource
                             ->label('Hours worked')
                             ->numeric()
                             ->suffix(' hrs'),
-                        Forms\Components\Placeholder::make('check_in_coords')
-                            ->label('Check-in coordinates')
-                            ->content(fn (?DriverAttendance $record) => $record && $record->check_in_latitude && $record->check_in_longitude
-                                ? "{$record->check_in_latitude}, {$record->check_in_longitude}"
-                                : 'N/A'),
-                        Forms\Components\Placeholder::make('check_out_coords')
-                            ->label('Check-out coordinates')
-                            ->content(fn (?DriverAttendance $record) => $record && $record->check_out_latitude && $record->check_out_longitude
-                                ? "{$record->check_out_latitude}, {$record->check_out_longitude}"
-                                : 'N/A'),
+                        Forms\Components\TextInput::make('check_in_latitude')
+                            ->label('Check-in Latitude')
+                            ->numeric()
+                            ->step(0.000001)
+                            ->nullable()
+                            ->dehydrateStateUsing(fn ($state) => $state === '' || $state === null ? null : $state),
+                        Forms\Components\TextInput::make('check_in_longitude')
+                            ->label('Check-in Longitude')
+                            ->numeric()
+                            ->step(0.000001)
+                            ->nullable()
+                            ->dehydrateStateUsing(fn ($state) => $state === '' || $state === null ? null : $state),
+                        Forms\Components\TextInput::make('check_out_latitude')
+                            ->label('Check-out Latitude')
+                            ->numeric()
+                            ->step(0.000001)
+                            ->nullable()
+                            ->dehydrateStateUsing(fn ($state) => $state === '' || $state === null ? null : $state),
+                        Forms\Components\TextInput::make('check_out_longitude')
+                            ->label('Check-out Longitude')
+                            ->numeric()
+                            ->step(0.000001)
+                            ->nullable()
+                            ->dehydrateStateUsing(fn ($state) => $state === '' || $state === null ? null : $state),
                     ])->columns(2),
             ]);
     }
@@ -170,6 +186,9 @@ class AttendanceResource extends Resource
                     }),
             ])
             ->defaultSort('date', 'desc')
+            ->headerActions([
+                Tables\Actions\CreateAction::make(),
+            ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
@@ -185,6 +204,7 @@ class AttendanceResource extends Resource
     {
         return [
             'index' => Pages\ListAttendances::route('/'),
+            'create' => Pages\CreateAttendance::route('/create'),
             'view' => Pages\ViewAttendance::route('/{record}'),
             'edit' => Pages\EditAttendance::route('/{record}/edit'),
         ];
@@ -192,7 +212,7 @@ class AttendanceResource extends Resource
 
     public static function canCreate(): bool
     {
-        return false;
+        return true;
     }
 }
 

@@ -3,7 +3,9 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Super_Admin\Resources\AttendanceResource;
+use Filament\Facades\Filament;
 use Filament\Http\Middleware\Authenticate;
+use Filament\Navigation\NavigationItem;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\MenuItem;
@@ -36,6 +38,14 @@ class AdminPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Super_Admin/Resources'), for: 'App\\Filament\\Super_Admin\\Resources')
             ->resources([
                 AttendanceResource::class,
+            ])
+            ->navigationItems([
+                NavigationItem::make('Attendances')
+                    ->label('Attendances')
+                    ->url(fn () => Filament::getPanel('admin')->getUrl() . '/attendances')
+                    ->icon('heroicon-o-clipboard-document-check')
+                    ->group('System management')
+                    ->sort(7),
             ])
             ->discoverPages(in: app_path('Filament/Super_Admin/Pages'), for: 'App\\Filament\\Super_Admin\\Pages')
             ->pages([
