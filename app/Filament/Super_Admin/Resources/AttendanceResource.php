@@ -67,26 +67,30 @@ class AttendanceResource extends Resource
                         Forms\Components\TextInput::make('check_in_latitude')
                             ->label('Check-in Latitude')
                             ->numeric()
-                            ->step(0.000001)
+                            ->step('any')
                             ->nullable()
+                            ->rules(['nullable', 'numeric', 'between:-90,90'])
                             ->dehydrateStateUsing(fn ($state) => $state === '' || $state === null ? null : $state),
                         Forms\Components\TextInput::make('check_in_longitude')
                             ->label('Check-in Longitude')
                             ->numeric()
-                            ->step(0.000001)
+                            ->step('any')
                             ->nullable()
+                            ->rules(['nullable', 'numeric', 'between:-180,180'])
                             ->dehydrateStateUsing(fn ($state) => $state === '' || $state === null ? null : $state),
                         Forms\Components\TextInput::make('check_out_latitude')
                             ->label('Check-out Latitude')
                             ->numeric()
-                            ->step(0.000001)
+                            ->step('any')
                             ->nullable()
+                            ->rules(['nullable', 'numeric', 'between:-90,90'])
                             ->dehydrateStateUsing(fn ($state) => $state === '' || $state === null ? null : $state),
                         Forms\Components\TextInput::make('check_out_longitude')
                             ->label('Check-out Longitude')
                             ->numeric()
-                            ->step(0.000001)
+                            ->step('any')
                             ->nullable()
+                            ->rules(['nullable', 'numeric', 'between:-180,180'])
                             ->dehydrateStateUsing(fn ($state) => $state === '' || $state === null ? null : $state),
                     ])->columns(2),
             ]);
