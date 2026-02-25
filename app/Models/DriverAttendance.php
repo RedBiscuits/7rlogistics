@@ -23,6 +23,7 @@ class DriverAttendance extends Model
         'check_out_longitude',
         'hours_worked',
         'date',
+        'shift_number',
     ];
 
     protected $casts = [
@@ -72,6 +73,22 @@ class DriverAttendance extends Model
         return $query->whereNotNull('check_out_at');
     }
 
+    public static function nextShiftNumber(int $driverId, string $date): int
+    {
+        $max = static::where('driver_id', $driverId)
+            ->whereDate('date', $date)
+            ->max('shift_number');
+
+        return ($max ?? 0) + 1;
+    }
+
+    public static function hasActiveShift(int $driverId): bool
+    {
+        return static::where('driver_id', $driverId)
+            ->whereNull('check_out_at')
+            ->exists();
+    }
+
     /**
      * Calculate hours worked from check-in and check-out times
      */
@@ -94,7 +111,8 @@ class DriverAttendance extends Model
 
         static::updating(function ($attendance) {
             if ($attendance->isDirty('check_out_at') && $attendance->check_out_at) {
-                $attendance->hours_worked = $attendance->calculateHours();
+                $hours = $attendance->calculateHours();
+                $attendance->hours_worked = $hours !== null ? min($hours, 999.99) : null;
             }
         });
     }

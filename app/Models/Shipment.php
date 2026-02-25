@@ -142,6 +142,21 @@ class Shipment extends Model implements HasMedia
         return $this->hasMany(DriverNotification::class);
     }
 
+    public function stops()
+    {
+        return $this->hasMany(ShipmentStop::class)->orderBy('type')->orderBy('sequence');
+    }
+
+    public function pickupStops()
+    {
+        return $this->hasMany(ShipmentStop::class)->where('type', 'pickup')->orderBy('sequence');
+    }
+
+    public function deliveryStops()
+    {
+        return $this->hasMany(ShipmentStop::class)->where('type', 'delivery')->orderBy('sequence');
+    }
+
     public function getDeliveryProofs()
     {
         return $this->getMedia('delivery_proofs');

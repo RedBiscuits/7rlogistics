@@ -74,7 +74,7 @@ Route::middleware(['set.locale'])->group(function () {
     Route::prefix('v1')->group(function () {
         Route::post('/auth/login', [AuthController::class, 'login']);
         
-        Route::middleware(['auth:sanctum', 'driver.license'])->group(function () {
+        Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('/auth/logout', [AuthController::class, 'logout']);
             Route::get('/auth/profile', [AuthController::class, 'profile']);
             Route::post('/auth/register-device', [AuthController::class, 'registerDevice']);

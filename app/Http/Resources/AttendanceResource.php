@@ -13,6 +13,7 @@ class AttendanceResource extends JsonResource
             'id' => (string) $this->id,
             'driverId' => (string) $this->driver_id,
             'date' => $this->date->format('Y-m-d'),
+            'shiftNumber' => (int) ($this->shift_number ?? 1),
             'checkInTime' => $this->check_in_at?->format('Y-m-d\TH:i:s\Z'),
             'checkInLat' => (float) $this->check_in_latitude,
             'checkInLng' => (float) $this->check_in_longitude,

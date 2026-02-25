@@ -19,29 +19,35 @@ class ShipmentResource extends JsonResource
         $statusMapping = app(StatusMappingService::class);
         $imageService = app(ImageUploadService::class);
 
-        // Build pickup address - use from_location if available, otherwise build from area/city
+        // Resolve stops if loaded
+        $pickupStops = $this->whenLoaded('stops', function () {
+            return $this->stops->where('type', 'pickup')->sortBy('sequence')->values();
+        });
+        $deliveryStops = $this->whenLoaded('stops', function () {
+            return $this->stops->where('type', 'delivery')->sortBy('sequence')->values();
+        });
+
+        $firstPickup = $pickupStops instanceof \Illuminate\Support\Collection ? $pickupStops->first() : null;
+        $firstDelivery = $deliveryStops instanceof \Illuminate\Support\Collection ? $deliveryStops->first() : null;
+
+        // Build pickup address -- prefer stop name, fall back to legacy columns
         $pickupAddress = null;
-        $pickupLat = null;
-        $pickupLng = null;
-        
-        if ($this->fromArea) {
-            // Build from area and optionally city
+        if ($firstPickup) {
+            $pickupAddress = $firstPickup->name ?: $firstPickup->location;
+        } elseif ($this->fromArea) {
             $pickupAddress = $this->fromArea->name;
             if ($this->fromCity) {
                 $pickupAddress .= ', ' . $this->fromCity->name;
             }
         }
-        
-        // Get coordinates from area if available
-        if ($this->fromArea) {
-            $pickupLat = isset($this->fromArea->latitude) ? (float) $this->fromArea->latitude : null;
-            $pickupLng = isset($this->fromArea->longitude) ? (float) $this->fromArea->longitude : null;
-        }
 
-        // Build delivery address - use to_location if available, otherwise receiver_address
-        $deliveryAddress = $this->receiver_address;
-        $deliveryLat = $this->latitude;
-        $deliveryLng = $this->longitude;
+        // Build delivery address -- prefer stop name, fall back to legacy columns
+        $deliveryAddress = null;
+        if ($firstDelivery) {
+            $deliveryAddress = $firstDelivery->name ?: $firstDelivery->location;
+        } else {
+            $deliveryAddress = $this->receiver_address;
+        }
 
         // Get photos from media collections
         $pickupPhotos = $imageService->getImageUrls($this->resource, 'pickup_photos', false);
@@ -69,18 +75,16 @@ class ShipmentResource extends JsonResource
 
         return [
             'id' => (string) $this->id,
-            'trackingNumber' => $this->awb ?? $this->tracking_number ?? (string) $this->id,
+            'trackingNumber' => (string) $this->id,
             'status' => $statusMapping->toMobileApp($this->status),
             'customerName' => $this->receiver_name,
             'customerPhone' => $this->receiver_phone,
             'pickupAddress' => $pickupAddress,
-            'pickupLat' => $pickupLat,
-            'pickupLng' => $pickupLng,
             'deliveryAddress' => $deliveryAddress,
-            'deliveryLat' => $deliveryLat,
-            'deliveryLng' => $deliveryLng,
             'fromLocation' => $this->from_location,
             'toLocation' => $this->to_location,
+            'areaFrom' => $this->fromArea?->name,
+            'areaTo' => $this->toArea?->name,
             'requestedVehicle' => $requestedVehicle,
             'carType' => $this->truck?->truckType?->name,
             'specialInstructions' => $this->instructions ?? $this->notes ?? $this->description ?? null,
@@ -91,7 +95,6 @@ class ShipmentResource extends JsonResource
             'deliveryPhotos' => $deliveryPhotos,
             'tollPhotos' => $tollPhotos,
             'signature' => $signature,
-            // Photo requirements info
             'photoRequirements' => [
                 'pickup' => [
                     'count' => $this->resource->getPickupPhotosCount(),
@@ -108,6 +111,12 @@ class ShipmentResource extends JsonResource
                     'fulfilled' => $this->resource->hasSignature(),
                 ],
             ],
+            'stops' => $this->when($this->relationLoaded('stops') && $this->stops->isNotEmpty(), function () use ($pickupStops, $deliveryStops) {
+                return [
+                    'pickup' => ShipmentStopResource::collection($pickupStops),
+                    'delivery' => ShipmentStopResource::collection($deliveryStops),
+                ];
+            }),
         ];
     }
 }

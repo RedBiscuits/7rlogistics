@@ -20,8 +20,8 @@ return [
     'biometric_disabled' => 'تم تعطيل المصادقة بالبصمة بنجاح',
 
     // Attendance
-    'already_checked_in' => 'لقد قمت بتسجيل الحضور مسبقاً اليوم',
-    'already_checked_in_today' => 'لقد قمت بتسجيل الحضور اليوم مسبقاً. يُسمح بتسجيل حضور واحد فقط في اليوم.',
+    'already_checked_in' => 'لديك وردية نشطة. يرجى تسجيل الانصراف قبل بدء وردية جديدة.',
+    'already_checked_in_today' => 'لديك وردية نشطة. يرجى تسجيل الانصراف قبل بدء وردية جديدة.',
     'not_at_allowed_location' => 'أنت لست في موقع مسموح به',
     'nearest_location' => 'أقرب موقع: :name (:distance متر)',
     'no_locations_configured' => 'يرجى الحضور في موقع مسموح به',

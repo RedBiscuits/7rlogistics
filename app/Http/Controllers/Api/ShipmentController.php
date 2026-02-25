@@ -46,6 +46,7 @@ class ShipmentController extends Controller
                 'toCity',
                 'company',
                 'packages',
+                'stops',
             ]);
 
         // Filter by status (mobile app string values)
@@ -96,6 +97,7 @@ class ShipmentController extends Controller
             'toCity',
             'company',
             'packages',
+            'stops',
         ]);
 
         return $this->successResponse(new ShipmentResource($shipment));
@@ -109,12 +111,6 @@ class ShipmentController extends Controller
         // Verify shipment belongs to driver
         if ($shipment->driver_id !== $driver->id) {
             return $this->errorResponse(__('api.unauthorized'), 403);
-        }
-
-        // Check license
-        if (!$this->licenseService->canPerformAction($driver)) {
-            $status = $this->licenseService->checkLicenseStatus($driver);
-            return $this->errorResponse($status['message'], 403);
         }
 
         try {
@@ -139,12 +135,6 @@ class ShipmentController extends Controller
         // Verify shipment belongs to driver
         if ($shipment->driver_id !== $driver->id) {
             return $this->errorResponse(__('api.unauthorized'), 403);
-        }
-
-        // Check license
-        if (!$this->licenseService->canPerformAction($driver)) {
-            $status = $this->licenseService->checkLicenseStatus($driver);
-            return $this->errorResponse($status['message'], 403);
         }
 
         try {

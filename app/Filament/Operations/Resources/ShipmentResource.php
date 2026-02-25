@@ -318,6 +318,56 @@ class ShipmentResource extends Resource
                             ]),
                     ]),
 
+                Forms\Components\Section::make('Pickup & Delivery Stops')
+                    ->schema([
+                        Forms\Components\Repeater::make('stops')
+                            ->relationship('stops')
+                            ->defaultItems(0)
+                            ->columns(2)
+                            ->addActionLabel('Add Stop')
+                            ->orderColumn('sequence')
+                            ->schema([
+                                Forms\Components\Select::make('type')
+                                    ->label('Stop Type')
+                                    ->options(['pickup' => 'Pickup', 'delivery' => 'Delivery'])
+                                    ->required(),
+
+                                Forms\Components\TextInput::make('sequence')
+                                    ->label('Order')
+                                    ->numeric()
+                                    ->default(1)
+                                    ->required()
+                                    ->minValue(1),
+
+                                Forms\Components\TextInput::make('name')
+                                    ->label('Stop Name')
+                                    ->required()
+                                    ->columnSpanFull()
+                                    ->placeholder('e.g. Cairo Office, Alexandria Warehouse'),
+
+                                Forms\Components\TextInput::make('location')
+                                    ->label('Google Maps Link')
+                                    ->url()
+                                    ->columnSpanFull()
+                                    ->placeholder('https://www.google.com/maps?q=...'),
+
+                                Forms\Components\TextInput::make('contact_name')
+                                    ->label('Contact Name'),
+
+                                Forms\Components\TextInput::make('contact_phone')
+                                    ->label('Contact Phone')
+                                    ->tel(),
+
+                                Forms\Components\Textarea::make('notes')
+                                    ->label('Notes')
+                                    ->columnSpanFull()
+                                    ->rows(2),
+                            ]),
+                    ])
+                    ->collapsible()
+                    ->collapsed(fn ($record) => $record && $record->stops->isEmpty())
+                    ->description('Optional: Add multiple pickup and delivery locations for this shipment'),
+
                 Forms\Components\Card::make('Packages Information')
                     ->schema([
                         Forms\Components\Repeater::make('packages')

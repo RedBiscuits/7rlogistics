@@ -27,14 +27,6 @@ class ShipmentStatusService
         // Validate status transition
         $this->validateStatusTransition($shipment, $newStatus);
 
-        // Validate photo requirements for specific transitions
-        $this->validatePhotoRequirements($shipment, $newStatus);
-
-        // Validate proofs if required
-        if ($proofs !== null) {
-            $this->validateProofs($shipment, $newStatus, $proofs);
-        }
-
         // Record timestamp
         $this->recordStatusTimestamp($shipment, $newStatus);
 

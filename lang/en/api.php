@@ -20,8 +20,8 @@ return [
     'biometric_disabled' => 'Biometric authentication disabled successfully',
 
     // Attendance
-    'already_checked_in' => 'You are already checked in today',
-    'already_checked_in_today' => 'You have already checked in today. Only one check-in per day is allowed.',
+    'already_checked_in' => 'You have an active shift. Please check out before starting a new shift.',
+    'already_checked_in_today' => 'You have an active shift. Please check out before starting a new shift.',
     'not_at_allowed_location' => 'You are not at an allowed location',
     'nearest_location' => 'Nearest location: :name (:distance m away)',
     'no_locations_configured' => 'Please attend at your allowed location',

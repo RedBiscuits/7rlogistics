@@ -29,15 +29,10 @@ class AttendanceController extends Controller
         /** @var \App\Models\Driver $driver */
         $driver = $request->user();
 
-        // Check if already checked in today (once per day validation)
-        $todayAttendance = DriverAttendance::forDriver($driver->id)
-            ->forDate(now()->toDateString())
-            ->first();
-
-        if ($todayAttendance) {
+        if (DriverAttendance::hasActiveShift($driver->id)) {
             return $this->successResponse([
                 'allowed' => false,
-                'message' => __('api.already_checked_in_today'),
+                'message' => __('api.already_checked_in'),
             ]);
         }
 
@@ -64,14 +59,16 @@ class AttendanceController extends Controller
             ]);
         }
 
-        // Create attendance record
+        $today = now()->toDateString();
+
         $attendance = DriverAttendance::create([
             'driver_id' => $driver->id,
             'attendance_location_id' => $validation['location']->id,
             'check_in_at' => now(),
             'check_in_latitude' => $request->latitude,
             'check_in_longitude' => $request->longitude,
-            'date' => now()->toDateString(),
+            'date' => $today,
+            'shift_number' => DriverAttendance::nextShiftNumber($driver->id, $today),
         ]);
 
         $attendance->load(['location', 'driver']);
@@ -88,7 +85,6 @@ class AttendanceController extends Controller
         /** @var \App\Models\Driver $driver */
         $driver = $request->user();
 
-        // Find active check-in
         $attendance = DriverAttendance::forDriver($driver->id)
             ->checkedIn()
             ->latest('check_in_at')
@@ -101,15 +97,14 @@ class AttendanceController extends Controller
             ]);
         }
 
-        // Update check-out
         $attendance->update([
             'check_out_at' => now(),
             'check_out_latitude' => $request->latitude,
             'check_out_longitude' => $request->longitude,
         ]);
 
-        // Calculate hours worked
-        $attendance->hours_worked = $attendance->calculateHours();
+        $hours = $attendance->calculateHours();
+        $attendance->hours_worked = $hours !== null ? min($hours, 999.99) : null;
         $attendance->save();
         $attendance->refresh();
         $attendance->load(['location', 'driver']);
@@ -126,20 +121,25 @@ class AttendanceController extends Controller
         /** @var \App\Models\Driver $driver */
         $driver = $request->user();
 
-        $todayAttendance = DriverAttendance::forDriver($driver->id)
-            ->forDate(now()->toDateString())
+        $activeShift = DriverAttendance::forDriver($driver->id)
             ->checkedIn()
+            ->latest('check_in_at')
             ->first();
 
-        $hoursToday = DriverAttendance::forDriver($driver->id)
+        $completedHours = (float) DriverAttendance::forDriver($driver->id)
             ->forDate(now()->toDateString())
             ->completed()
             ->sum('hours_worked');
 
+        $shiftsToday = (int) DriverAttendance::forDriver($driver->id)
+            ->forDate(now()->toDateString())
+            ->count();
+
         return response()->json([
-            'checked_in' => $todayAttendance !== null,
-            'current_attendance' => $todayAttendance ? new AttendanceResource($todayAttendance) : null,
-            'hours_today' => (float) $hoursToday,
+            'checked_in' => $activeShift !== null,
+            'current_attendance' => $activeShift ? new AttendanceResource($activeShift) : null,
+            'hours_today' => $completedHours,
+            'shifts_today' => $shiftsToday,
         ]);
     }
 
@@ -151,9 +151,9 @@ class AttendanceController extends Controller
         $query = DriverAttendance::forDriver($driver->id)
             ->completed()
             ->with('location')
-            ->orderBy('date', 'desc');
+            ->orderBy('date', 'desc')
+            ->orderBy('shift_number', 'asc');
 
-        // Date range filter - support both 'from'/'to' and 'from_date'/'to_date'
         $fromDate = $request->input('from') ?? $request->input('from_date');
         $toDate = $request->input('to') ?? $request->input('to_date');
 
@@ -165,13 +165,11 @@ class AttendanceController extends Controller
             $query->whereDate('date', '<=', $toDate);
         }
 
-        // Pagination
         $page = $request->input('page', 1);
         $limit = $request->input('limit', 20);
         
         $attendances = $query->paginate($limit, ['*'], 'page', $page);
 
-        // Return array directly in data, not paginated object
         return $this->successResponse(AttendanceResource::collection($attendances->items()));
     }
 
@@ -180,12 +178,50 @@ class AttendanceController extends Controller
         /** @var \App\Models\Driver $driver */
         $driver = $request->user();
 
-        $attendance = DriverAttendance::forDriver($driver->id)
+        $shifts = DriverAttendance::forDriver($driver->id)
             ->forDate(now()->toDateString())
             ->with('location')
-            ->first();
+            ->orderBy('shift_number', 'asc')
+            ->get();
 
-        return $this->successResponse($attendance ? new AttendanceResource($attendance) : null);
+        // Also check for any unchecked-out shift from a previous day (e.g. driver forgot to check out)
+        $activeShift = $shifts->whereNull('check_out_at')->first();
+        if (!$activeShift) {
+            $staleShift = DriverAttendance::forDriver($driver->id)
+                ->checkedIn()
+                ->with('location')
+                ->latest('check_in_at')
+                ->first();
+            if ($staleShift) {
+                $activeShift = $staleShift;
+                // Include it in the shifts collection so the UI can display it
+                $shifts->push($staleShift);
+            }
+        }
+
+        $completedHours = (float) $shifts->whereNotNull('check_out_at')->sum('hours_worked');
+
+        // Backward compat: top-level fields from the latest shift
+        $latest = $shifts->last();
+
+        $response = [
+            'shifts' => AttendanceResource::collection($shifts),
+            'totalHoursToday' => round($completedHours, 2),
+            'activeShift' => $activeShift ? new AttendanceResource($activeShift) : null,
+            'date' => now()->toDateString(),
+        ];
+
+        // Backward compat flat fields from latest shift
+        if ($latest) {
+            $response['id'] = (string) $latest->id;
+            $response['driverId'] = (string) $latest->driver_id;
+            $response['checkInTime'] = $latest->check_in_at?->format('Y-m-d\TH:i:s\Z');
+            $response['checkOutTime'] = $latest->check_out_at?->format('Y-m-d\TH:i:s\Z');
+            $response['status'] = $latest->check_out_at ? 'checked_out' : 'checked_in';
+            $response['hoursWorked'] = $latest->hours_worked ? (float) $latest->hours_worked : null;
+        }
+
+        return $this->successResponse($shifts->isEmpty() ? null : $response);
     }
 
     public function getMonthlySummary(Request $request): JsonResponse
@@ -199,27 +235,30 @@ class AttendanceController extends Controller
         $attendances = DriverAttendance::forDriver($driver->id)
             ->forMonth($year, $month)
             ->completed()
+            ->orderBy('date')
+            ->orderBy('shift_number')
             ->get();
 
-        $totalDays = $attendances->count();
+        $totalShifts = $attendances->count();
+        $totalDays = $attendances->pluck('date')->unique()->count();
         $totalHours = $attendances->sum('hours_worked');
-        $averageHours = $totalDays > 0 ? round($totalHours / $totalDays, 2) : 0;
+        $averageHoursPerDay = $totalDays > 0 ? round($totalHours / $totalDays, 2) : 0;
 
         return response()->json([
             'year' => $year,
             'month' => $month,
             'total_days_worked' => $totalDays,
+            'total_shifts' => $totalShifts,
             'total_hours' => round($totalHours, 2),
-            'average_hours_per_day' => $averageHours,
+            'average_hours_per_day' => $averageHoursPerDay,
             'attendances' => AttendanceResource::collection($attendances),
         ]);
     }
 
     public function getLocations(Request $request): JsonResponse
     {
-        $locations = \App\Models\AttendanceLocation::active()->get();
+        $locations = AttendanceLocation::active()->get();
 
-        // If coordinates provided, calculate distance
         $lat = $request->input('latitude') ?? $request->input('lat');
         $lng = $request->input('longitude') ?? $request->input('lng');
         

@@ -132,16 +132,33 @@ class AuthController extends Controller
     {
         $request->validate([
             'token' => ['required', 'string', 'min:32'],
+            'driver_code' => ['nullable', 'string'],
+            'userId' => ['nullable', 'string'],
         ]);
 
-        // Find driver by biometric token
-        $drivers = Driver::all();
         $matchedDriver = null;
 
-        foreach ($drivers as $driver) {
-            if ($driver->hasBiometricEnabled() && $driver->validateBiometricToken($request->token)) {
+        // Fast path: direct lookup when driver_code or userId is provided
+        $driverCode = $request->input('driver_code') ?? $request->input('userId');
+        if ($driverCode) {
+            $driver = Driver::where('code', $driverCode)
+                ->orWhere('id', $driverCode)
+                ->first();
+
+            if ($driver && $driver->hasBiometricEnabled() && $driver->validateBiometricToken($request->token)) {
                 $matchedDriver = $driver;
-                break;
+            }
+        }
+
+        // Fallback: scan only drivers with biometric enabled (backward compat)
+        if (!$matchedDriver) {
+            $drivers = Driver::whereNotNull('biometric_token')->get();
+
+            foreach ($drivers as $driver) {
+                if ($driver->validateBiometricToken($request->token)) {
+                    $matchedDriver = $driver;
+                    break;
+                }
             }
         }
 
