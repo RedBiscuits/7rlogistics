@@ -9,11 +9,11 @@
 
 | Item | Status | Notes |
 |------|--------|------|
-| Monetary widgets not registered | OK | `_3ShipmentsStatusOverview` and `_7ProfitChart` are **not** in `OperationsPanelProvider::widgets()`; only non-monetary widgets are registered. |
+| Monetary widgets removed | OK | `_3ShipmentsStatusOverview` and `_7ProfitChart` have been **deleted** from `app/Filament/Operations/Widgets/`. |
 | Latest Shipments widget | OK | `_4LatestShipments` has **no price column**; only company, areas, status. |
 | Remaining widgets | OK | `_1ShipmentsOverview`, `_2ShipmentsValuesOverview`, `_5ShipmentsOperationsOverview`, `_8ShipmentsChart`, `AttendanceReports`, `DriverLicenseWarnings` use **counts only**, no money. |
 
-**Note:** The widget classes `_3ShipmentsStatusOverview.php` and `_7ProfitChart.php` still exist on disk but are not registered for the operations panel, so they do not appear on the dashboard.
+**Note:** After deploy, run `composer dump-autoload` (or `composer install`) to clear Filament's component cache via `post-autoload-dump`, which runs `filament:clear-cached-components`.
 
 ---
 

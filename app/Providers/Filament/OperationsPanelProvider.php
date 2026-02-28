@@ -38,7 +38,6 @@ class OperationsPanelProvider extends PanelProvider
             ])
             ->widgets([
                 Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
                 \App\Filament\Operations\Widgets\_1ShipmentsOverview::class,
                 \App\Filament\Operations\Widgets\_2ShipmentsValuesOverview::class,
                 \App\Filament\Operations\Widgets\_4LatestShipments::class,
