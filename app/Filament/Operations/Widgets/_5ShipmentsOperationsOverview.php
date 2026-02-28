@@ -23,12 +23,12 @@ class _5ShipmentsOperationsOverview extends BaseWidget
                 ->description('Total Number of Companies')
                 ->icon('heroicon-o-building-office')
                 ->chart([12, 5, 8, 15, 3, 9, 11])
-                ->url('admin/companies')
+                ->url('operations/companies')
                 ->color(Color::Cyan),
 
             Stat::make('Total Drivers', Driver::count())
                 ->description('Total available drivers')
-                ->url('admin/drivers')
+                ->url('operations/drivers')
                 ->chart([8, 12, 5, 15, 9, 11, 13])
                 ->icon('heroicon-o-truck')
                 ->color('DRIVER_RECEIVED'),
@@ -37,7 +37,7 @@ class _5ShipmentsOperationsOverview extends BaseWidget
                 ->description('Total Number of Shipments')
                 ->icon('heroicon-o-x-circle')
                 ->chart([7, 2, 10, 3, 15, 4, 17])
-                ->url('admin/shipments?tableFilters[status][value]=canceled&tableFilters[status][values][0]=1')
+                ->url('operations/shipments?tableFilters[status][value]=canceled&tableFilters[status][values][0]=1')
                 ->color('CANCELLED'),
 
         ];

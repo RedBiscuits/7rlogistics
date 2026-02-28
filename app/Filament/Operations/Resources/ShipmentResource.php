@@ -62,6 +62,12 @@ class ShipmentResource extends Resource
                     })
                     ->disabled(fn ($get) => ! $get('company_id')),
 
+                Forms\Components\Placeholder::make('status_view')
+                    ->label('Status')
+                    ->content(fn ($record) => $record && $record->status ? $record->status->getLabel() : '')
+                    ->visibleOn('edit')
+                    ->visible(fn ($record) => $record && $record->exists && ! in_array($record->status->value ?? null, [ShipmentStatus::PENDING->value, ShipmentStatus::CANCELLED->value], true)),
+
                 Forms\Components\ToggleButtons::make('status')
                     ->inline()
                     ->options([
@@ -71,7 +77,8 @@ class ShipmentResource extends Resource
                     ->required()
                     ->reactive()
                     ->default(ShipmentStatus::PENDING->value)
-                    ->visibleOn('edit'),
+                    ->visibleOn('edit')
+                    ->visible(fn ($record) => ! $record || ! $record->exists || in_array($record->status->value ?? null, [ShipmentStatus::PENDING->value, ShipmentStatus::CANCELLED->value], true)),
 
                 Forms\Components\Select::make('driver_id')
                     ->label('Driver')

@@ -2,9 +2,11 @@
 
 namespace App\Models\Traits;
 
+use App\Enums\ModelChangeSource;
 use App\Enums\ModelChangeType;
 use App\Models\ModelChangeNotification;
 use App\Services\ModelChangeMessageFormatter;
+use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Model;
 
 trait RecordsModelChangeNotifications
@@ -89,11 +91,21 @@ trait RecordsModelChangeNotifications
         array $original
     ): void {
         $source = app()->bound('model_change.source') ? app('model_change.source') : null;
+        $actor = app()->bound('model_change.actor') ? app('model_change.actor') : null;
+
+        // Livewire form submissions (create/update) use livewire.update route, so panel
+        // middleware never runs. Detect Operations panel from Filament current panel.
+        if ($source === null && class_exists(Filament::class)) {
+            $panel = Filament::getCurrentPanel();
+            if ($panel?->getId() === 'operations') {
+                $source = ModelChangeSource::OPERATIONS_PANEL;
+                $actor = $actor ?? auth()->user();
+            }
+        }
+
         if ($source === null) {
             return;
         }
-
-        $actor = app()->bound('model_change.actor') ? app('model_change.actor') : null;
 
         $formatter = app(ModelChangeMessageFormatter::class);
         $message = $formatter->format($model, $changeType, $actor, $changes, $original);

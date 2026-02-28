@@ -22,11 +22,17 @@ class EditShipment extends EditRecord
 
     protected function handleRecordUpdate(Model $record, array $data): Model
     {
-        // Operations panel: only allow Pending or Cancelled; reject other status changes.
+        // Operations panel: can only set Pending or Cancelled. Once status has left that set, they cannot change it (view only).
         if (auth()->user()->hasRole('Operations')) {
-            $status = (int) ($data['status'] ?? $record->status->value);
-            if ($status !== ShipmentStatus::PENDING->value && $status !== ShipmentStatus::CANCELLED->value) {
-                $data['status'] = $record->status->value;
+            $currentValue = $record->status->value;
+            $isStillEditable = in_array($currentValue, [ShipmentStatus::PENDING->value, ShipmentStatus::CANCELLED->value], true);
+            if (! $isStillEditable) {
+                $data['status'] = $currentValue;
+            } else {
+                $newStatus = (int) ($data['status'] ?? $currentValue);
+                if ($newStatus !== ShipmentStatus::PENDING->value && $newStatus !== ShipmentStatus::CANCELLED->value) {
+                    $data['status'] = $currentValue;
+                }
             }
         }
 

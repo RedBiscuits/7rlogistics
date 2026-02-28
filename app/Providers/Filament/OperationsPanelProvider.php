@@ -2,6 +2,8 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Super_Admin\Resources\ModelChangeNotificationResource;
+use App\Models\ModelChangeNotification;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -10,6 +12,7 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
 use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -17,6 +20,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\View;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Joaopaulolndev\FilamentEditProfile\FilamentEditProfilePlugin;
 use Joaopaulolndev\FilamentEditProfile\Pages\EditProfilePage;
@@ -32,6 +36,9 @@ class OperationsPanelProvider extends PanelProvider
                 'primary' => Color::Amber,
             ])
             ->discoverResources(in: app_path('Filament/Operations/Resources'), for: 'App\\Filament\\Operations\\Resources')
+            ->resources([
+                ModelChangeNotificationResource::class,
+            ])
             ->discoverPages(in: app_path('Filament/Operations/Pages'), for: 'App\\Filament\\Operations\\Pages')
             ->pages([
                 Pages\Dashboard::class,
@@ -80,6 +87,12 @@ class OperationsPanelProvider extends PanelProvider
                     ->visible(function (): bool {
                         return true;
                     }),
-            ]);
+            ])
+            ->renderHook(PanelsRenderHook::USER_MENU_BEFORE, function (): string {
+                return View::make('filament.components.admin-notification-bell', [
+                    'unreadCount' => ModelChangeNotification::unread()->count(),
+                    'url' => ModelChangeNotificationResource::getUrl('index'),
+                ])->render();
+            });
     }
 }
