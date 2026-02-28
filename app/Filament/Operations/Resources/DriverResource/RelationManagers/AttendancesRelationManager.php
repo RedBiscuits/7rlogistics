@@ -33,7 +33,7 @@ class AttendancesRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('check_out_at')
                     ->label('Check-out')
                     ->dateTime('H:i')
-                    ->default('N/A')
+                    ->placeholder('—')
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('hours_worked')
@@ -44,7 +44,7 @@ class AttendancesRelationManager extends RelationManager
 
                 Tables\Columns\TextColumn::make('location.name')
                     ->label('Location')
-                    ->default('N/A')
+                    ->placeholder('—')
                     ->sortable(),
 
                 Tables\Columns\IconColumn::make('status')

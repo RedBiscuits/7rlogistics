@@ -47,7 +47,7 @@ class AttendanceReports extends BaseWidget
                 Tables\Columns\TextColumn::make('check_out_at')
                     ->label('Check-out Time')
                     ->dateTime('H:i')
-                    ->default('N/A')
+                    ->placeholder('—')
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('hours_worked')
@@ -60,7 +60,7 @@ class AttendanceReports extends BaseWidget
 
                 Tables\Columns\TextColumn::make('location.name')
                     ->label('Location')
-                    ->default('N/A')
+                    ->placeholder('—')
                     ->sortable(),
 
                 Tables\Columns\IconColumn::make('status')
