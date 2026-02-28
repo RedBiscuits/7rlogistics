@@ -3,7 +3,6 @@
 namespace App\Filament\Operations\Widgets;
 
 use App\Models\DriverAttendance;
-use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
@@ -11,8 +10,6 @@ use Illuminate\Database\Eloquent\Builder;
 
 class AttendanceReports extends BaseWidget
 {
-    use HasWidgetShield;
-
     protected static ?string $heading = 'Attendance Reports';
 
     protected static ?int $sort = 11;

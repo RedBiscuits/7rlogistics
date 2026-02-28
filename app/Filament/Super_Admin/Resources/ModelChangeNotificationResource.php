@@ -32,14 +32,14 @@ class ModelChangeNotificationResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\IconColumn::make('read_at')
+                Tables\Columns\IconColumn::make('read_by_current_user')
                     ->label('')
+                    ->getStateUsing(fn (ModelChangeNotification $record): bool => $record->isRead())
                     ->boolean()
                     ->trueIcon('heroicon-o-check-circle')
                     ->falseIcon('heroicon-o-bell-alert')
                     ->trueColor('success')
-                    ->falseColor('gray')
-                    ->sortable(),
+                    ->falseColor('gray'),
                 Tables\Columns\TextColumn::make('message')
                     ->label('Message')
                     ->wrap()
@@ -68,14 +68,14 @@ class ModelChangeNotificationResource extends Resource
                     ->sortable(),
             ])
             ->filters([
-                Tables\Filters\TernaryFilter::make('read_at')
+                Tables\Filters\TernaryFilter::make('read_by_me')
                     ->label('Status')
                     ->placeholder('All')
-                    ->trueLabel('Read')
-                    ->falseLabel('Unread')
+                    ->trueLabel('Read by me')
+                    ->falseLabel('Unread by me')
                     ->queries(
-                        true: fn ($q) => $q->whereNotNull('read_at'),
-                        false: fn ($q) => $q->whereNull('read_at'),
+                        true: fn ($q) => $q->whereHas('reads', fn ($r) => $r->where('user_id', auth()->id())),
+                        false: fn ($q) => $q->whereDoesntHave('reads', fn ($r) => $r->where('user_id', auth()->id())),
                     ),
                 Tables\Filters\SelectFilter::make('source')
                     ->options(ModelChangeSource::class),

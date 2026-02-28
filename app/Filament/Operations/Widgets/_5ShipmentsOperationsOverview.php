@@ -6,15 +6,12 @@ use App\Enums\ShipmentStatus;
 use App\Models\Company;
 use App\Models\Driver;
 use App\Models\Shipment;
-use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Support\Colors\Color;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class _5ShipmentsOperationsOverview extends BaseWidget
 {
-    use HasWidgetShield;
-
     protected static ?int $sort = 5;
 
     protected function getStats(): array

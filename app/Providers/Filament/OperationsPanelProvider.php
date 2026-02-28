@@ -51,7 +51,6 @@ class OperationsPanelProvider extends PanelProvider
                 \App\Filament\Operations\Widgets\_5ShipmentsOperationsOverview::class,
                 \App\Filament\Operations\Widgets\_8ShipmentsChart::class,
                 \App\Filament\Operations\Widgets\AttendanceReports::class,
-                \App\Filament\Operations\Widgets\DriverLicenseWarnings::class,
             ])
             ->middleware([
                 EncryptCookies::class,

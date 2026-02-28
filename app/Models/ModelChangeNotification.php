@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\ModelChangeSource;
 use App\Enums\ModelChangeType;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class ModelChangeNotification extends Model
@@ -17,30 +18,49 @@ class ModelChangeNotification extends Model
         'actor_type',
         'actor_id',
         'message',
-        'read_at',
     ];
 
     protected $casts = [
         'change_type' => ModelChangeType::class,
         'source' => ModelChangeSource::class,
-        'read_at' => 'datetime',
     ];
 
-    public function isRead(): bool
+    public function reads(): HasMany
     {
-        return $this->read_at !== null;
+        return $this->hasMany(ModelChangeNotificationRead::class, 'model_change_notification_id');
     }
 
-    public function markAsRead(): void
+    public function isRead(?\Illuminate\Contracts\Auth\Authenticatable $user = null): bool
     {
-        if (! $this->read_at) {
-            $this->update(['read_at' => now()]);
+        $user = $user ?? auth()->user();
+        if (! $user) {
+            return false;
         }
+
+        return $this->reads()->where('user_id', $user->getAuthIdentifier())->exists();
     }
 
-    public function scopeUnread($query)
+    public function markAsRead(?\Illuminate\Contracts\Auth\Authenticatable $user = null): void
     {
-        return $query->whereNull('read_at');
+        $user = $user ?? auth()->user();
+        if (! $user) {
+            return;
+        }
+
+        $this->reads()->updateOrCreate(
+            ['user_id' => $user->getAuthIdentifier()],
+            ['read_at' => now()]
+        );
+    }
+
+    public function scopeUnread($query, ?\Illuminate\Contracts\Auth\Authenticatable $user = null)
+    {
+        $user = $user ?? auth()->user();
+        if (! $user) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        return $query->whereDoesntHave('reads', fn ($q) => $q->where('user_id', $user->getAuthIdentifier()));
     }
 
     public function subject(): MorphTo

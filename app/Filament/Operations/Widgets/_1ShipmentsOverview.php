@@ -4,15 +4,12 @@ namespace App\Filament\Operations\Widgets;
 
 use App\Enums\ShipmentStatus;
 use App\Models\Shipment;
-use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Support\Colors\Color;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class _1ShipmentsOverview extends BaseWidget
 {
-    use HasWidgetShield;
-
     protected static ?int $sort = 1;
 
     protected function getStats(): array
