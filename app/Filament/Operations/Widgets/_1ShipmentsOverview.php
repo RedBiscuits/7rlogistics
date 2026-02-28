@@ -2,6 +2,7 @@
 
 namespace App\Filament\Operations\Widgets;
 
+use App\Enums\ShipmentStatus;
 use App\Models\Shipment;
 use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Support\Colors\Color;
@@ -16,6 +17,8 @@ class _1ShipmentsOverview extends BaseWidget
 
     protected function getStats(): array
     {
+        $filterUrl = fn (int $status) => 'operations/shipments?tableFilters[status][value]=canceled&tableFilters[status][values][0]=' . $status;
+
         return [
             Stat::make('Total Shipments', Shipment::count())
                 ->description('Total Number of Shipments')
@@ -24,20 +27,19 @@ class _1ShipmentsOverview extends BaseWidget
                 ->url('operations/shipments')
                 ->color(Color::Emerald),
 
-            Stat::make('Pending Shipments', Shipment::where('status', 0)->count())
+            Stat::make('Pending Shipments', Shipment::where('status', ShipmentStatus::PENDING)->count())
                 ->description('Shipments submitted by users')
                 ->icon('heroicon-o-clock')
                 ->chart([7, 2, 10, 3, 15, 4, 17])
-                ->url('operations/shipments?tableFilters[status][value]=canceled&tableFilters[status][values][0]=0')
-                ->color('PENDING'),
+                ->url($filterUrl(ShipmentStatus::PENDING->value))
+                ->color(ShipmentStatus::PENDING->getColor()),
 
-            Stat::make('Approved Shipments', Shipment::where('status', 6)->count())
+            Stat::make('Approved Shipments', Shipment::where('status', ShipmentStatus::APPROVED)->count())
                 ->description('Shipments accepted by personnel')
                 ->icon('heroicon-o-arrow-down-circle')
                 ->chart([7, 2, 10, 3, 15, 4, 17])
-                ->url('operations/shipments?tableFilters[status][value]=canceled&tableFilters[status][values][0]=6')
-                ->color('success'),
-
+                ->url($filterUrl(ShipmentStatus::APPROVED->value))
+                ->color(ShipmentStatus::APPROVED->getColor()),
         ];
     }
 }

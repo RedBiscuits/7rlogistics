@@ -62,23 +62,15 @@ class ShipmentResource extends Resource
                     })
                     ->disabled(fn ($get) => ! $get('company_id')),
 
-                Forms\Components\Placeholder::make('status_view')
-                    ->label('Status')
-                    ->content(fn ($record) => $record && $record->status ? $record->status->getLabel() : '')
-                    ->visibleOn('edit')
-                    ->visible(fn ($record) => $record && $record->exists && ! in_array($record->status->value ?? null, [ShipmentStatus::PENDING->value, ShipmentStatus::CANCELLED->value], true)),
-
                 Forms\Components\ToggleButtons::make('status')
                     ->inline()
-                    ->options([
-                        ShipmentStatus::PENDING->value => ShipmentStatus::PENDING->getLabel(),
-                        ShipmentStatus::CANCELLED->value => ShipmentStatus::CANCELLED->getLabel(),
-                    ])
+                    ->options(collect(ShipmentStatus::cases())->mapWithKeys(fn ($case) => [$case->value => $case->getLabel()])->all())
                     ->required()
                     ->reactive()
                     ->default(ShipmentStatus::PENDING->value)
                     ->visibleOn('edit')
-                    ->visible(fn ($record) => ! $record || ! $record->exists || in_array($record->status->value ?? null, [ShipmentStatus::PENDING->value, ShipmentStatus::CANCELLED->value], true)),
+                    ->disabled(fn ($record) => $record && $record->exists && ! in_array($record->status->value ?? null, [ShipmentStatus::PENDING->value, ShipmentStatus::CANCELLED->value], true))
+                    ->disableOptionWhen(fn (string|int $value): bool => ! in_array((int) $value, [ShipmentStatus::PENDING->value, ShipmentStatus::CANCELLED->value], true)),
 
                 Forms\Components\Select::make('driver_id')
                     ->label('Driver')
@@ -610,7 +602,7 @@ class ShipmentResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn ($query) => 
+            ->modifyQueryUsing(fn ($query) =>
                 $query->with([
                     'company',
                     'fromArea',
@@ -618,8 +610,9 @@ class ShipmentResource extends Resource
                     'truck.truckType',
                     'driver',
                     'user'
-                ])
+                ])->orderBy('created_at', 'desc')
             )
+            ->defaultSort('created_at', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('id')->label('Code')->sortable(),
                 Tables\Columns\TextColumn::make('company.name')->label('Company')->sortable(),
