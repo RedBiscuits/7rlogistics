@@ -8,4 +8,11 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateMission extends CreateRecord
 {
     protected static string $resource = MissionResource::class;
+
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        $data['price'] = $data['price'] ?? 0;
+
+        return $data;
+    }
 }

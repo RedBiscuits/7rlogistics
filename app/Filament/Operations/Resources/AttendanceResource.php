@@ -26,6 +26,13 @@ class AttendanceResource extends Resource
 
     protected static ?int $navigationSort = 7;
 
+    protected static ?string $slug = 'attendances';
+
+    public static function canViewAny(): bool
+    {
+        return true;
+    }
+
     public static function form(Form $form): Form
     {
         return $form

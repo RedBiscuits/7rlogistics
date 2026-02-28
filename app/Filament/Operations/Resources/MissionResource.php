@@ -82,9 +82,7 @@ class MissionResource extends Resource
                     ->default('pending')
                     ->required(),
                 Forms\Components\Textarea::make('note'),
-                Forms\Components\TextInput::make('price')
-                    ->numeric()
-                    ->required(),
+                // Price hidden from operations; managed by Finance/Super Admin.
             ]);
     }
 
@@ -99,7 +97,6 @@ class MissionResource extends Resource
                 Tables\Columns\TextColumn::make('driver.code')->label('Driver Code'),
                 Tables\Columns\TextColumn::make('truck.plate_number')->label('Truck'),
                 Tables\Columns\TextColumn::make('status')->label('Status')->badge(),
-                Tables\Columns\TextColumn::make('price')->label('Price')->money('EGP'),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')

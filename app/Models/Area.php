@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Area extends Model
 {
-    use HasFactory;
+    use HasFactory, \App\Models\Traits\RecordsModelChangeNotifications;
 
     protected $guarded = [];
 

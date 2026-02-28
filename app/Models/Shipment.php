@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use App\Models\Traits\RecordsModelChangeNotifications;
 
 /**
  * @property ShipmentStatus $status
@@ -40,7 +41,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  */
 class Shipment extends Model implements HasMedia
 {
-    use HasFactory , InteractsWithMedia;
+    use HasFactory, InteractsWithMedia, RecordsModelChangeNotifications;
 
     protected $guarded = [];
 
@@ -155,6 +156,18 @@ class Shipment extends Model implements HasMedia
     public function deliveryStops()
     {
         return $this->hasMany(ShipmentStop::class)->where('type', 'delivery')->orderBy('sequence');
+    }
+
+    /**
+     * Scope: only shipments visible to drivers (exclude Pending and Cancelled).
+     * Drivers see shipments only after admin approval (APPROVED or later).
+     */
+    public function scopeVisibleToDriver($query)
+    {
+        return $query->whereNotIn('status', [
+            \App\Enums\ShipmentStatus::PENDING,
+            \App\Enums\ShipmentStatus::CANCELLED,
+        ]);
     }
 
     public function getDeliveryProofs()

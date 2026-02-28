@@ -7,10 +7,11 @@ use Laravel\Sanctum\HasApiTokens;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use App\Models\Traits\RecordsModelChangeNotifications;
 
 class Driver extends Model implements HasMedia
 {
-    use HasApiTokens, InteractsWithMedia;
+    use HasApiTokens, InteractsWithMedia, RecordsModelChangeNotifications;
 
     protected $fillable = [
         'user_id',

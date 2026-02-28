@@ -36,6 +36,7 @@ class ShipmentController extends Controller
         $driver = $request->user();
 
         $query = Shipment::where('driver_id', $driver->id)
+            ->visibleToDriver()
             ->where('created_at', '>=', now()->subDays(40))
             ->with([
                 'driver',
@@ -83,8 +84,11 @@ class ShipmentController extends Controller
         /** @var \App\Models\Driver $driver */
         $driver = $request->user();
 
-        // Verify shipment belongs to driver
+        // Verify shipment belongs to driver and is visible (not Pending/Cancelled)
         if ($shipment->driver_id !== $driver->id) {
+            return $this->errorResponse(__('api.unauthorized'), 403);
+        }
+        if (in_array($shipment->status, [\App\Enums\ShipmentStatus::PENDING, \App\Enums\ShipmentStatus::CANCELLED], true)) {
             return $this->errorResponse(__('api.unauthorized'), 403);
         }
 
@@ -108,8 +112,11 @@ class ShipmentController extends Controller
         /** @var \App\Models\Driver $driver */
         $driver = $request->user();
 
-        // Verify shipment belongs to driver
+        // Verify shipment belongs to driver and is visible to driver (approved, not Pending)
         if ($shipment->driver_id !== $driver->id) {
+            return $this->errorResponse(__('api.unauthorized'), 403);
+        }
+        if (in_array($shipment->status, [\App\Enums\ShipmentStatus::PENDING, \App\Enums\ShipmentStatus::CANCELLED], true)) {
             return $this->errorResponse(__('api.unauthorized'), 403);
         }
 
@@ -132,8 +139,11 @@ class ShipmentController extends Controller
         /** @var \App\Models\Driver $driver */
         $driver = $request->user();
 
-        // Verify shipment belongs to driver
+        // Verify shipment belongs to driver and is visible to driver
         if ($shipment->driver_id !== $driver->id) {
+            return $this->errorResponse(__('api.unauthorized'), 403);
+        }
+        if (in_array($shipment->status, [\App\Enums\ShipmentStatus::PENDING, \App\Enums\ShipmentStatus::CANCELLED], true)) {
             return $this->errorResponse(__('api.unauthorized'), 403);
         }
 
@@ -157,8 +167,7 @@ class ShipmentController extends Controller
         /** @var \App\Models\Driver $driver */
         $driver = $request->user();
 
-        // Verify shipment belongs to driver
-        if ($shipment->driver_id !== $driver->id) {
+        if ($shipment->driver_id !== $driver->id || in_array($shipment->status, [\App\Enums\ShipmentStatus::PENDING, \App\Enums\ShipmentStatus::CANCELLED], true)) {
             return $this->errorResponse(__('api.unauthorized'), 403);
         }
 
@@ -178,8 +187,7 @@ class ShipmentController extends Controller
         /** @var \App\Models\Driver $driver */
         $driver = $request->user();
 
-        // Verify shipment belongs to driver
-        if ($shipment->driver_id !== $driver->id) {
+        if ($shipment->driver_id !== $driver->id || in_array($shipment->status, [\App\Enums\ShipmentStatus::PENDING, \App\Enums\ShipmentStatus::CANCELLED], true)) {
             return $this->errorResponse(__('api.unauthorized'), 403);
         }
 
@@ -199,8 +207,7 @@ class ShipmentController extends Controller
         /** @var \App\Models\Driver $driver */
         $driver = $request->user();
 
-        // Verify shipment belongs to driver
-        if ($shipment->driver_id !== $driver->id) {
+        if ($shipment->driver_id !== $driver->id || in_array($shipment->status, [\App\Enums\ShipmentStatus::PENDING, \App\Enums\ShipmentStatus::CANCELLED], true)) {
             return $this->errorResponse(__('api.unauthorized'), 403);
         }
 
@@ -220,8 +227,7 @@ class ShipmentController extends Controller
         /** @var \App\Models\Driver $driver */
         $driver = $request->user();
 
-        // Verify shipment belongs to driver
-        if ($shipment->driver_id !== $driver->id) {
+        if ($shipment->driver_id !== $driver->id || in_array($shipment->status, [\App\Enums\ShipmentStatus::PENDING, \App\Enums\ShipmentStatus::CANCELLED], true)) {
             return $this->errorResponse(__('api.unauthorized'), 403);
         }
 
@@ -242,6 +248,7 @@ class ShipmentController extends Controller
         $driver = $request->user();
 
         $count = Shipment::where('driver_id', $driver->id)
+            ->visibleToDriver()
             ->whereIn('status', [
                 ShipmentStatus::ASSIGNEDMISSION,
                 ShipmentStatus::APPROVED,
@@ -257,6 +264,7 @@ class ShipmentController extends Controller
         $driver = $request->user();
 
         $count = Shipment::where('driver_id', $driver->id)
+            ->visibleToDriver()
             ->whereIn('status', [
                 ShipmentStatus::DRIVER_ACKNOWLEDGED,
                 ShipmentStatus::DRIVER_ON_WAY_TO_COLLECT,
@@ -275,6 +283,7 @@ class ShipmentController extends Controller
         $driver = $request->user();
 
         $count = Shipment::where('driver_id', $driver->id)
+            ->visibleToDriver()
             ->where('status', ShipmentStatus::DELIVERED)
             ->whereDate('updated_at', today())
             ->count();
@@ -288,8 +297,7 @@ class ShipmentController extends Controller
         /** @var \App\Models\Driver $driver */
         $driver = $request->user();
 
-        // Verify shipment belongs to driver
-        if ($shipment->driver_id !== $driver->id) {
+        if ($shipment->driver_id !== $driver->id || in_array($shipment->status, [\App\Enums\ShipmentStatus::PENDING, \App\Enums\ShipmentStatus::CANCELLED], true)) {
             return $this->errorResponse(__('api.unauthorized'), 403);
         }
 

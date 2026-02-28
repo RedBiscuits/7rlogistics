@@ -326,27 +326,7 @@ class ShipmentsRelationManager extends RelationManager
                                 return new HtmlString('<h1>'.$availableWeight.'</h1>');
                             }),
 
-                        Forms\Components\Placeholder::make('total_price')
-                            ->label('Total Price')
-                            ->content(function ($get) {
-                                $fromArea = $get('from_area');
-                                $toArea = $get('to_area');
-                                $truck = $get('truck_type_id');
-                                $user_id = $get('user_id');
-                                if ($fromArea && $toArea && $truck && $user_id) {
-                                    $destination = Destination::where('user_id', $user_id)
-                                        ->where('from_area', $fromArea)
-                                        ->where('to_area', $toArea)
-                                        ->where('truck_type_id', $truck)
-                                        ->whereNotNull('price')
-                                        ->first();
-
-                                    return new HtmlString('<h1>'.$destination->price.'</h1>');
-                                }
-
-                                return new HtmlString('<h1>'. 0 .'</h1>');
-
-                            }),
+                        // Price hidden from operations panel; set server-side from destination.
 
                     ]),
 
@@ -363,7 +343,6 @@ class ShipmentsRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('toCity.name')->label('To City'),
                 Tables\Columns\TextColumn::make('toArea.name')->label('To Area'),
                 Tables\Columns\TextColumn::make('status')->label('Status')->badge(),
-                Tables\Columns\TextColumn::make('price')->label('Price')->money('EGP'),
             ])
             ->filters([
                 //

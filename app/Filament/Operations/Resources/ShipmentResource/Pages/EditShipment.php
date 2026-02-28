@@ -3,6 +3,7 @@
 namespace App\Filament\Operations\Resources\ShipmentResource\Pages;
 
 use App\Actions\Shipment\CreateClaimAction;
+use App\Enums\ShipmentStatus;
 use App\Filament\Operations\Resources\ShipmentResource;
 use App\Models\Invoice;
 use App\Models\Mission;
@@ -21,11 +22,20 @@ class EditShipment extends EditRecord
 
     protected function handleRecordUpdate(Model $record, array $data): Model
     {
-        if ($data['status'] == 0 || $data['status'] == 1) {
+        // Operations panel: only allow Pending or Cancelled; reject other status changes.
+        if (auth()->user()->hasRole('Operations')) {
+            $status = (int) ($data['status'] ?? $record->status->value);
+            if ($status !== ShipmentStatus::PENDING->value && $status !== ShipmentStatus::CANCELLED->value) {
+                $data['status'] = $record->status->value;
+            }
+        }
+
+        // Only clear driver when Cancelled; keep driver when Pending so operations can assign early.
+        if (($data['status'] ?? null) == ShipmentStatus::CANCELLED->value) {
             $data['driver_id'] = null;
         }
 
-        if ($data['status'] == 5) {
+        if (($data['status'] ?? null) == ShipmentStatus::DELIVERED->value) {
             Invoice::firstOrCreate([
                 'shipment_id' => $record->id,
             ], [
@@ -60,13 +70,13 @@ class EditShipment extends EditRecord
                 'note' => 'Mission created automatically',
             ]);
 
-            // Handle multiple claims
+            // Handle multiple claims (amount hidden from Operations; use 0 when not provided)
             if (isset($data['has_claim']) && $data['has_claim'] && isset($data['claim_packages'])) {
                 foreach ($data['claim_packages'] as $claim) {
                     CreateClaimAction::execute(
                         $record,
                         $claim['claim_type'],
-                        $claim['amount'],
+                        $claim['amount'] ?? 0,
                         $claim['quantity']
                     );
                 }
@@ -114,6 +124,7 @@ class EditShipment extends EditRecord
             Action::make('Download_Invoice')
                 ->label('Download Invoice')
                 ->color(Color::Indigo)
+                ->visible(fn () => ! auth()->user()->hasRole('Operations'))
                 ->action(function (Shipment $record) {
                     $service = new ShipmentService($record);
 

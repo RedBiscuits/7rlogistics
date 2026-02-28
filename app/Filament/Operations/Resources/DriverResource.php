@@ -87,9 +87,7 @@ class DriverResource extends Resource
 
                 \Filament\Forms\Components\Placeholder::make('biometric_enabled')
                     ->label('Biometric Authentication')
-                    ->content(fn (?Driver $record) => $record && $record->hasBiometricEnabled() ? 'Enabled' : 'Disabled')
-                    ->badge()
-                    ->color(fn (?Driver $record) => $record && $record->hasBiometricEnabled() ? 'success' : 'gray'),
+                    ->content(fn (?Driver $record) => $record && $record->hasBiometricEnabled() ? 'Enabled' : 'Disabled'),
 
                 SpatieMediaLibraryFileUpload::make('license_front')
                     ->collection('license_front')

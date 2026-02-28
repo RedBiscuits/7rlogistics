@@ -2,6 +2,7 @@
 
 namespace App\Filament\Operations\Resources\ShipmentResource\Pages;
 
+use App\Enums\ShipmentStatus;
 use App\Filament\Operations\Resources\ShipmentResource;
 use App\Models\Destination;
 use App\Models\Truck;
@@ -13,6 +14,9 @@ class CreateShipment extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
+        // Operations can only create shipments as Pending; price comes from destination.
+        $data['status'] = ShipmentStatus::PENDING->value;
+
         $destination = Destination::where('company_id', $data['company_id'])
             ->where(function ($query) use ($data) {
                 $query->where(function ($q) use ($data) {
@@ -24,6 +28,7 @@ class CreateShipment extends CreateRecord
                 });
             })
             ->where('truck_type_id', Truck::find($data['truck_id'])->truckType->id)
+            ->whereNotNull('price')
             ->first();
 
         if ($destination) {
@@ -32,9 +37,7 @@ class CreateShipment extends CreateRecord
             redirect()->back()->with('error', 'No destination found');
         }
 
-        if ($data['status'] == 0 || $data['status'] == 1) {
-            $data['driver_id'] = null;
-        }
+        // Allow driver assignment when Pending; do not clear driver_id.
 
         return $data;
     }

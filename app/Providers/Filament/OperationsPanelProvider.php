@@ -36,10 +36,16 @@ class OperationsPanelProvider extends PanelProvider
             ->pages([
                 Pages\Dashboard::class,
             ])
-            ->discoverWidgets(in: app_path('Filament/Operations/Widgets'), for: 'App\\Filament\\Operations\\Widgets')
             ->widgets([
                 Widgets\AccountWidget::class,
                 Widgets\FilamentInfoWidget::class,
+                \App\Filament\Operations\Widgets\_1ShipmentsOverview::class,
+                \App\Filament\Operations\Widgets\_2ShipmentsValuesOverview::class,
+                \App\Filament\Operations\Widgets\_4LatestShipments::class,
+                \App\Filament\Operations\Widgets\_5ShipmentsOperationsOverview::class,
+                \App\Filament\Operations\Widgets\_8ShipmentsChart::class,
+                \App\Filament\Operations\Widgets\AttendanceReports::class,
+                \App\Filament\Operations\Widgets\DriverLicenseWarnings::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -51,6 +57,7 @@ class OperationsPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                \App\Http\Middleware\SetModelChangeContextForOperations::class,
             ])
             ->authMiddleware([
                 Authenticate::class,

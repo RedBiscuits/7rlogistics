@@ -31,7 +31,6 @@ class MissionsRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('toCity.name')->label('To City'),
                 Tables\Columns\TextColumn::make('toArea.name')->label('To Area'),
                 Tables\Columns\TextColumn::make('status')->label('Status')->badge(),
-                Tables\Columns\TextColumn::make('price')->label('Price')->money('EGP'),
             ])
             ->filters([
                 //

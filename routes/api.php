@@ -14,8 +14,8 @@ Route::middleware(['set.locale'])->group(function () {
     Route::post('/auth/login', [AuthController::class, 'login']);
     Route::post('/auth/biometric/verify', [AuthController::class, 'biometricVerify']);
 
-    // Protected routes
-    Route::middleware(['auth:sanctum'])->group(function () {
+    // Protected routes (model_change.context sets source/actor for admin change notifications)
+    Route::middleware(['auth:sanctum', 'model_change.context'])->group(function () {
         // Authentication
         Route::post('/auth/logout', [AuthController::class, 'logout']);
         Route::get('/auth/profile', [AuthController::class, 'profile']);
@@ -74,7 +74,7 @@ Route::middleware(['set.locale'])->group(function () {
     Route::prefix('v1')->group(function () {
         Route::post('/auth/login', [AuthController::class, 'login']);
         
-        Route::middleware(['auth:sanctum'])->group(function () {
+        Route::middleware(['auth:sanctum', 'model_change.context'])->group(function () {
             Route::post('/auth/logout', [AuthController::class, 'logout']);
             Route::get('/auth/profile', [AuthController::class, 'profile']);
             Route::post('/auth/register-device', [AuthController::class, 'registerDevice']);

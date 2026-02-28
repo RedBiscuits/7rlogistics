@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class ContactRequests extends Model
 {
-    use HasFactory;
+    use HasFactory, \App\Models\Traits\RecordsModelChangeNotifications;
 
     protected $fillable = ['name', 'email', 'phone', 'message', 'is_read'];
 }

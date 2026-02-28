@@ -96,7 +96,6 @@ class ShipmentRelationManager extends RelationManager
                                     })
                                     ->searchable()
                                     ->afterStateUpdated(function (Forms\Components\Select $component, $state, callable $get, callable $set) {
-                                        $set('price', null);
                                         $set('truck_type_id', null);
                                         $set('to_area', null);
                                     })
@@ -122,7 +121,6 @@ class ShipmentRelationManager extends RelationManager
                                     ->reactive()
                                     ->searchable()
                                     ->afterStateUpdated(function (Forms\Components\Select $component, $state, callable $set) {
-                                        $set('price', null);
                                         $set('truck_type_id', null);
                                     })
                                     ->required(),
@@ -205,25 +203,6 @@ class ShipmentRelationManager extends RelationManager
                                     }
 
                                     return [];
-                                })
-                                ->afterStateUpdated(function (Forms\Components\Select $component, $state, callable $get, callable $set) {
-                                    $fromArea = $get('from_area');
-                                    $toArea = $get('to_area');
-                                    $truck = $get('truck_type_id');
-                                    $company_id = $this->getOwnerRecord()->id;
-                                    if ($fromArea && $toArea && $truck && $company_id) {
-                                        $destination = Destination::where('company_id', $company_id)
-                                            ->where('from_area', $fromArea)
-                                            ->where('to_area', $toArea)
-                                            ->where('truck_type_id', $truck)
-                                            ->whereNotNull('price');
-                                        \Log::info($destination->toSql());
-
-                                        $destination = $destination->first();
-                                        if ($destination) {
-                                            $set('total_price', $destination->price);
-                                        }
-                                    }
                                 })
                                 ->required(),
                         ]),
@@ -323,33 +302,7 @@ class ShipmentRelationManager extends RelationManager
                                 return new HtmlString('<h1>'.$availableWeight.'</h1>');
                             }),
 
-                        Forms\Components\Placeholder::make('total_price')
-                            ->label('Total Price')
-                            ->content(function ($get) {
-                                $fromArea = $get('from_area');
-                                $toArea = $get('to_area');
-                                $truck = $get('truck_type_id');
-                                $company_id = $this->getOwnerRecord()->id;
-                                if ($fromArea && $toArea && $truck && $company_id) {
-                                    $destination = Destination::where('company_id', $company_id)
-                                        ->where(function ($query) use ($fromArea, $toArea) {
-                                            $query->where(function ($q) use ($fromArea, $toArea) {
-                                                $q->where('from_area', $fromArea)
-                                                    ->where('to_area', $toArea);
-                                            })->orWhere(function ($q) use ($fromArea, $toArea) {
-                                                $q->where('to_area', $fromArea)
-                                                    ->where('from_area', $toArea);
-                                            });
-                                        })
-                                        ->where('truck_type_id', $truck)
-                                        ->whereNotNull('price')
-                                        ->first();
-
-                                    return new HtmlString('<h1>'.$destination->price.'</h1>');
-                                }
-
-                                return new HtmlString('<h1>'. 0 .'</h1>');
-                            }),
+                        // Price is set server-side from Destination; hidden from operations users.
 
                     ]),
 
@@ -374,7 +327,6 @@ class ShipmentRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('truck.name')->label('Truck')
                     ->getStateUsing(fn ($record) => $record->truck->name.' - ('.$record->truck->plate_number.')'),
                 Tables\Columns\TextColumn::make('status')->label('Status')->badge(),
-                Tables\Columns\TextColumn::make('price')->label('Price')->money('EGP'),
                 Tables\Columns\TextColumn::make('created_at')->label('Creation Date')->dateTime('Y-m-d H:i A'),
             ])
             ->filters([

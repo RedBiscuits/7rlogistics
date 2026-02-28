@@ -36,7 +36,6 @@ class _4LatestShipments extends BaseWidget
                 Tables\Columns\TextColumn::make('toArea.city.name')->label('To City'),
                 Tables\Columns\TextColumn::make('toArea.name')->label('To Area'),
                 Tables\Columns\TextColumn::make('status')->label('Status')->badge(),
-                Tables\Columns\TextColumn::make('price')->label('Price')->money('EGP'),
             ]);
     }
 }

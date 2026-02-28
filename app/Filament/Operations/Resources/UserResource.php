@@ -11,6 +11,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Validation\Rules\Password;
+use Spatie\Permission\Models\Role;
 
 class UserResource extends Resource
 {
@@ -48,19 +49,13 @@ class UserResource extends Resource
                     ->label('Confirm New Password')
                     ->columnSpan(1),
                 Forms\Components\Select::make('roles')
-                    ->relationship('roles', 'name', function ($query, $get) {
-                        $query = $query->where('name', '!=', 'Super Admin');
-                        if (! $get('company_id')) {
-                            $query->where('name', '!=', 'Client');
-                        }
-
-                        return $query;
-                    })
+                    ->relationship('roles', 'name', fn ($query) => $query->where('name', 'Operations'))
                     ->multiple()
                     ->preload()
                     ->searchable()
                     ->required()
-                    ->maxItems(1),
+                    ->maxItems(1)
+                    ->helperText('Operations panel can only assign the Operations role.'),
             ]);
     }
 
@@ -83,13 +78,8 @@ class UserResource extends Resource
             ])->defaultSort('id', 'desc')
             ->filters([
                 Tables\Filters\SelectFilter::make('role')
-                    ->options([
-                        'Super Admin' => 'Super Admin',
-                        'Client' => 'Client',
-                        'Finance' => 'Finance',
-                        'Operations' => 'Operations',
-                    ])
-                    ->relationship('roles', 'name')
+                    ->options(fn () => Role::where('name', 'Operations')->pluck('name', 'name'))
+                    ->relationship('roles', 'name', fn ($query) => $query->where('name', 'Operations'))
                     ->label('Role'),
             ])
             ->actions([

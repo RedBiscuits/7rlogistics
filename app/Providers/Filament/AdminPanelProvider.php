@@ -3,6 +3,8 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Super_Admin\Resources\AttendanceResource;
+use App\Filament\Super_Admin\Resources\ModelChangeNotificationResource;
+use App\Models\ModelChangeNotification;
 use Filament\Facades\Filament;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Navigation\NavigationItem;
@@ -13,6 +15,8 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
+use Illuminate\Support\Facades\View;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -108,6 +112,12 @@ class AdminPanelProvider extends PanelProvider
                     ->visible(function (): bool {
                         return true;
                     }),
-            ]);
+            ])
+            ->renderHook(PanelsRenderHook::USER_MENU_BEFORE, function (): string {
+                return View::make('filament.components.admin-notification-bell', [
+                    'unreadCount' => ModelChangeNotification::unread()->count(),
+                    'url' => ModelChangeNotificationResource::getUrl('index'),
+                ])->render();
+            });
     }
 }

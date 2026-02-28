@@ -93,46 +93,9 @@ class DestinationsRelationManager extends RelationManager
                     })
                     ->reactive()
                     ->searchable()
-                    ->afterStateUpdated(function (callable $set, callable $get) {
-                        $destination = Destination::where('company_id', $this->getOwnerRecord()->id)
-                            ->where(function ($query) use ($get) {
-                                $query->where(function ($q) use ($get) {
-                                    $q->where('from_area', $get('from_area'))
-                                        ->where('to_area', $get('to_area'));
-                                })->orWhere(function ($q) use ($get) {
-                                    $q->where('to_area', $get('from_area'))
-                                        ->where('from_area', $get('to_area'));
-                                });
-                            })
-                            ->where('truck_type_id', $get('truck_type_id'))
-                            ->first();
-
-                        $set('price', $destination?->price ?? null);
-                    })
                     ->required(),
 
-                Forms\Components\TextInput::make('price')
-                    ->required()
-                    ->numeric()
-                    ->prefix('EGP')
-                    ->minValue(0)
-                    ->default(function (callable $get) {
-                        $destination = $this->getOwnerRecord()->destinations()
-                            ->where(function ($query) use ($get) {
-                                $query->where(function ($q) use ($get) {
-                                    $q->where('from_area', $get('from_area'))
-                                        ->where('to_area', $get('to_area'));
-                                })->orWhere(function ($q) use ($get) {
-                                    $q->where('to_area', $get('from_area'))
-                                        ->where('from_area', $get('to_area'));
-                                });
-                            })
-                            ->where('truck_type_id', $get('truck_type_id'))
-                            ->first();
-
-                        return $destination->price ?? 0;
-                    })
-                    ->reactive(),
+                // Price is set by Finance/Super Admin; hidden from operations users. DB column is nullable.
             ]);
     }
 
@@ -146,7 +109,6 @@ class DestinationsRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('toCity.name')->label('To City'),
                 Tables\Columns\TextColumn::make('toArea.name')->label('To Area'),
                 Tables\Columns\TextColumn::make('truck.name')->label('Truck'),
-                Tables\Columns\TextColumn::make('price')->label('Price')->money('EGP'),
             ])
             ->filters([
                 //
@@ -227,17 +189,11 @@ class DestinationsRelationManager extends RelationManager
                             ->first();
 
                         if ($destination) {
-                            $destination->update(['price' => $data['price']]);
-
-                            Notification::make()
-                                ->title('Price Updated Successfully')
-                                ->success()
-                                ->send();
-
                             return $destination;
                         }
 
                         $data['company_id'] = $this->getOwnerRecord()->id;
+                        $data['price'] = $data['price'] ?? null;
 
                         return $model::create($data);
                     })

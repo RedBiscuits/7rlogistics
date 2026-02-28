@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Traits\RecordsModelChangeNotifications;
 
 class TruckType extends Model
 {
+    use RecordsModelChangeNotifications;
+
     protected $fillable = ['name', 'capacity', 'weight', 'length', 'width', 'height'];
 
     protected $table = 'truck_types';

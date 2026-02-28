@@ -44,28 +44,7 @@ class TrucksDestinationsRelationManager extends RelationManager
                     ->searchable()
                     ->required(),
 
-                Forms\Components\TextInput::make('price')
-                    ->required()
-                    ->numeric()
-                    ->prefix('EGP')
-                    ->minValue(0)
-                    ->columnSpanFull()
-                    ->default(function (callable $get) {
-                        $destination = TruckDestination::where(function ($query) use ($get) {
-                            $query->where(function ($q) use ($get) {
-                                $q->where('from_area', $get('from_area'))
-                                    ->where('to_area', $get('to_area'));
-                            })->orWhere(function ($q) use ($get) {
-                                $q->where('to_area', $get('from_area'))
-                                    ->where('from_area', $get('to_area'));
-                            });
-                        })
-                            ->where('truck_type_id', $this->getOwnerRecord()->id)
-                            ->first();
-
-                        return $destination->price ?? 0;
-                    })
-                    ->reactive(),
+                // Price is set by Finance/Super Admin; hidden from operations users. DB column is nullable.
             ]);
     }
 
@@ -76,7 +55,6 @@ class TrucksDestinationsRelationManager extends RelationManager
             ->columns([
                 Tables\Columns\TextColumn::make('fromArea.name')->label('From Area'),
                 Tables\Columns\TextColumn::make('toArea.name')->label('To Area'),
-                Tables\Columns\TextColumn::make('price')->label('Price')->money('EGP'),
             ])
             ->filters([
                 //
@@ -152,17 +130,11 @@ class TrucksDestinationsRelationManager extends RelationManager
                             ->first();
 
                         if ($destination) {
-                            $destination->update(['price' => $data['price']]);
-
-                            Notification::make()
-                                ->title('Price Updated Successfully')
-                                ->success()
-                                ->send();
-
                             return $destination;
                         }
 
                         $data['truck_type_id'] = $this->getOwnerRecord()->id;
+                        $data['price'] = $data['price'] ?? null;
 
                         return $model::create($data);
                     })

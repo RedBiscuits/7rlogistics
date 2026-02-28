@@ -15,6 +15,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'set.locale' => \App\Http\Middleware\SetLocale::class,
             'driver.license' => \App\Http\Middleware\CheckDriverLicense::class,
+            'model_change.context' => \App\Http\Middleware\SetModelChangeContext::class,
+            'model_change.context.operations' => \App\Http\Middleware\SetModelChangeContextForOperations::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

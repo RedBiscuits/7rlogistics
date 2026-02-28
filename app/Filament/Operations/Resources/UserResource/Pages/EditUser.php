@@ -8,10 +8,21 @@ use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\Rules\Password;
+use Spatie\Permission\Models\Role;
 
 class EditUser extends EditRecord
 {
     protected static string $resource = UserResource::class;
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        $operationsRole = Role::where('name', 'Operations')->first();
+        if ($operationsRole) {
+            $data['roles'] = [$operationsRole->id];
+        }
+
+        return $data;
+    }
 
     protected function getHeaderActions(): array
     {

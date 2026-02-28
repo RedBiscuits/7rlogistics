@@ -37,7 +37,9 @@ class ClaimInformationComponent
                             ->label('Amount')
                             ->numeric()
                             ->required()
-                            ->prefix('EGP'),
+                            ->default(0)
+                            ->prefix('EGP')
+                            ->visible(fn () => ! auth()->user()->hasRole('Operations')),
                     ])
                     ->columns(3)
                     ->defaultItems(1)
@@ -55,7 +57,7 @@ class ClaimInformationComponent
                 Forms\Components\Placeholder::make('total_claim_amount')
                     ->label('Total Claim Amount')
                     ->content(fn ($get) => 'EGP '.number_format($get('total_claim_amount') ?? 0, 2))
-                    ->visible(fn ($get) => $get('has_claim') && $get('status') === ShipmentStatus::DELIVERED->value),
+                    ->visible(fn ($get) => $get('has_claim') && $get('status') === ShipmentStatus::DELIVERED->value && ! auth()->user()->hasRole('Operations')),
             ])
             ->visible(fn ($get) => $get('status') === ShipmentStatus::DELIVERED->value)
             ->collapsible();

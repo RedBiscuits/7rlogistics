@@ -6,11 +6,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Builder;
+use App\Models\Traits\RecordsModelChangeNotifications;
 use Carbon\Carbon;
 
 class DriverAttendance extends Model
 {
-    use HasFactory;
+    use HasFactory, RecordsModelChangeNotifications;
 
     protected $fillable = [
         'driver_id',

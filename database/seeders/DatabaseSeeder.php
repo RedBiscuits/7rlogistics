@@ -21,11 +21,27 @@ class DatabaseSeeder extends Seeder
         Role::firstOrCreate(['name' => 'Operations']);
         Role::firstOrCreate(['name' => 'Finance']);
 
-        User::firstOrCreate([
-            'name' => 'Hossam Nassef',
-            'email' => 'hossam.nassef@7rlogistics.net',
-            'password' => 'Hossam@01159211171HY',
-        ])->assignRole('Super Admin');
+        $superAdmin = User::firstOrCreate(
+            ['email' => 'hossam.nassef@7rlogistics.net'],
+            [
+                'name' => 'Hossam Nassef',
+                'password' => 'Hossam@01159211171HY',
+            ]
+        );
+        if (! $superAdmin->hasRole('Super Admin')) {
+            $superAdmin->assignRole('Super Admin');
+        }
+
+        $opsUser = User::updateOrCreate(
+            ['email' => 'operations@7rlogistics.local'],
+            [
+                'name' => 'Operations User',
+                'password' => 'Operations123!',
+            ]
+        );
+        if (! $opsUser->hasRole('Operations')) {
+            $opsUser->assignRole('Operations');
+        }
 
         // User::factory()
         //     ->count(50)

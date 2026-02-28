@@ -64,10 +64,14 @@ class ShipmentResource extends Resource
 
                 Forms\Components\ToggleButtons::make('status')
                     ->inline()
-                    ->options(ShipmentStatus::class)
+                    ->options([
+                        ShipmentStatus::PENDING->value => ShipmentStatus::PENDING->getLabel(),
+                        ShipmentStatus::CANCELLED->value => ShipmentStatus::CANCELLED->getLabel(),
+                    ])
                     ->required()
                     ->reactive()
-                    ->default(0),
+                    ->default(ShipmentStatus::PENDING->value)
+                    ->visibleOn('edit'),
 
                 Forms\Components\Select::make('driver_id')
                     ->label('Driver')
@@ -78,9 +82,9 @@ class ShipmentResource extends Resource
                     })
                     ->reactive()
                     ->searchable()
-                    ->hidden(fn ($get) => $get('status') == 0 || $get('status') == 1)
-                    ->required(fn ($get) => $get('status') != 0 && $get('status') != 1 && $get('status') != 6)
-                    ->dehydrated(fn ($get) => $get('status') != 0 && $get('status') != 1)
+                    ->hidden(fn ($get) => (int) $get('status') === ShipmentStatus::CANCELLED->value)
+                    ->required(fn ($get) => (int) $get('status') === ShipmentStatus::PENDING->value)
+                    ->dehydrated(true)
                     ->helperText(function (callable $get) {
                         $driverId = $get('driver_id');
                         if ($driverId) {
@@ -173,7 +177,6 @@ class ShipmentResource extends Resource
                                     })
                                     ->searchable()
                                     ->afterStateUpdated(function (Forms\Components\Select $component, $state, callable $get, callable $set) {
-                                        $set('price', null);
                                         $set('truck_id', null);
                                         $set('to_area', null);
                                     })
@@ -199,7 +202,6 @@ class ShipmentResource extends Resource
                                     ->reactive()
                                     ->searchable()
                                     ->afterStateUpdated(function (Forms\Components\Select $component, $state, callable $set) {
-                                        $set('price', null);
                                         $set('truck_id', null);
                                     })
                                     ->required(),
@@ -301,9 +303,6 @@ class ShipmentResource extends Resource
                                                 ->whereNotNull('price');
 
                                             $destination = $destination->first();
-                                            if ($destination) {
-                                                $set('price', $destination->price);
-                                            }
                                         }
                                     })
                                     ->required(),
@@ -495,11 +494,7 @@ class ShipmentResource extends Resource
                                 return new HtmlString('<h1>'.$availableWeight.'</h1>');
                             }),
 
-                        Forms\Components\TextInput::make('price')
-                            ->label('Total Price')
-                            ->numeric()
-                            ->reactive()
-                            ->required(),
+                        // Price is set server-side from Destination; hidden from operations users.
 
                         // ->content(function ($get) {
                         //     $fromArea = $get('from_area');
@@ -641,7 +636,6 @@ class ShipmentResource extends Resource
                     ->label('Awaiting Collection')
                     ->dateTime('Y-m-d H:i')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('price')->label('Price')->money('EGP'),
                 Tables\Columns\TextColumn::make('created_at')->label('Creation Date')->dateTime('Y-m-d H:i A'),
             ])
             ->filters([

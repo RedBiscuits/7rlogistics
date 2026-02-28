@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Truck extends Model
 {
-    use HasFactory;
+    use HasFactory, \App\Models\Traits\RecordsModelChangeNotifications;
 
     protected $guarded = [];
 

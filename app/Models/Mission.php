@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Traits\RecordsModelChangeNotifications;
 
 class Mission extends Model
 {
+    use RecordsModelChangeNotifications;
+
     protected $fillable = [
         'shipment_id',
         'driver_id',
