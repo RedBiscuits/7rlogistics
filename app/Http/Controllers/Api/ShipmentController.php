@@ -22,6 +22,18 @@ class ShipmentController extends Controller
 {
     use ApiResponseTrait;
 
+    private const SHIPMENT_RELATIONS = [
+        'driver',
+        'truck.truckType',
+        'fromArea',
+        'toArea',
+        'fromCity',
+        'toCity',
+        'company',
+        'packages',
+        'stops',
+    ];
+
     public function __construct(
         private ShipmentStatusService $statusService,
         private LicenseValidationService $licenseService,
@@ -38,17 +50,7 @@ class ShipmentController extends Controller
         $query = Shipment::where('driver_id', $driver->id)
             ->visibleToDriver()
             ->where('created_at', '>=', now()->subDays(40))
-            ->with([
-                'driver',
-                'truck.truckType',
-                'fromArea',
-                'toArea',
-                'fromCity',
-                'toCity',
-                'company',
-                'packages',
-                'stops',
-            ]);
+            ->with(self::SHIPMENT_RELATIONS);
 
         // Filter by status (mobile app string values)
         if ($request->has('status')) {
@@ -92,17 +94,7 @@ class ShipmentController extends Controller
             return $this->errorResponse(__('api.unauthorized'), 403);
         }
 
-        $shipment->load([
-            'driver',
-            'truck.truckType',
-            'fromArea',
-            'toArea',
-            'fromCity',
-            'toCity',
-            'company',
-            'packages',
-            'stops',
-        ]);
+        $shipment->load(self::SHIPMENT_RELATIONS);
 
         return $this->successResponse(new ShipmentResource($shipment));
     }
@@ -122,6 +114,7 @@ class ShipmentController extends Controller
 
         try {
             $shipment = $this->statusService->acknowledgeShipment($shipment);
+            $shipment->load(self::SHIPMENT_RELATIONS);
             return $this->successResponse(new ShipmentResource($shipment));
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage(), 400);
@@ -155,6 +148,7 @@ class ShipmentController extends Controller
                 $newStatus,
                 $request->file('proofs')
             );
+            $shipment->load(self::SHIPMENT_RELATIONS);
 
             return $this->successResponse(new ShipmentResource($shipment));
         } catch (\Exception $e) {
@@ -175,6 +169,7 @@ class ShipmentController extends Controller
             $photo = $request->getPhoto();
             $this->imageService->uploadFromRequest($shipment, $photo, 'pickup_photos');
             $shipment->refresh();
+            $shipment->load(self::SHIPMENT_RELATIONS);
 
             return $this->successResponse(new ShipmentResource($shipment));
         } catch (\Exception $e) {
@@ -195,6 +190,7 @@ class ShipmentController extends Controller
             $photo = $request->getPhoto();
             $this->imageService->uploadFromRequest($shipment, $photo, 'delivery_photos');
             $shipment->refresh();
+            $shipment->load(self::SHIPMENT_RELATIONS);
 
             return $this->successResponse(new ShipmentResource($shipment));
         } catch (\Exception $e) {
@@ -215,6 +211,7 @@ class ShipmentController extends Controller
             $photo = $request->getPhoto();
             $this->imageService->uploadFromRequest($shipment, $photo, 'toll_photos');
             $shipment->refresh();
+            $shipment->load(self::SHIPMENT_RELATIONS);
 
             return $this->successResponse(new ShipmentResource($shipment));
         } catch (\Exception $e) {
@@ -235,6 +232,7 @@ class ShipmentController extends Controller
             $signature = $request->input('signature');
             $this->imageService->uploadFromRequest($shipment, $signature, 'signature');
             $shipment->refresh();
+            $shipment->load(self::SHIPMENT_RELATIONS);
 
             return $this->successResponse(new ShipmentResource($shipment));
         } catch (\Exception $e) {

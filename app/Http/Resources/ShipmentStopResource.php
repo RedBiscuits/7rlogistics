@@ -11,6 +11,7 @@ class ShipmentStopResource extends JsonResource
     {
         return [
             'id' => (string) $this->id,
+            'type' => $this->type,
             'sequence' => $this->sequence,
             'name' => $this->name,
             'location' => $this->location,

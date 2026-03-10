@@ -111,11 +111,10 @@ class ShipmentResource extends JsonResource
                     'fulfilled' => $this->resource->hasSignature(),
                 ],
             ],
-            'stops' => $this->when($this->relationLoaded('stops') && $this->stops->isNotEmpty(), function () use ($pickupStops, $deliveryStops) {
-                return [
-                    'pickup' => ShipmentStopResource::collection($pickupStops),
-                    'delivery' => ShipmentStopResource::collection($deliveryStops),
-                ];
+            'stops' => $this->when($this->relationLoaded('stops') && $this->stops->isNotEmpty(), function () {
+                return ShipmentStopResource::collection(
+                    $this->stops->sortBy(['type', 'sequence'])->values()
+                );
             }),
         ];
     }
